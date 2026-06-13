@@ -146,7 +146,7 @@ export interface Flashcard {
   id: string;
   question: string;
   answer: string;
-  category: "technical" | "behavioral" | "system-design" | "ai-ml" | "general";
+  category: "technical" | "behavioral" | "system-design" | "ai-ml" | "cloud" | "general";
   deck: string; // group name
   difficulty: "easy" | "medium" | "hard";
   level: number; // 1-5 based on how well known

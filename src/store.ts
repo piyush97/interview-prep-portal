@@ -200,6 +200,19 @@ const defaultFlashcards: Flashcard[] = [
   { id: "fc23", question: "Explain dependency injection and why it matters", answer: "DI: passing dependencies into a component rather than creating them internally. Benefits: testability (mock deps), flexibility (swap implementations), loose coupling. Patterns: constructor injection, property injection, service locator. In React: prop drilling → context → DI containers.", category: "technical", deck: "Architecture", difficulty: "medium", level: 3 },
   { id: "fc24", question: "What is CORS and how do you fix it?", answer: "Browser prevents JS from fetching cross-origin unless server allows. Fix server: set Access-Control-Allow-Origin header. Preflight: browser sends OPTIONS for non-simple requests. For dev: proxy in vite.config.ts. For prod: API gateway handles CORS.", category: "technical", deck: "Architecture", difficulty: "easy", level: 4 },
   { id: "fc25", question: "Explain the CAP theorem", answer: "Distributed systems can have at most 2 of: Consistency (all nodes see same data), Availability (every request gets a response), Partition Tolerance (system works despite network splits). Reality: P is mandatory (networks fail). You choose CP or AP. Examples: MongoDB (CP), Cassandra (AP).", category: "technical", deck: "System Design", difficulty: "medium", level: 3 },
+  // Kubernetes & Docker
+  { id: "fc26", question: "What is a Pod in Kubernetes?", answer: "Smallest deployable unit in K8s. One or more containers sharing network namespace, storage, and lifecycle. Pods are ephemeral — replaced, not repaired. Use Deployments for stateless apps, StatefulSets for stateful.", category: "technical", deck: "DevOps", difficulty: "medium", level: 2 },
+  { id: "fc27", question: "What's the difference between a Service and an Ingress?", answer: "Service: internal L4 load balancer exposing Pods within the cluster (ClusterIP, NodePort, LoadBalancer). Ingress: external L7 HTTP/HTTPS routing to Services based on host/path. Ingress requires an Ingress Controller (nginx, Traefik, AWS ALB).", category: "technical", deck: "DevOps", difficulty: "medium", level: 2 },
+  { id: "fc28", question: "Explain Docker multi-stage builds", answer: "Use multiple FROM statements in one Dockerfile. Build stage: compile/bundle with full SDK. Runtime stage: copy only the artifact to a slim base image. Benefit: 10x smaller images, fewer vulnerabilities.", category: "technical", deck: "DevOps", difficulty: "medium", level: 3 },
+  { id: "fc29", question: "What is a ConfigMap vs Secret?", answer: "Both inject configuration into Pods. ConfigMap: non-sensitive data (env vars, config files). Secret: sensitive (base64 encoded, encryption at rest). Secrets support encryption providers, external secret stores.", category: "technical", deck: "DevOps", difficulty: "easy", level: 3 },
+  // Azure
+  { id: "fc30", question: "What is Azure AI Studio?", answer: "Unified platform to build, evaluate, and deploy AI applications. Features: prompt flow for orchestration, content safety, model catalog (OpenAI, Llama, Mistral), evaluation tools, monitoring.", category: "ai-ml", deck: "Azure", difficulty: "medium", level: 2 },
+  { id: "fc31", question: "How does Azure AI Search implement hybrid search?", answer: "Combines BM25 keyword search with vector search (cosine similarity). Uses Reciprocal Rank Fusion (RRF) to merge results. Supports semantic ranking (deep learning reranker). Configure through search index with vector fields + search profiles.", category: "ai-ml", deck: "Azure", difficulty: "hard", level: 2 },
+  { id: "fc32", question: "What are Azure OpenAI deployment types?", answer: "Provisioned throughput (PTU): reserved capacity, predictable latency. Standard: pay-per-token, shared pool, may have rate limits. Global standard: routes to available global capacity. Choose PTU for production, Standard for dev.", category: "cloud", deck: "Azure", difficulty: "medium", level: 2 },
+  // More System Design
+  { id: "fc33", question: "How does a Distributed Cache work?", answer: "Redis/Memcached cluster with sharding (consistent hashing). Reads: check cache first (O(1)). Misses: fetch from DB, populate cache. TTL eviction, LRU/LFU policies. Write strategies: write-through, write-behind, cache-aside.", category: "system-design", deck: "System Design", difficulty: "medium", level: 3 },
+  { id: "fc34", question: "Design a Notification System", answer: "Ingestion: API gateway → message queue (Kafka/RabbitMQ). Processing: fan-out to channel handlers (email, push, SMS, in-app). Each handler: template rendering, rate limiting, retry with exponential backoff.", category: "system-design", deck: "System Design", difficulty: "hard", level: 2 },
+  { id: "fc35", question: "What is a Message Queue and when to use it?", answer: "Async communication between services. Producer sends message, consumer processes. Benefits: decoupling, load leveling, fault tolerance, buffering. Good for: background jobs, event notifications, task distribution.", category: "system-design", deck: "System Design", difficulty: "easy", level: 3 },
 ];
 
 const defaultResources: CuratedResource[] = [
@@ -212,32 +225,33 @@ const defaultResources: CuratedResource[] = [
   { id: "r6", title: "RAGAS Documentation", url: "https://docs.ragas.io/", description: "RAG evaluation metrics: faithfulness, answer relevance, context precision", category: "ai-ml", type: "doc", tags: ["evaluation", "rag", "metrics"] },
   { id: "r7", title: "OpenAI Agents SDK", url: "https://github.com/openai/openai-agents-python", description: "Official OpenAI SDK for building multi-agent systems with handoffs and guardrails", category: "ai-ml", type: "repo", tags: ["agents", "openai", "sdk"] },
   { id: "r8", title: "MLOps Course (Made with ML)", url: "https://madewithml.com/", description: "Full-stack ML: data ops, training, serving, monitoring, LLMOps", category: "ai-ml", type: "course", tags: ["mlops", "course", "production"] },
-
+  { id: "r32", title: "Prompt Engineering Guide (DAIR.AI)", url: "https://www.promptingguide.ai/", description: "Comprehensive guide to prompt engineering — zero-shot, few-shot, chain-of-thought, RAG prompting", category: "ai-ml", type: "doc", tags: ["prompt-engineering", "guide", "llm"] },
+  { id: "r33", title: "OpenAI GPT Best Practices", url: "https://platform.openai.com/docs/guides/optimizing-llm-accuracy", description: "Official guide: prompt engineering, system messages, function calling patterns, rate limiting", category: "ai-ml", type: "doc", tags: ["openai", "best-practices", "llm"] },
   // Frontend
   { id: "r9", title: "React 19 Release Notes", url: "https://react.dev/blog/2024/12/05/react-19", description: "use(), Actions, useOptimistic, useFormStatus, ref as prop, assets loading", category: "frontend", type: "doc", tags: ["react", "v19", "new"] },
   { id: "r10", title: "Patterns.dev", url: "https://www.patterns.dev/", description: "Modern design patterns for React, TypeScript, and web performance", category: "frontend", type: "article", tags: ["patterns", "react", "performance"] },
   { id: "r11", title: "TypeScript Type Challenges", url: "https://github.com/type-challenges/type-challenges", description: "Practice TypeScript type system with 300+ exercises", category: "frontend", type: "repo", tags: ["typescript", "practice", "exercises"] },
   { id: "r12", title: "Web.dev Performance", url: "https://web.dev/fast/", description: "Core Web Vitals optimization, lazy loading, resource hints, CDN strategies", category: "frontend", type: "article", tags: ["performance", "web-vitals", "optimization"] },
   { id: "r13", title: "TanStack Query Essentials", url: "https://tanstack.com/query/latest/docs/framework/react/overview", description: "Server state management — caching, stale-while-revalidate, optimistic updates", category: "frontend", type: "doc", tags: ["data-fetching", "caching", "react"] },
-
-  // Cloud / Azure
+  { id: "r35", title: "React 19 Deep Dive", url: "https://www.youtube.com/watch?v=6iVgNw9TpS8", description: "Video covering use(), Actions, useOptimistic, Server Components, and asset loading in React 19", category: "frontend", type: "video", tags: ["react", "v19", "video"] },
+  // Cloud
   { id: "r14", title: "Azure AI Search Vector Index", url: "https://learn.microsoft.com/en-us/azure/search/vector-search-overview", description: "Vector search, hybrid retrieval, semantic ranking in Azure", category: "cloud", type: "doc", tags: ["azure", "vector-search", "rag"] },
   { id: "r15", title: "Azure OpenAI Service Docs", url: "https://learn.microsoft.com/en-us/azure/ai-services/openai/", description: "Deployment, fine-tuning, safety, quotas, regional models", category: "cloud", type: "doc", tags: ["azure", "openai", "deployment"] },
   { id: "r16", title: "Azure Well-Architected Framework", url: "https://learn.microsoft.com/en-us/azure/well-architected/", description: "Cost, reliability, performance, security, operational excellence pillars", category: "cloud", type: "doc", tags: ["azure", "architecture", "best-practices"] },
   { id: "r17", title: "HashiCorp Terraform Azure Tutorial", url: "https://developer.hashicorp.com/terraform/tutorials/azure", description: "Infrastructure as code for Azure — networking, AKS, AI services", category: "cloud", type: "course", tags: ["terraform", "iac", "azure"] },
-
+  { id: "r30", title: "Azure Cost Optimization Best Practices", url: "https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/cost-mgt-best-practices", description: "Right-sizing, reserved instances, auto-scaling, governance policies to keep cloud costs low", category: "cloud", type: "doc", tags: ["azure", "cost", "optimization"] },
+  { id: "r34", title: "AWS Solutions Architect Learning Path", url: "https://aws.amazon.com/training/learn-about/solutions-architect/", description: "Free digital training for AWS solutions architecture — compute, storage, networking, security", category: "cloud", type: "course", tags: ["aws", "solutions-architect", "free"] },
   // DevOps
   { id: "r18", title: "Docker Best Practices for Node.js", url: "https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md", description: "Multi-stage builds, layer caching, security hardening", category: "devops", type: "doc", tags: ["docker", "nodejs", "best-practices"] },
   { id: "r19", title: "Docker Compose in Production", url: "https://docs.docker.com/compose/production/", description: "Scaling Compose apps, health checks, secrets, logging", category: "devops", type: "doc", tags: ["docker", "compose", "production"] },
   { id: "r20", title: "GitHub Actions CI/CD Guide", url: "https://docs.github.com/en/actions/guides", description: "Build, test, and deploy pipelines — caching, matrix builds, environments", category: "devops", type: "doc", tags: ["github-actions", "cicd", "automation"] },
-
-  // System Design
+  { id: "r29", title: "Kubernetes in Action (2nd Ed)", url: "https://www.manning.com/books/kubernetes-in-action-second-edition", description: "The definitive guide to K8s — Pods, controllers, services, security, operators", category: "devops", type: "book", tags: ["kubernetes", "book", "containers"] },
+  // System Design & Career
   { id: "r21", title: "System Design Primer (GitHub)", url: "https://github.com/donnemartin/system-design-primer", description: "Anki flashcards, distributed systems patterns, case studies (design Uber, Twitter, etc.)", category: "soft-skills", type: "repo", tags: ["system-design", "interview", "distributed"] },
   { id: "r22", title: "Microservices.io Patterns", url: "https://microservices.io/patterns/index.html", description: "Chris Richardson's catalog of microservices patterns with explanations", category: "soft-skills", type: "article", tags: ["microservices", "patterns", "architecture"] },
   { id: "r23", title: "Byte Byte Go Newsletter", url: "https://blog.bytebytego.com/", description: "System design illustrations and deep dives — great for visual learners", category: "soft-skills", type: "newsletter", tags: ["system-design", "newsletter", "visual"] },
   { id: "r24", title: "Designing Data-Intensive Applications", url: "https://dataintensive.net/", description: "The bible of distributed systems — replication, partitioning, transactions, consensus", category: "soft-skills", type: "book", tags: ["distributed-systems", "database", "book"] },
-
-  // Career
+  { id: "r31", title: "Distributed Systems (Martin Kleppmann)", url: "https://www.youtube.com/playlist?list=PLeKd45zvjcDFUEv_ohr_HdUFe97RItdiB", description: "Video series by author of DDIA — replication, consensus, transactions, stream processing", category: "soft-skills", type: "video", tags: ["distributed-systems", "video", "ddia"] },
   { id: "r25", title: "Levels.fyi Salary Data", url: "https://www.levels.fyi/", description: "Real salary ranges by company, level, location — use for negotiation prep", category: "soft-skills", type: "tool", tags: ["salary", "negotiation", "market-data"] },
   { id: "r26", title: "C2C Contracting Calculator", url: "https://www.hellobonsai.com/freelance-rate-calculator", description: "Calculate your hourly rate from desired salary, overhead, and vacation", category: "soft-skills", type: "tool", tags: ["c2c", "rate", "calculator"] },
   { id: "r27", title: "Tech Interview Handbook", url: "https://www.techinterviewhandbook.org/", description: "Complete interview prep — coding, system design, behavioral, negotiation", category: "soft-skills", type: "article", tags: ["interview", "handbook", "comprehensive"] },
@@ -277,15 +291,16 @@ function loadData(): AppData {
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
-        ...defaultData, ...parsed,
-        skills: parsed.skills || defaultData.skills,
-        learningPaths: parsed.learningPaths || defaultData.learningPaths,
-        flashcards: parsed.flashcards || defaultData.flashcards,
-        resources: parsed.resources || defaultData.resources,
+        ...defaultData,
+        ...parsed,
+        skills: parsed.skills?.length ? parsed.skills : defaultData.skills,
+        learningPaths: parsed.learningPaths?.length ? parsed.learningPaths : defaultData.learningPaths,
+        flashcards: parsed.flashcards?.length ? parsed.flashcards : defaultData.flashcards,
+        resources: parsed.resources?.length ? parsed.resources : defaultData.resources,
       };
     }
   } catch { /* ignore */ }
-  return { ...defaultData, skills: [...defaultData.skills] };
+  return JSON.parse(JSON.stringify(defaultData));
 }
 
 function saveData(data: AppData): void {
@@ -424,7 +439,7 @@ export function importData(json: string): boolean {
   } catch { return false; }
 }
 export function resetData(): void {
-  _data = { ...defaultData, skills: [...defaultData.skills], learningPaths: [...defaultData.learningPaths], flashcards: [...defaultData.flashcards], resources: [...defaultData.resources] };
+  _data = JSON.parse(JSON.stringify(defaultData));
   persist();
 }
 
