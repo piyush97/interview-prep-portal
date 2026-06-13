@@ -10,6 +10,7 @@ import Research from "./pages/Research";
 import Learn from "./pages/Learn";
 import Flashcards from "./pages/Flashcards";
 import Resources from "./pages/Resources";
+import JDEvaluator from "./pages/JDEvaluator";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/learn" element={<Learn />} />
         <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/resources" element={<Resources />} />
+        <Route path="/evaluate" element={<JDEvaluator />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

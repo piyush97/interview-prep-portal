@@ -10,6 +10,7 @@ import {
   Library,
   BrainCircuit,
   Globe,
+  Search,
 } from "lucide-react";
 
 const links = [
@@ -19,6 +20,7 @@ const links = [
   { to: "/learn", label: "Learn", icon: BookOpen },
   { to: "/flashcards", label: "Flashcards", icon: BrainCircuit },
   { to: "/resources", label: "Resources", icon: Globe },
+  { to: "/evaluate", label: "JD Evaluator", icon: Search },
   { to: "/skills", label: "Skills", icon: Library },
   { to: "/resume", label: "Resume", icon: FileText },
   { to: "/research", label: "Research", icon: Building2 },
