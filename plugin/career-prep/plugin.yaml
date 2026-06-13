@@ -1,0 +1,38 @@
+name: career-prep
+version: 1.0.0
+description: >-
+  AI-powered career preparation plugin for Hermes Agent.
+  Evaluate job descriptions, generate tailored cover letters and CVs,
+  research companies, scan job portals, practice interview stories,
+  and get negotiation scripts. Inspired by career-ops.
+  Pairs with the Interview Prep Portal React dashboard.
+
+author: Piyush Mehta
+homepage: https://github.com/piyush97/interview-prep-portal
+repository:
+  type: git
+  url: https://github.com/piyush97/interview-prep-portal.git
+
+kind: standalone
+
+platforms:
+  - linux
+  - macos
+
+requires_env:
+  - name: PREP_PORTAL_DIR
+    description: "Path to the interview-prep-portal React project"
+    default: "~/interview-prep-portal"
+
+provides_tools:
+  - evaluate_jd
+  - generate_cover_letter
+  - research_company
+  - scan_jobs
+  - generate_interview_stories
+  - generate_negotiation_script
+  - serve_portal
+  - portal_status
+
+hooks:
+  - on_session_start
