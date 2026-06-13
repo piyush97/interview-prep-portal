@@ -7,13 +7,19 @@ import {
   FileText,
   Building2,
   ChevronRight,
+  Library,
+  BrainCircuit,
+  Globe,
 } from "lucide-react";
 
 const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/applications", label: "Applications", icon: Briefcase },
   { to: "/interviews", label: "Interview Prep", icon: GraduationCap },
-  { to: "/skills", label: "Skills", icon: BookOpen },
+  { to: "/learn", label: "Learn", icon: BookOpen },
+  { to: "/flashcards", label: "Flashcards", icon: BrainCircuit },
+  { to: "/resources", label: "Resources", icon: Globe },
+  { to: "/skills", label: "Skills", icon: Library },
   { to: "/resume", label: "Resume", icon: FileText },
   { to: "/research", label: "Research", icon: Building2 },
 ];

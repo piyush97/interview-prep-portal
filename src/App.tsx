@@ -7,6 +7,9 @@ import InterviewPrep from "./pages/InterviewPrep";
 import Skills from "./pages/Skills";
 import Resume from "./pages/Resume";
 import Research from "./pages/Research";
+import Learn from "./pages/Learn";
+import Flashcards from "./pages/Flashcards";
+import Resources from "./pages/Resources";
 
 export default function App() {
   return (
@@ -19,6 +22,9 @@ export default function App() {
         <Route path="/skills" element={<Skills />} />
         <Route path="/resume" element={<Resume />} />
         <Route path="/research" element={<Research />} />
+        <Route path="/learn" element={<Learn />} />
+        <Route path="/flashcards" element={<Flashcards />} />
+        <Route path="/resources" element={<Resources />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

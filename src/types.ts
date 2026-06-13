@@ -118,10 +118,57 @@ export interface ResumeVersion {
   lastUpdated: string;
 }
 
+export interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  category: SkillCategory;
+  priority: "high" | "medium" | "low";
+  modules: LearningModule[];
+  completedModules: string[]; // module IDs
+}
+
+export interface LearningModule {
+  id: string;
+  title: string;
+  description: string;
+  resources: LinkResource[];
+  duration: string; // e.g. "2hrs"
+}
+
+export interface LinkResource {
+  title: string;
+  url: string;
+  type: "article" | "video" | "course" | "book" | "repo" | "doc" | "tool";
+}
+
+export interface Flashcard {
+  id: string;
+  question: string;
+  answer: string;
+  category: "technical" | "behavioral" | "system-design" | "ai-ml" | "general";
+  deck: string; // group name
+  difficulty: "easy" | "medium" | "hard";
+  level: number; // 1-5 based on how well known
+}
+
+export interface CuratedResource {
+  id: string;
+  title: string;
+  url: string;
+  description: string;
+  category: SkillCategory;
+  type: "article" | "video" | "course" | "book" | "repo" | "tool" | "newsletter" | "podcast" | "doc";
+  tags: string[];
+}
+
 export interface AppData {
   applications: Application[];
   interviews: InterviewPrep[];
   skills: Skill[];
   companies: CompanyResearch[];
   resumes: ResumeVersion[];
+  learningPaths: LearningPath[];
+  flashcards: Flashcard[];
+  resources: CuratedResource[];
 }
