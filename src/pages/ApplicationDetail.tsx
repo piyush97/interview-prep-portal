@@ -108,7 +108,7 @@ export default function ApplicationDetail() {
           <h3 className="text-sm font-medium text-gray-500 mb-3">Details</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-gray-500">Applied</span><span>{new Date(app.dateApplied).toLocaleDateString()}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Salary</span><span>{app.salary || "-"}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Salary</span><span>{app.salaryRange || "-"}</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Location</span><span>{app.location || "-"}{app.remote && " (Remote)"}</span></div>
           </div>
         </div>

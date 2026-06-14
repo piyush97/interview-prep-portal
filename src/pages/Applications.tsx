@@ -42,8 +42,10 @@ export default function Applications() {
     addApplication({
       id: generateId(),
       ...form,
+      salaryRange: form.salary,
       dateApplied: now,
       contacts: [],
+      documents: [],
       timeline: [{ date: now, type: "created", description: `Application for ${form.role} at ${form.company} created` }],
       createdAt: now,
       updatedAt: now,

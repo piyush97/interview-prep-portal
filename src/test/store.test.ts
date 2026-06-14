@@ -326,10 +326,10 @@ function mockApp(id: string, company: string, role: string, status: Application[
   return {
     id, company, role, status,
     url: "", dateApplied: new Date().toISOString(),
-    contacts: [], notes: "", timeline: [],
+    contacts: [], documents: [], notes: "", timeline: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  } as Application;
+  };
 }
 
 // ─── Validation ───

@@ -41,7 +41,9 @@ jobs:
         run: npm run typecheck
 
       - name: Run tests
-        run: npm test
+        run: |
+          npm run test:js
+          python3 -m pytest plugin-tests/ -v
 
       - name: Build
         run: npm run build

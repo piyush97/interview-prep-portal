@@ -12,6 +12,7 @@ import Learn from "./pages/Learn";
 import Flashcards from "./pages/Flashcards";
 import Resources from "./pages/Resources";
 import JDEvaluator from "./pages/JDEvaluator";
+import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
 import Offers from "./pages/Offers";
 import Contacts from "./pages/Contacts";
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/flashcards" element={<Flashcards />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/evaluate" element={<JDEvaluator />} />
+        <Route path="/reminders" element={<Reminders />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/offers" element={<Offers />} />
           <Route path="/contacts" element={<Contacts />} />

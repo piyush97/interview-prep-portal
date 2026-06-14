@@ -3,16 +3,29 @@ export interface Application {
   company: string;
   role: string;
   url: string;
+  jdText?: string;
   status: ApplicationStatus;
   dateApplied: string;
-  salary?: string;
+  salaryRange?: string;
   location?: string;
   remote?: boolean;
+  score?: number; // 1-5 from JD evaluation
+  followUpDate?: string;
+  interviewDate?: string;
   contacts: Contact[];
+  documents: ApplicationDocument[];
   notes: string;
   timeline: TimelineEvent[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ApplicationDocument {
+  id: string;
+  type: "cv" | "cover-letter" | "portfolio" | "other";
+  title: string;
+  content: string;
+  createdAt: string;
 }
 
 export type ApplicationStatus =
@@ -177,7 +190,18 @@ export interface AppData {
   contacts: StandaloneContact[];
   offers: Offer[];
   journal: JournalEntry[];
+  reminders: Reminder[];
   lastBackup?: string;
+}
+
+export interface Reminder {
+  id: string;
+  title: string;
+  date: string;
+  status: "pending" | "done" | "snoozed";
+  type: "follow-up" | "interview" | "deadline" | "study" | "general";
+  relatedId?: string; // application id or other
+  notes?: string;
 }
 
 export interface UserProfile {

@@ -1,6 +1,6 @@
 import type {
   AppData, Application, InterviewPrep, Skill, CompanyResearch, ResumeVersion,
-  LearningPath, Flashcard, CuratedResource, UserProfile, StandaloneContact, Offer, JournalEntry
+  LearningPath, Flashcard, CuratedResource, UserProfile, StandaloneContact, Offer, JournalEntry, Reminder, ApplicationDocument
 } from "./types";
 
 const STORAGE_KEY = "interview-prep-portal-data";
@@ -307,6 +307,7 @@ const defaultData: AppData = {
   contacts: [],
   offers: [],
   journal: [],
+  reminders: [],
   lastBackup: undefined,
 };
 
@@ -339,7 +340,7 @@ function ensureId<T extends { id: string }>(obj: T, prefix: string): T {
 }
 
 function migrateData(parsed: any): AppData {
-  return {
+  const migrated: AppData = {
     ...defaultData,
     ...parsed,
     version: parsed.version || defaultData.version,
@@ -352,12 +353,50 @@ function migrateData(parsed: any): AppData {
     contacts: parsed.contacts || defaultData.contacts,
     offers: parsed.offers || defaultData.offers,
     journal: parsed.journal || defaultData.journal,
+    reminders: parsed.reminders || defaultData.reminders,
   };
+  if (migrated.applications?.length) {
+    migrated.applications = migrated.applications.map(ensureApplicationDefaults);
+  }
+  return migrated;
+}
+
+function ensureApplicationDefaults(app: Application): Application {
+  if (!Array.isArray(app.contacts)) app.contacts = [];
+  if (!Array.isArray(app.documents)) app.documents = [];
+  if (!Array.isArray(app.timeline)) app.timeline = [];
+  return app;
+}
+
+
+
+// Mirror the portal's localStorage to a JSON file the Hermes plugin can read.
+// Only runs in Node (Vite dev/preview sets PREP_PORTAL_DIR). Browser side no-ops.
+const DATA_FILE: string | null = (() => {
+  if (typeof globalThis !== "undefined") {
+    const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+    if (env?.PREP_PORTAL_DIR) return env.PREP_PORTAL_DIR + "/data.json";
+  }
+  return null;
+})();
+
+function mirrorToFilesystem(data: AppData): void {
+  if (!DATA_FILE) return;
+  if (typeof window !== "undefined") return; // browser: skip
+  try {
+    // Lazy-require node:fs to keep browser bundle clean
+    const req = (globalThis as { require?: (m: string) => { writeFileSync: (p: string, c: string) => void } }).require;
+    if (req) req("fs").writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  } catch {
+    // ignore: missing fs or read-only
+  }
 }
 
 
 function saveData(data: AppData): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const json = JSON.stringify(data);
+  localStorage.setItem(STORAGE_KEY, json);
+  mirrorToFilesystem(data);
 }
 
 let _data: AppData | null = null;
@@ -378,7 +417,7 @@ export function getApplications(): Application[] {
 export function addApplication(app: Application): Application {
   if (!isNonEmptyString(app.company)) throw new Error("Application requires a company name");
   if (!isNonEmptyString(app.role)) throw new Error("Application requires a role");
-  const a = ensureId(app, "app");
+  const a = ensureApplicationDefaults(ensureId(app, "app"));
   getData().applications.push(a);
   persist();
   return a;
@@ -639,6 +678,64 @@ export function needsBackup(): boolean {
   return daysSince >= 7;
 }
 export function recordBackup(): void { getData().lastBackup = new Date().toISOString(); persist(); }
+
+
+// --- Reminders CRUD ---
+export function getReminders(): Reminder[] {
+  return [...getData().reminders].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+}
+export function addReminder(reminder: Reminder): Reminder {
+  if (!isNonEmptyString(reminder.title)) throw new Error("Reminder requires a title");
+  if (!isNonEmptyString(reminder.date)) throw new Error("Reminder requires a date");
+  const r = ensureId(reminder, "rm");
+  getData().reminders.push(r);
+  persist();
+  return r;
+}
+export function updateReminder(id: string, updates: Partial<Reminder>): boolean {
+  const data = getData(); const idx = data.reminders.findIndex(r => r.id === id);
+  if (idx === -1) return false;
+  data.reminders[idx] = { ...data.reminders[idx], ...updates, id };
+  persist();
+  return true;
+}
+export function deleteReminder(id: string): boolean {
+  const data = getData(); const before = data.reminders.length;
+  data.reminders = data.reminders.filter(r => r.id !== id);
+  if (data.reminders.length === before) return false;
+  persist();
+  return true;
+}
+
+
+// --- Application Documents ---
+export function addApplicationDocument(appId: string, doc: ApplicationDocument): ApplicationDocument | null {
+  const data = getData();
+  const app = data.applications.find(a => a.id === appId);
+  if (!app) return null;
+  const d = ensureId(doc, "doc");
+  app.documents.push(d);
+  persist();
+  return d;
+}
+export function updateApplicationDocument(appId: string, docId: string, updates: Partial<ApplicationDocument>): boolean {
+  const app = getData().applications.find(a => a.id === appId);
+  if (!app) return false;
+  const idx = app.documents.findIndex(d => d.id === docId);
+  if (idx === -1) return false;
+  app.documents[idx] = { ...app.documents[idx], ...updates, id: docId };
+  persist();
+  return true;
+}
+export function deleteApplicationDocument(appId: string, docId: string): boolean {
+  const app = getData().applications.find(a => a.id === appId);
+  if (!app) return false;
+  const before = app.documents.length;
+  app.documents = app.documents.filter(d => d.id !== docId);
+  if (app.documents.length === before) return false;
+  persist();
+  return true;
+}
 
 // --- Export / Import ---
 export function exportData(): string {

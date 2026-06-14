@@ -11,10 +11,11 @@ import {
   BrainCircuit,
   Globe,
   Search,
-  Users,
+  Bell,
   Trophy,
   Settings,
   Scale,
+  Users,
 } from "lucide-react";
 
 const links = [
@@ -25,6 +26,7 @@ const links = [
   { to: "/flashcards", label: "Flashcards", icon: BrainCircuit },
   { to: "/resources", label: "Resources", icon: Globe },
   { to: "/evaluate", label: "JD Evaluator", icon: Search },
+  { to: "/reminders", label: "Reminders", icon: Bell },
   { to: "/compare", label: "Compare Jobs", icon: Scale },
   { to: "/contacts", label: "Contacts", icon: Users },
   { to: "/offers", label: "Offers", icon: Trophy },
