@@ -331,3 +331,94 @@ function mockApp(id: string, company: string, role: string, status: Application[
     updatedAt: new Date().toISOString(),
   } as Application;
 }
+
+// ─── Validation ───
+
+describe("Input Validation", () => {
+  it("rejects application without company", () => {
+    expect(() => addApplication(mockApp("x", "", "Dev"))).toThrow(/company/i);
+  });
+
+  it("rejects application without role", () => {
+    expect(() => addApplication(mockApp("x", "Co", ""))).toThrow(/role/i);
+  });
+
+  it("rejects whitespace-only fields", () => {
+    expect(() => addApplication(mockApp("x", "   ", "Dev"))).toThrow(/company/i);
+  });
+
+  it("auto-generates ID when missing", () => {
+    const app = { ...mockApp("", "Co", "Dev") } as Application;
+    app.id = "";
+    const added = addApplication(app);
+    expect(added.id).toMatch(/^app_/);
+  });
+
+  it("rejects non-empty JSON for import", () => {
+    expect(importData("")).toBe(false);
+    expect(importData("  ")).toBe(false);
+  });
+
+  it("rejects JSON without required fields", () => {
+    expect(importData('{"foo": 1}')).toBe(false);
+    expect(importData('{"applications": [], "skills": []}')).toBe(true);
+  });
+});
+
+// ─── CRUD return types ───
+
+describe("CRUD return types", () => {
+  it("updateApplication returns false for unknown id", () => {
+    expect(updateApplication("nonexistent", { status: "offer" })).toBe(false);
+  });
+
+  it("updateApplication returns true on success", () => {
+    addApplication(mockApp("a1", "Co", "Dev"));
+    expect(updateApplication("a1", { status: "offer" })).toBe(true);
+  });
+
+  it("deleteApplication returns false for unknown id", () => {
+    expect(deleteApplication("nonexistent")).toBe(false);
+  });
+
+  it("deleteApplication returns true on success", () => {
+    addApplication(mockApp("a1", "Co", "Dev"));
+    expect(deleteApplication("a1")).toBe(true);
+  });
+
+  it("updateFlashcardLevel returns false for unknown id", () => {
+    expect(updateFlashcardLevel("nonexistent", 3)).toBe(false);
+  });
+
+  it("updateFlashcardLevel returns true on success", () => {
+    const c = getFlashcards()[0];
+    expect(updateFlashcardLevel(c.id, 4)).toBe(true);
+  });
+});
+
+// ─── Data integrity ───
+
+describe("Data integrity", () => {
+  it("getApplications returns new array (no mutation)", () => {
+    addApplication(mockApp("a1", "Co", "Dev"));
+    const apps1 = getApplications();
+    const apps2 = getApplications();
+    expect(apps1).not.toBe(apps2);
+    expect(apps1).toEqual(apps2);
+  });
+
+  it("getContacts returns new array (no mutation)", () => {
+    addContact({ id: "c1", name: "Alice", role: "r", company: "c", email: "", linkedin: "", phone: "", notes: "", status: "cold", lastContacted: new Date().toISOString() });
+    const c1 = getContacts();
+    const c2 = getContacts();
+    expect(c1).not.toBe(c2);
+    expect(c1).toEqual(c2);
+  });
+
+  it("getFlashcardDecks is sorted and unique", () => {
+    const decks = getFlashcardDecks();
+    const sorted = [...decks].sort();
+    expect(decks).toEqual(sorted);
+    expect(new Set(decks).size).toBe(decks.length);
+  });
+});

@@ -17,7 +17,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  test:
+  quality:
+    name: Lint + Typecheck + Test + Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,11 +30,15 @@ jobs:
 
       - run: npm ci
 
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
       - name: Lint
         run: npm run lint
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Run tests
         run: npm test
@@ -41,9 +46,18 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check bundle size
+        run: |
+          JS_SIZE=$(stat -c %s dist/assets/index-*.js 2>/dev/null || stat -f %z dist/assets/index-*.js)
+          CSS_SIZE=$(stat -c %s dist/assets/index-*.css 2>/dev/null || stat -f %z dist/assets/index-*.css)
+          echo "JS bundle: $JS_SIZE bytes ($(echo "scale=2; $JS_SIZE/1024" | bc)KB)"
+          echo "CSS bundle: $CSS_SIZE bytes ($(echo "scale=2; $CSS_SIZE/1024" | bc)KB)"
+          if [ "$JS_SIZE" -gt 524288 ]; then echo "::error::JS bundle exceeds 512KB"; exit 1; fi
+          if [ "$CSS_SIZE" -gt 102400 ]; then echo "::error::CSS bundle exceeds 100KB"; exit 1; fi
+
   deploy:
     if: github.ref == 'refs/heads/main'
-    needs: test
+    needs: quality
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -318,7 +318,24 @@ function loadData(): AppData {
       return migrateData(parsed);
     }
   } catch { /* ignore */ }
-  return JSON.parse(JSON.stringify(defaultData));
+  return deepClone(defaultData);
+}
+
+function deepClone<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function genId(prefix: string): string {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function isNonEmptyString(v: unknown): v is string {
+  return typeof v === "string" && v.trim().length > 0;
+}
+
+function ensureId<T extends { id: string }>(obj: T, prefix: string): T {
+  if (!obj.id) obj.id = genId(prefix);
+  return obj;
 }
 
 function migrateData(parsed: any): AppData {
@@ -356,69 +373,137 @@ function persist(): void {
 
 // --- Application CRUD ---
 export function getApplications(): Application[] {
-  return getData().applications.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  return [...getData().applications].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
-export function addApplication(app: Application): void { getData().applications.push(app); persist(); }
-export function updateApplication(id: string, updates: Partial<Application>): void {
+export function addApplication(app: Application): Application {
+  if (!isNonEmptyString(app.company)) throw new Error("Application requires a company name");
+  if (!isNonEmptyString(app.role)) throw new Error("Application requires a role");
+  const a = ensureId(app, "app");
+  getData().applications.push(a);
+  persist();
+  return a;
+}
+export function updateApplication(id: string, updates: Partial<Application>): boolean {
   const data = getData();
   const idx = data.applications.findIndex(a => a.id === id);
-  if (idx !== -1) { data.applications[idx] = { ...data.applications[idx], ...updates, updatedAt: new Date().toISOString() }; persist(); }
-}
-export function deleteApplication(id: string): void {
-  const data = getData();
-  data.applications = data.applications.filter(a => a.id !== id);
+  if (idx === -1) return false;
+  data.applications[idx] = { ...data.applications[idx], ...updates, id, updatedAt: new Date().toISOString() };
   persist();
+  return true;
+}
+export function deleteApplication(id: string): boolean {
+  const data = getData();
+  const before = data.applications.length;
+  data.applications = data.applications.filter(a => a.id !== id);
+  if (data.applications.length === before) return false;
+  persist();
+  return true;
 }
 
 // --- Interview Prep CRUD ---
 export function getInterviews(): InterviewPrep[] {
-  return getData().interviews.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  return [...getData().interviews].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
-export function addInterview(interview: InterviewPrep): void { getData().interviews.push(interview); persist(); }
-export function updateInterview(id: string, updates: Partial<InterviewPrep>): void {
+export function addInterview(interview: InterviewPrep): InterviewPrep {
+  const i = ensureId(interview, "int");
+  getData().interviews.push(i);
+  persist();
+  return i;
+}
+export function updateInterview(id: string, updates: Partial<InterviewPrep>): boolean {
   const data = getData();
   const idx = data.interviews.findIndex(i => i.id === id);
-  if (idx !== -1) { data.interviews[idx] = { ...data.interviews[idx], ...updates, updatedAt: new Date().toISOString() }; persist(); }
+  if (idx === -1) return false;
+  data.interviews[idx] = { ...data.interviews[idx], ...updates, id, updatedAt: new Date().toISOString() };
+  persist();
+  return true;
 }
-export function deleteInterview(id: string): void { const data = getData(); data.interviews = data.interviews.filter(i => i.id !== id); persist(); }
+export function deleteInterview(id: string): boolean {
+  const data = getData();
+  const before = data.interviews.length;
+  data.interviews = data.interviews.filter(i => i.id !== id);
+  if (data.interviews.length === before) return false;
+  persist();
+  return true;
+}
 
 // --- Skills CRUD ---
 export function getSkills(): Skill[] { return getData().skills; }
-export function updateSkill(id: string, updates: Partial<Skill>): void {
+export function updateSkill(id: string, updates: Partial<Skill>): boolean {
   const data = getData(); const idx = data.skills.findIndex(s => s.id === id);
-  if (idx !== -1) { data.skills[idx] = { ...data.skills[idx], ...updates }; persist(); }
+  if (idx === -1) return false;
+  data.skills[idx] = { ...data.skills[idx], ...updates, id };
+  persist();
+  return true;
 }
-export function addSkill(skill: Skill): void { getData().skills.push(skill); persist(); }
+export function addSkill(skill: Skill): Skill {
+  if (!isNonEmptyString(skill.name)) throw new Error("Skill requires a name");
+  const s = ensureId(skill, "skl");
+  getData().skills.push(s);
+  persist();
+  return s;
+}
 
 // --- Company Research CRUD ---
 export function getCompanies(): CompanyResearch[] {
-  return getData().companies.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  return [...getData().companies].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
-export function addCompany(company: CompanyResearch): void { getData().companies.push(company); persist(); }
-export function updateCompany(id: string, updates: Partial<CompanyResearch>): void {
+export function addCompany(company: CompanyResearch): CompanyResearch {
+  if (!isNonEmptyString(company.company)) throw new Error("Company requires a name");
+  const c = ensureId(company, "co");
+  getData().companies.push(c);
+  persist();
+  return c;
+}
+export function updateCompany(id: string, updates: Partial<CompanyResearch>): boolean {
   const data = getData(); const idx = data.companies.findIndex(c => c.id === id);
-  if (idx !== -1) { data.companies[idx] = { ...data.companies[idx], ...updates, updatedAt: new Date().toISOString() }; persist(); }
+  if (idx === -1) return false;
+  data.companies[idx] = { ...data.companies[idx], ...updates, id, updatedAt: new Date().toISOString() };
+  persist();
+  return true;
 }
-export function deleteCompany(id: string): void { const data = getData(); data.companies = data.companies.filter(c => c.id !== id); persist(); }
+export function deleteCompany(id: string): boolean {
+  const data = getData(); const before = data.companies.length;
+  data.companies = data.companies.filter(c => c.id !== id);
+  if (data.companies.length === before) return false;
+  persist();
+  return true;
+}
 
 // --- Resume CRUD ---
 export function getResumes(): ResumeVersion[] { return getData().resumes; }
-export function addResume(resume: ResumeVersion): void { getData().resumes.push(resume); persist(); }
-export function updateResume(id: string, updates: Partial<ResumeVersion>): void {
-  const data = getData(); const idx = data.resumes.findIndex(r => r.id === id);
-  if (idx !== -1) { data.resumes[idx] = { ...data.resumes[idx], ...updates, lastUpdated: new Date().toISOString() }; persist(); }
+export function addResume(resume: ResumeVersion): ResumeVersion {
+  if (!isNonEmptyString(resume.title)) throw new Error("Resume requires a title");
+  const r = ensureId(resume, "res");
+  getData().resumes.push(r);
+  persist();
+  return r;
 }
-export function deleteResume(id: string): void { const data = getData(); data.resumes = data.resumes.filter(r => r.id !== id); persist(); }
+export function updateResume(id: string, updates: Partial<ResumeVersion>): boolean {
+  const data = getData(); const idx = data.resumes.findIndex(r => r.id === id);
+  if (idx === -1) return false;
+  data.resumes[idx] = { ...data.resumes[idx], ...updates, id, lastUpdated: new Date().toISOString() };
+  persist();
+  return true;
+}
+export function deleteResume(id: string): boolean {
+  const data = getData(); const before = data.resumes.length;
+  data.resumes = data.resumes.filter(r => r.id !== id);
+  if (data.resumes.length === before) return false;
+  persist();
+  return true;
+}
 
 // --- Learning Paths CRUD ---
 export function getLearningPaths(): LearningPath[] { return getData().learningPaths; }
-export function toggleModuleComplete(pathId: string, moduleId: string): void {
+export function toggleModuleComplete(pathId: string, moduleId: string): boolean {
   const path = getData().learningPaths.find(p => p.id === pathId);
-  if (!path) return;
+  if (!path) return false;
   const idx = path.completedModules.indexOf(moduleId);
   if (idx === -1) path.completedModules.push(moduleId);
   else path.completedModules.splice(idx, 1);
   persist();
+  return true;
 }
 export function getLearningPathProgress(pathId: string): { completed: number; total: number; percent: number } {
   const path = getData().learningPaths.find(p => p.id === pathId);
@@ -431,18 +516,19 @@ export function getLearningPathProgress(pathId: string): { completed: number; to
 // --- Flashcards CRUD ---
 export function getFlashcards(): Flashcard[] { return getData().flashcards; }
 export function getFlashcardDecks(): string[] {
-  const decks = new Set(getData().flashcards.map(f => f.deck));
-  return Array.from(decks);
+  return Array.from(new Set(getData().flashcards.map(f => f.deck))).sort();
 }
 export function getFlashcardsByDeck(deck: string): Flashcard[] {
   return getData().flashcards.filter(f => f.deck === deck);
 }
-export function updateFlashcardLevel(id: string, level: number): void {
+export function updateFlashcardLevel(id: string, level: number): boolean {
   const f = getData().flashcards.find(f => f.id === id);
-  if (f) { f.level = Math.max(1, Math.min(5, level)); persist(); }
+  if (!f) return false;
+  f.level = Math.max(1, Math.min(5, level));
+  persist();
+  return true;
 }
 export function getDueFlashcards(): Flashcard[] {
-  // Lower level = more due (spaced rep: level 1 = 10, level 5 = 1)
   return getData().flashcards.filter(f => f.level < 5).sort((a, b) => a.level - b.level);
 }
 
@@ -463,27 +549,59 @@ export function setTheme(theme: "light" | "dark" | "system"): void { getData().t
 
 // --- Contacts CRUD ---
 export function getContacts(): StandaloneContact[] {
-  return getData().contacts.sort((a, b) => new Date(b.lastContacted).getTime() - new Date(a.lastContacted).getTime());
+  return [...getData().contacts].sort((a, b) => new Date(b.lastContacted).getTime() - new Date(a.lastContacted).getTime());
 }
-export function addContact(contact: StandaloneContact): void { getData().contacts.push(contact); persist(); }
-export function updateContact(id: string, updates: Partial<StandaloneContact>): void {
+export function addContact(contact: StandaloneContact): StandaloneContact {
+  if (!isNonEmptyString(contact.name)) throw new Error("Contact requires a name");
+  const c = ensureId(contact, "ctc");
+  getData().contacts.push(c);
+  persist();
+  return c;
+}
+export function updateContact(id: string, updates: Partial<StandaloneContact>): boolean {
   const data = getData(); const idx = data.contacts.findIndex(c => c.id === id);
-  if (idx !== -1) { data.contacts[idx] = { ...data.contacts[idx], ...updates }; persist(); }
+  if (idx === -1) return false;
+  data.contacts[idx] = { ...data.contacts[idx], ...updates, id };
+  persist();
+  return true;
 }
-export function deleteContact(id: string): void { const data = getData(); data.contacts = data.contacts.filter(c => c.id !== id); persist(); }
+export function deleteContact(id: string): boolean {
+  const data = getData(); const before = data.contacts.length;
+  data.contacts = data.contacts.filter(c => c.id !== id);
+  if (data.contacts.length === before) return false;
+  persist();
+  return true;
+}
 
 // --- Offers CRUD ---
 export function getOffers(): Offer[] {
-  return getData().offers.sort((a, b) => b.score - a.score);
+  return [...getData().offers].sort((a, b) => b.score - a.score);
 }
-export function addOffer(offer: Offer): void { getData().offers.push(offer); persist(); }
-export function updateOffer(id: string, updates: Partial<Offer>): void {
+export function addOffer(offer: Offer): Offer {
+  if (!isNonEmptyString(offer.company)) throw new Error("Offer requires a company name");
+  if (!isNonEmptyString(offer.role)) throw new Error("Offer requires a role");
+  const o = ensureId(offer, "ofr");
+  o.score = calculateOfferScore(o);
+  getData().offers.push(o);
+  persist();
+  return o;
+}
+export function updateOffer(id: string, updates: Partial<Offer>): boolean {
   const data = getData(); const idx = data.offers.findIndex(o => o.id === id);
-  if (idx !== -1) { data.offers[idx] = { ...data.offers[idx], ...updates }; persist(); }
+  if (idx === -1) return false;
+  data.offers[idx] = { ...data.offers[idx], ...updates, id };
+  data.offers[idx].score = calculateOfferScore(data.offers[idx]);
+  persist();
+  return true;
 }
-export function deleteOffer(id: string): void { const data = getData(); data.offers = data.offers.filter(o => o.id !== id); persist(); }
+export function deleteOffer(id: string): boolean {
+  const data = getData(); const before = data.offers.length;
+  data.offers = data.offers.filter(o => o.id !== id);
+  if (data.offers.length === before) return false;
+  persist();
+  return true;
+}
 export function calculateOfferScore(offer: Offer): number {
-  // Simple scoring: base + bonus*1.5 + equity*0.5 + pto*2000
   const totalComp = offer.baseSalary + offer.bonus * 1.5 + offer.equity * 0.5;
   const remoteBonus = offer.remote === "fully-remote" ? 5000 : offer.remote === "hybrid" ? 2500 : 0;
   const ptoValue = offer.pto * 2000;
@@ -492,14 +610,28 @@ export function calculateOfferScore(offer: Offer): number {
 
 // --- Journal CRUD ---
 export function getJournal(): JournalEntry[] {
-  return getData().journal.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return [...getData().journal].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
-export function addJournal(entry: JournalEntry): void { getData().journal.push(entry); persist(); }
-export function updateJournal(id: string, updates: Partial<JournalEntry>): void {
+export function addJournal(entry: JournalEntry): JournalEntry {
+  const e = ensureId(entry, "jrn");
+  getData().journal.push(e);
+  persist();
+  return e;
+}
+export function updateJournal(id: string, updates: Partial<JournalEntry>): boolean {
   const data = getData(); const idx = data.journal.findIndex(j => j.id === id);
-  if (idx !== -1) { data.journal[idx] = { ...data.journal[idx], ...updates }; persist(); }
+  if (idx === -1) return false;
+  data.journal[idx] = { ...data.journal[idx], ...updates, id };
+  persist();
+  return true;
 }
-export function deleteJournal(id: string): void { const data = getData(); data.journal = data.journal.filter(j => j.id !== id); persist(); }
+export function deleteJournal(id: string): boolean {
+  const data = getData(); const before = data.journal.length;
+  data.journal = data.journal.filter(j => j.id !== id);
+  if (data.journal.length === before) return false;
+  persist();
+  return true;
+}
 export function needsBackup(): boolean {
   const data = getData();
   if (!data.lastBackup) return true;
@@ -513,16 +645,20 @@ export function exportData(): string {
   return JSON.stringify(getData(), null, 2);
 }
 export function importData(json: string): boolean {
+  if (typeof json !== "string" || !json.trim()) return false;
   try {
     const parsed = JSON.parse(json);
-    if (!parsed.applications || !parsed.skills) return false;
+    if (!parsed || typeof parsed !== "object") return false;
+    if (!Array.isArray(parsed.applications) || !Array.isArray(parsed.skills)) return false;
     _data = migrateData(parsed);
     persist();
     return true;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 export function resetData(): void {
-  _data = JSON.parse(JSON.stringify(defaultData));
+  _data = deepClone(defaultData);
   persist();
 }
 

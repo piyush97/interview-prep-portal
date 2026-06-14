@@ -1,15 +1,45 @@
 {
   "name": "interview-prep-portal",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.2.0",
   "type": "module",
+  "description": "AI-powered interview preparation dashboard for software engineers. Track applications, evaluate JDs, practice with flashcards, compare offers, and run your entire job search.",
+  "keywords": [
+    "interview",
+    "job-search",
+    "career",
+    "react",
+    "typescript",
+    "ai",
+    "llm",
+    "flashcards",
+    "spaced-repetition",
+    "hermes-agent"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/piyush97/interview-prep-portal#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/piyush97/interview-prep-portal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/piyush97/interview-prep-portal/issues"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
     "preview": "vite preview",
+    "start": "vite preview --host 0.0.0.0 --port 8766",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "prepare": "husky || true"
   },
   "dependencies": {
     "lucide-react": "^1.18.0",
