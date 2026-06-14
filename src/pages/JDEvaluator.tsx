@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, Loader, Save, Plus, Sparkles, AlertTriangle } from "lucide-react";
 import { addApplication } from "../store";
+import { extractFromJD } from "../utils/extract";
 
 export default function JDEvaluator() {
   const [input, setInput] = useState("");
@@ -10,16 +11,12 @@ export default function JDEvaluator() {
   const [extracted, setExtracted] = useState({ company: "", role: "", url: "" });
   const [saved, setSaved] = useState(false);
 
-  // Try to extract company/role from JD (very simple heuristic)
+  // Big Mick v1.3.2 YELLOW fix: smart extraction.
+  // The old inline regex grabbed "TestCo. We need 5" as the company name.
+  // Now uses src/utils/extract.ts with proper sentence-boundary detection.
   const tryExtract = (text: string) => {
-    const companyMatch = text.match(/(?:at|@|for)\s+([A-Z][A-Za-z0-9&.\- ]{1,40}(?:\s+(?:Inc|LLC|Ltd|Corp|Co|Corporation))?)/);
-    const roleMatch = text.match(/Position:\s*([^\n]+)/i) || text.match(/Role:\s*([^\n]+)/i) || text.match(/Title:\s*([^\n]+)/i);
-    const urlMatch = text.match(/https?:\/\/\S+/);
-    setExtracted({
-      company: companyMatch?.[1]?.trim() || "",
-      role: roleMatch?.[1]?.trim() || "",
-      url: urlMatch?.[0] || "",
-    });
+    const { company, role, url } = extractFromJD(text);
+    setExtracted({ company, role, url });
   };
 
   const handleSave = () => {
@@ -51,7 +48,8 @@ export default function JDEvaluator() {
 
   const handleInput = (v: string) => {
     setInput(v);
-    if (v.length > 100) tryExtract(v);
+    // v1.3.2: try extracting on any meaningful change (was >100 chars, too late)
+    if (v.length > 30) tryExtract(v);
   };
 
   const handleEvaluate = async () => {
@@ -138,10 +136,11 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
 
       {/* Primary action: paste + extract + save */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="jd-input" className="block text-sm font-medium text-gray-700 mb-2">
           Job Description (URL or paste text)
         </label>
         <textarea
+          id="jd-input"
           value={input}
           onChange={(e) => handleInput(e.target.value)}
           rows={8}
@@ -160,8 +159,9 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
             </h3>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <div>
-                <label className="block text-xs text-indigo-700 mb-1">Company</label>
+                <label htmlFor="jd-company" className="block text-xs text-indigo-700 mb-1">Company</label>
                 <input
+                  id="jd-company"
                   value={extracted.company}
                   onChange={(e) => setExtracted({ ...extracted, company: e.target.value })}
                   className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -169,8 +169,9 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
                 />
               </div>
               <div>
-                <label className="block text-xs text-indigo-700 mb-1">Role</label>
+                <label htmlFor="jd-role" className="block text-xs text-indigo-700 mb-1">Role</label>
                 <input
+                  id="jd-role"
                   value={extracted.role}
                   onChange={(e) => setExtracted({ ...extracted, role: e.target.value })}
                   className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -178,8 +179,9 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs text-indigo-700 mb-1">URL</label>
+                <label htmlFor="jd-url" className="block text-xs text-indigo-700 mb-1">URL</label>
                 <input
+                  id="jd-url"
                   value={extracted.url}
                   onChange={(e) => setExtracted({ ...extracted, url: e.target.value })}
                   className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"

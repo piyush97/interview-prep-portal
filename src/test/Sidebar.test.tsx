@@ -57,4 +57,36 @@ describe("Sidebar", () => {
       expect(screen.getByText("1")).toBeInTheDocument();
     });
   });
+
+  it("groups nav items under category headings", () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+    // 5 categories from the Big Mick v1.3.2 YELLOW fix
+    expect(screen.getByText("Pipeline")).toBeInTheDocument();
+    expect(screen.getByText("Prep")).toBeInTheDocument();
+    expect(screen.getByText("Tools")).toBeInTheDocument();
+    expect(screen.getByText("Library")).toBeInTheDocument();
+    expect(screen.getByText("Config")).toBeInTheDocument();
+  });
+
+  it("renders all link labels (no items lost in grouping)", () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+    const expected = [
+      "Dashboard", "Applications", "Compare Jobs", "Contacts", "Offers", "Journal",
+      "Interview Prep", "Learn", "Flashcards", "Resources",
+      "JD Evaluator", "Reminders",
+      "Skills", "Resume", "Research",
+      "Settings",
+    ];
+    for (const label of expected) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    }
+  });
 });

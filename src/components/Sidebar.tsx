@@ -20,23 +20,50 @@ import {
 } from "lucide-react";
 import { getReminders } from "../store";
 
-const links = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/applications", label: "Applications", icon: Briefcase },
-  { to: "/interviews", label: "Interview Prep", icon: GraduationCap },
-  { to: "/learn", label: "Learn", icon: BookOpen },
-  { to: "/flashcards", label: "Flashcards", icon: BrainCircuit },
-  { to: "/resources", label: "Resources", icon: Globe },
-  { to: "/evaluate", label: "JD Evaluator", icon: Search },
-  { to: "/reminders", label: "Reminders", icon: Bell },
-  { to: "/compare", label: "Compare Jobs", icon: Scale },
-  { to: "/contacts", label: "Contacts", icon: Users },
-  { to: "/offers", label: "Offers", icon: Trophy },
-  { to: "/journal", label: "Journal", icon: BookOpen },
-  { to: "/settings", label: "Settings", icon: Settings },
-  { to: "/skills", label: "Skills", icon: Library },
-  { to: "/resume", label: "Resume", icon: FileText },
-  { to: "/research", label: "Research", icon: Building2 },
+// Big Mick v1.3.2 YELLOW fix: 16 sidebar items are now grouped under 5 categories
+// so power users can still see everything, but new users get a clearer mental map.
+const sections = [
+  {
+    label: "Pipeline",
+    links: [
+      { to: "/", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/applications", label: "Applications", icon: Briefcase },
+      { to: "/compare", label: "Compare Jobs", icon: Scale },
+      { to: "/contacts", label: "Contacts", icon: Users },
+      { to: "/offers", label: "Offers", icon: Trophy },
+      { to: "/journal", label: "Journal", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Prep",
+    links: [
+      { to: "/interviews", label: "Interview Prep", icon: GraduationCap },
+      { to: "/learn", label: "Learn", icon: BookOpen },
+      { to: "/flashcards", label: "Flashcards", icon: BrainCircuit },
+      { to: "/resources", label: "Resources", icon: Globe },
+    ],
+  },
+  {
+    label: "Tools",
+    links: [
+      { to: "/evaluate", label: "JD Evaluator", icon: Search },
+      { to: "/reminders", label: "Reminders", icon: Bell, badge: "reminders" as const },
+    ],
+  },
+  {
+    label: "Library",
+    links: [
+      { to: "/skills", label: "Skills", icon: Library },
+      { to: "/resume", label: "Resume", icon: FileText },
+      { to: "/research", label: "Research", icon: Building2 },
+    ],
+  },
+  {
+    label: "Config",
+    links: [
+      { to: "/settings", label: "Settings", icon: Settings },
+    ],
+  },
 ];
 
 export default function Sidebar() {
@@ -69,46 +96,55 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1">
-        {links.map((link) => {
-          const Icon = link.icon;
-          const isActive = link.to === "/"
-            ? location.pathname === "/"
-            : location.pathname.startsWith(link.to);
-          return (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              <Icon size={18} />
-              <span>{link.label}</span>
-              {link.to === "/reminders" ? (
-                <span className="ml-auto flex items-center gap-2">
-                  {pendingReminders > 0 && (
-                    <span className="bg-amber-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                      {pendingReminders}
-                    </span>
-                  )}
-                  {isActive && <ChevronRight size={14} className="text-indigo-400" />}
-                </span>
-              ) : (
-                isActive && <ChevronRight size={14} className="ml-auto text-indigo-400" />
-              )}
-              </NavLink>
-          );
-        })}
+      {/* Nav grouped by section */}
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+        {sections.map((section) => (
+          <div key={section.label}>
+            <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+              {section.label}
+            </div>
+            <div className="space-y-0.5">
+              {section.links.map((link) => {
+                const Icon = link.icon;
+                const isActive = link.to === "/"
+                  ? location.pathname === "/"
+                  : location.pathname.startsWith(link.to);
+                return (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-indigo-50 text-indigo-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                  >
+                    <Icon size={16} />
+                    <span>{link.label}</span>
+                    {link.badge === "reminders" ? (
+                      <span className="ml-auto flex items-center gap-2">
+                        {pendingReminders > 0 && (
+                          <span className="bg-amber-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                            {pendingReminders}
+                          </span>
+                        )}
+                        {isActive && <ChevronRight size={14} className="text-indigo-400" />}
+                      </span>
+                    ) : (
+                      isActive && <ChevronRight size={14} className="ml-auto text-indigo-400" />
+                    )}
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Footer */}
       <div className="p-4 border-t border-gray-100">
         <p className="text-xs text-gray-400 text-center">
-          Interview Prep Portal v1.0
+          Interview Prep Portal v1.3.2
         </p>
       </div>
     </aside>
