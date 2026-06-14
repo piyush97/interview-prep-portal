@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getApplications, addApplication, deleteApplication, exportData, importData, resetData } from "../store";
+import { getApplications, addApplication, deleteApplication, exportData, importData } from "../store";
 import StatusBadge from "../components/StatusBadge";
 import Modal from "../components/Modal";
 import type { Application, ApplicationStatus } from "../types";
-import { Plus, Download, Upload, Trash2, RotateCcw, Search } from "lucide-react";
+import { Plus, Download, Upload, Trash2, Search } from "lucide-react";
 
 function generateId() {
   return crypto.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -84,15 +84,6 @@ export default function Applications() {
     }
   };
 
-  const handleReset = () => {
-    if (confirm("This will delete ALL data. Are you sure?")) {
-      if (confirm("Really? All applications, interviews, and notes will be gone.")) {
-        resetData();
-        refresh();
-      }
-    }
-  };
-
   const filtered = apps.filter(
     (a) =>
       a.company.toLowerCase().includes(search.toLowerCase()) ||
@@ -117,9 +108,6 @@ export default function Applications() {
           </button>
           <button onClick={handleExport} className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
             <Download size={14} /> Export
-          </button>
-          <button onClick={handleReset} className="flex items-center gap-1.5 px-3 py-2 text-sm border border-red-200 text-red-600 rounded-lg hover:bg-red-50">
-            <RotateCcw size={14} /> Reset
           </button>
           <button onClick={() => setShowModal(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
             <Plus size={16} /> Add Application

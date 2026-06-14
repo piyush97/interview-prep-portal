@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Briefcase,
@@ -17,6 +18,7 @@ import {
   Scale,
   Users,
 } from "lucide-react";
+import { getReminders } from "../store";
 
 const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -39,6 +41,18 @@ const links = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const [pendingReminders, setPendingReminders] = useState(0);
+
+  useEffect(() => {
+    const update = () => setPendingReminders(getReminders().filter((r) => r.status !== "done").length);
+    update();
+    const interval = setInterval(update, 5000);
+    window.addEventListener("storage", update);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", update);
+    };
+  }, [location.pathname]);
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -49,7 +63,7 @@ export default function Sidebar() {
             <Briefcase size={16} className="text-white" />
           </div>
           <div>
-            <h1 className="font-semibold text-gray-900 text-sm">Prep Portal</h1>
+            <h1 className="font-semibold text-gray-900 text-sm">Interview Prep Portal</h1>
             <p className="text-xs text-gray-500">Piyush Mehta</p>
           </div>
         </div>
@@ -74,8 +88,19 @@ export default function Sidebar() {
             >
               <Icon size={18} />
               <span>{link.label}</span>
-              {isActive && <ChevronRight size={14} className="ml-auto text-indigo-400" />}
-            </NavLink>
+              {link.to === "/reminders" ? (
+                <span className="ml-auto flex items-center gap-2">
+                  {pendingReminders > 0 && (
+                    <span className="bg-amber-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                      {pendingReminders}
+                    </span>
+                  )}
+                  {isActive && <ChevronRight size={14} className="text-indigo-400" />}
+                </span>
+              ) : (
+                isActive && <ChevronRight size={14} className="ml-auto text-indigo-400" />
+              )}
+              </NavLink>
           );
         })}
       </nav>

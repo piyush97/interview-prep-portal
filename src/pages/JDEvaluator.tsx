@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Loader, Save, Plus } from "lucide-react";
+import { Search, Loader, Save, Plus, Sparkles, AlertTriangle } from "lucide-react";
 import { addApplication } from "../store";
 
 export default function JDEvaluator() {
@@ -67,8 +67,8 @@ export default function JDEvaluator() {
 ## A) Role Summary
 Based on the job description, this role involves ${input.trim().slice(0, 100)}...
 
-**Estimated Level**: Senior / Staff  
-**Relevant for Piyush**: Potentially — evaluate below.
+**Estimated Level**: Senior / Staff
+**Relevant for You**: Potentially — evaluate below.
 
 ---
 
@@ -88,7 +88,7 @@ Based on the job description, this role involves ${input.trim().slice(0, 100)}..
 ---
 
 ## C) Level Strategy
-**Current level**: Senior Software Engineer (Contract)  
+**Current level**: Senior Software Engineer (Contract)
 **Target level**: Staff / Lead for FTE, Senior+ for C2C
 
 Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/agent stack.
@@ -119,7 +119,7 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
 
 ## Overall Score: Analyze further before applying
 
-**Verdict**: 📝 Review details before deciding — use the full Hermes agent evaluation for deeper analysis. Use \`/prep evaluate\` in your Hermes session for AI-powered scoring.`;
+**Verdict**: 📝 Review details before deciding — use the full Hermes agent evaluation for deeper analysis.`;
 
       setResult(evaluation);
     } catch (e: any) {
@@ -136,7 +136,7 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
         <p className="text-gray-500 mt-1">Paste a job description — get scored, matched, and prepped</p>
       </div>
 
-      {/* Input */}
+      {/* Primary action: paste + extract + save */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Job Description (URL or paste text)
@@ -148,8 +148,59 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
           className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="Paste a job description URL or the full JD text here..."
         />
+
+        {/* Auto-extracted + save — above the fold for the primary workflow */}
+        {(extracted.company || extracted.role) && (
+          <div className="mt-4 bg-indigo-50 border border-indigo-100 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-indigo-800 mb-2 flex items-center gap-2">
+              <Save size={14} /> Detected
+              <span className="text-xs font-normal text-indigo-600 ml-auto">
+                Edit before saving
+              </span>
+            </h3>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div>
+                <label className="block text-xs text-indigo-700 mb-1">Company</label>
+                <input
+                  value={extracted.company}
+                  onChange={(e) => setExtracted({ ...extracted, company: e.target.value })}
+                  className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  placeholder="Not detected"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-indigo-700 mb-1">Role</label>
+                <input
+                  value={extracted.role}
+                  onChange={(e) => setExtracted({ ...extracted, role: e.target.value })}
+                  className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  placeholder="Not detected"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs text-indigo-700 mb-1">URL</label>
+                <input
+                  value={extracted.url}
+                  onChange={(e) => setExtracted({ ...extracted, url: e.target.value })}
+                  className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleSave}
+              disabled={saved}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {saved ? <>✓ Saved to Applications</> : <><Plus size={14} /> Add to Pipeline</>}
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mt-3">
-          <p className="text-xs text-gray-400">Powered by Career Prep Plugin — Hermes Agent</p>
+          <p className="text-xs text-gray-400">
+            ✨ Save now, evaluate later — the goal is to capture the opportunity fast.
+          </p>
           <button
             onClick={handleEvaluate}
             disabled={evaluating || !input.trim()}
@@ -164,7 +215,6 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
         </div>
       </div>
 
-      {/* Result */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
           {error}
@@ -174,7 +224,10 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
       {result && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Evaluation Result</h2>
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Sparkles size={18} className="text-amber-500" />
+              AI-Suggested Evaluation
+            </h2>
             <button
               onClick={() => { setResult(null); setInput(""); }}
               className="text-sm text-gray-400 hover:text-gray-600"
@@ -182,55 +235,17 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
               Clear
             </button>
           </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-start gap-2">
+            <AlertTriangle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-800">
+              <strong>Template output.</strong> This is a structured scaffold based on common
+              evaluation patterns. For real AI analysis, use{" "}
+              <code className="bg-amber-100 px-1 rounded">/prep evaluate</code> in your Hermes
+              session.
+            </p>
+          </div>
           <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
             {result}
-          </div>
-          <div className="mt-6 pt-4 border-t border-gray-100 space-y-3">
-            <p className="text-sm text-gray-500">
-              Want deeper AI analysis? Open your Hermes session and type:
-            </p>
-            <code className="block bg-gray-900 text-green-400 px-4 py-2 rounded-lg text-sm font-mono">
-              /prep evaluate "{input.trim().slice(0, 80)}..."
-            </code>
-
-            <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mt-4">
-              <h3 className="text-sm font-semibold text-indigo-800 mb-2 flex items-center gap-2">
-                <Save size={14} /> Save as Application
-              </h3>
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div>
-                  <label className="block text-xs text-indigo-700 mb-1">Company</label>
-                  <input
-                    value={extracted.company}
-                    onChange={(e) => setExtracted({ ...extracted, company: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-indigo-700 mb-1">Role</label>
-                  <input
-                    value={extracted.role}
-                    onChange={(e) => setExtracted({ ...extracted, role: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs text-indigo-700 mb-1">URL</label>
-                  <input
-                    value={extracted.url}
-                    onChange={(e) => setExtracted({ ...extracted, url: e.target.value })}
-                    className="w-full px-2 py-1.5 text-sm border border-indigo-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
-              <button
-                onClick={handleSave}
-                disabled={saved}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {saved ? <>✓ Saved to Applications</> : <><Plus size={14} /> Add to Pipeline</>}
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -240,10 +255,9 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
         <h3 className="text-sm font-semibold text-indigo-800 mb-2">How to use the JD Evaluator</h3>
         <ul className="space-y-1 text-sm text-indigo-700">
           <li>• Paste the full JD (not just the URL) for best results</li>
-          <li>• The evaluator scores against your configured profile</li>
-          <li>• Only apply to roles scoring <strong>4.0/5</strong> or above</li>
-          <li>• Use the Hermes agent for full AI-powered 6-block evaluation</li>
-          <li>• Save promising roles to Applications for tracking</li>
+          <li>• The portal auto-extracts company + role — edit before saving if needed</li>
+          <li>• Save first, evaluate second — opportunity capture &gt; analysis paralysis</li>
+          <li>• For real AI evaluation, run <code className="bg-indigo-100 px-1 rounded">/prep evaluate</code> in Hermes</li>
         </ul>
       </div>
     </div>

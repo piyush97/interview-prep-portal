@@ -203,9 +203,17 @@ export default function Dashboard() {
         </div>
         <div className="space-y-0">
           {recentApps.length === 0 && (
-            <p className="text-sm text-gray-400 py-4 text-center">
-              No applications yet. Start tracking!
-            </p>
+            <div className="text-center py-8 px-4">
+              <Briefcase size={36} className="mx-auto mb-3 text-gray-300" />
+              <p className="text-sm text-gray-600 mb-1 font-medium">No applications tracked yet</p>
+              <p className="text-xs text-gray-400 mb-4">Paste a JD or add a company to get started.</p>
+              <button
+                onClick={() => navigate("/evaluate")}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700"
+              >
+                Evaluate a Job Description
+              </button>
+            </div>
           )}
           {recentApps.map((app) => (
             <div

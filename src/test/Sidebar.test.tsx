@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { addReminder, resetData } from "../store";
 
 describe("Sidebar", () => {
   it("renders all navigation links", () => {
@@ -37,6 +38,23 @@ describe("Sidebar", () => {
         <Sidebar />
       </MemoryRouter>
     );
-    expect(screen.getByText("Prep Portal")).toBeInTheDocument();
+    expect(screen.getByText("Interview Prep Portal")).toBeInTheDocument();
+  });
+
+  it("shows pending reminder count badge when reminders exist", async () => {
+    localStorage.clear();
+    resetData();
+    addReminder({
+      id: "rm_test_1", title: "Test", date: new Date().toISOString(),
+      type: "follow-up", status: "pending",
+    } as any);
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(screen.getByText("1")).toBeInTheDocument();
+    });
   });
 });
