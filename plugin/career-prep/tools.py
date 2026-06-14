@@ -295,7 +295,9 @@ def handle_serve_portal(args: dict, **kwargs) -> str:
                 capture_output=True, text=True, timeout=5
             )
             if result.stdout.strip() == "200":
-                return json.dumps({"status": "running", "url": "http://localhost:8766/interview-prep-portal/"})
+                return json.dumps({
+        "status": "running", "url": "http://localhost:8766/"
+    })
             else:
                 return json.dumps({"status": "stopped"})
         except:
@@ -305,7 +307,7 @@ def handle_serve_portal(args: dict, **kwargs) -> str:
         # Check if already running
         try:
             subprocess.run(["curl", "-s", "-o", "/dev/null", "http://localhost:8766"], timeout=3)
-            return json.dumps({"status": "already_running", "url": "http://localhost:8766/interview-prep-portal/"})
+            return json.dumps({"status": "already_running", "url": "http://localhost:8766/"})
         except:
             pass
 
@@ -322,7 +324,7 @@ def handle_serve_portal(args: dict, **kwargs) -> str:
                 stderr=subprocess.DEVNULL
             )
             time.sleep(2)
-            return json.dumps({"status": "started", "url": "http://localhost:8766/interview-prep-portal/"})
+            return json.dumps({"status": "started", "url": "http://localhost:8766/"})
         except Exception as e:
             return json.dumps({"error": f"Failed to start portal: {e}"})
 
@@ -348,7 +350,7 @@ def handle_portal_status(args: dict, **kwargs) -> str:
 
         # Fallback: return a message about the portal
         return json.dumps({
-            "message": "Portal data available via localStorage. Open the web portal at http://localhost:8766/interview-prep-portal/.",
+            "message": "Portal data available via localStorage. Open the web portal at http://localhost:8766/.",
             "applications": "N/A — access via web portal",
             "skills_progress": "N/A — access via web portal",
         })
@@ -357,8 +359,17 @@ def handle_portal_status(args: dict, **kwargs) -> str:
     skills = data.get("skills", [])
     flashcards = data.get("flashcards", [])
     learning_paths = data.get("learningPaths", [])
+    contacts = data.get("contacts", [])
+    offers = data.get("offers", [])
+    journal = data.get("journal", [])
+    profile = data.get("profile", {})
 
     return json.dumps({
+        "profile": {
+            "name": profile.get("name", "Unknown"),
+            "target_rate": profile.get("targetRate"),
+            "target_salary": profile.get("targetSalary"),
+        },
         "applications": {
             "total": len(apps),
             "active": len([a for a in apps if a.get("status") not in ["rejected", "accepted", "withdrawn"]]),
@@ -374,5 +385,17 @@ def handle_portal_status(args: dict, **kwargs) -> str:
             "flashcards_due": len([f for f in flashcards if f.get("level", 5) < 5]),
             "total_modules": sum(len(p.get("modules", [])) for p in learning_paths),
             "completed_modules": sum(len(p.get("completedModules", [])) for p in learning_paths),
-        }
+        },
+        "network": {
+            "contacts": len(contacts),
+            "warm_contacts": len([c for c in contacts if c.get("status") == "warm"]),
+        },
+        "offers": {
+            "total": len(offers),
+            "best_score": max((o.get("score", 0) for o in offers), default=0),
+        },
+        "journal": {
+            "entries": len(journal),
+            "latest": journal[0].get("date") if journal else None,
+        },
     })

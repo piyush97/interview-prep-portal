@@ -11,6 +11,11 @@ import Learn from "./pages/Learn";
 import Flashcards from "./pages/Flashcards";
 import Resources from "./pages/Resources";
 import JDEvaluator from "./pages/JDEvaluator";
+import Settings from "./pages/Settings";
+import Offers from "./pages/Offers";
+import Contacts from "./pages/Contacts";
+import Journal from "./pages/Journal";
+import CompareJobs from "./pages/CompareJobs";
 
 export default function App() {
   return (
@@ -27,6 +32,11 @@ export default function App() {
         <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/evaluate" element={<JDEvaluator />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/offers" element={<Offers />} />
+        <Route path="/contacts" element={<Contacts />} />
+        <Route path="/journal" element={<Journal />} />
+        <Route path="/compare" element={<CompareJobs />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

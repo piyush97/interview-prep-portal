@@ -1,0 +1,12 @@
+services:
+  portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8766:80"
+    container_name: interview-prep-portal
+    restart: unless-stopped
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80

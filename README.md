@@ -1,236 +1,338 @@
-# Interview Prep Portal 🎯
+# 🎯 Interview Prep Portal
 
-> A complete, open-source interview preparation dashboard for software engineers, AI/ML engineers, and technical professionals. Track applications, practice with flashcards, follow structured learning paths, manage resumes, and research companies — all in one place.
+> A complete, open-source interview preparation dashboard for software engineers, AI/ML engineers, and technical professionals.
 
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Tests](https://github.com/piyush97/interview-prep-portal/actions/workflows/deploy.yml/badge.svg)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
+Track applications, evaluate job descriptions, practice with flashcards, compare offers, manage contacts, schedule interviews, and run your entire job search like a senior architect.
 
----
-
-## Features
-
-### 📊 Dashboard
-- **At-a-glance stats**: active applications, interview stages, offers, rejections
-- **Study progress**: learning module completion, flashcards due
-- **Recent activity**: last 5 applications with status
-
-### 💼 Application Tracker
-- Full CRUD for job applications — company, role, status, salary, location
-- **Status pipeline**: Saved → Applied → Phone Screen → Technical → Onsite → Offer → Accepted/Rejected
-- **Contacts**: track recruiters, hiring managers, referrals
-- **Timeline**: every status change and note is timestamped
-- **Notes**: free-form notes per application
-- **Export/Import**: JSON backup and restore
-
-### 🧠 Flashcards (Spaced Repetition)
-- Pre-seeded with 25+ interview Q&A across:
-  - System Design, MCP & Agents, RAG, Behavioral, TypeScript, React, Architecture
-- **Decks**: study by topic
-- **Practice mode**: rate your recall (knew it / partially / struggled) → level adjusts
-- **Due cards**: filter cards needing review (levels 1-4)
-- Levels 1-5: lower = less familiar
-
-### 📖 Learning Paths
-- 7 structured curricula with 30+ modules:
-  - **System Design for AI & Full-Stack** (5 modules)
-  - **MCP & Agentic Workflows** (4 modules)
-  - **RAG & Vector Databases** (4 modules)
-  - **LangChain & LLM Frameworks** (4 modules)
-  - **Azure AI Services** (3 modules)
-  - **Advanced TypeScript & React Patterns** (3 modules)
-  - **Technical & Behavioral Interview Prep** (3 modules)
-- Each module has curated resources (docs, repos, videos, courses)
-- Check off completed modules → progress tracking
-
-### 🌐 Resources
-- 28+ curated links to docs, tools, courses, repos, newsletters
-- Filter by category (AI/ML, Frontend, Cloud, DevOps, Career)
-- Tag-based search
-
-### 📄 Resume Manager
-- Store tailored resume versions for different roles
-- Markdown editor with save/load
-- Download as `.md`
-
-### 🏢 Company Research
-- Track companies you're targeting
-- Products, tech stack, culture notes, interview process
-- People/contacts tracking
-
-### 📤 Data Portability
-- Export all data as JSON
-- Import from backup
-- Reset to defaults
-- All data stored in `localStorage` — zero backend, zero servers
+Pairs with the **Career Prep** Hermes Agent plugin for AI-powered JD evaluation, cover letters, company research, negotiation scripts, and interview story generation.
 
 ---
 
-## Getting Started
+## 🚀 Why This Exists
 
-### Prerequisites
-- Node.js 18+ (tested with 22)
-- npm 9+
+Most job-hunt tools are either:
 
-### Install & Run
+- **Spreadsheets** that don't help you prepare
+- **Career coaches** that cost money
+- **Generic job boards** that don't understand your profile
+
+This portal is **opinionated but forkable**. It bundles everything you need to run a modern, data-driven job search:
+
+- Application pipeline with status tracking
+- JD evaluation with CV match scoring
+- Spaced-repetition flashcards
+- Structured learning paths
+- Company research
+- Offer comparison
+- Interview scheduling + contact tracker
+- Daily journal
+- ATS-friendly resume versioning
+- Hermes Agent native integration
+
+All data lives in **your browser** (localStorage). No backend, no account, no lock-in.
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| **Dashboard** | Pipeline overview, upcoming interviews, study progress, flashcards due |
+| **Applications** | Track every role with status, notes, dates, JD, contacts, interviews |
+| **JD Evaluator** | Paste a JD, get structured A-F scoring, match analysis, prep roadmap |
+| **Interview Prep** | Per-application prep notes, questions, answers, company context |
+| **Flashcards** | 35+ cards across system design, AI/ML, TypeScript, React, behavioral |
+| **Learn** | 7 structured learning paths with modules, resources, progress tracking |
+| **Resources** | 35+ curated links by topic with search + filtering |
+| **Skills Matrix** | Rate yourself across 15+ skills, track gaps |
+| **Resume** | Version your resume and tailor for specific roles |
+| **Research** | Company profiles, SWOT, recent news, interview intel |
+|| **Settings** | Profile, theme, import/export/reset, backup reminders |
+|| **Offer Comparison** | Compare offers on comp, remote, PTO with auto-scoring |
+|| **Job Comparison** | Side-by-side pros/cons before applying |
+|| **Contacts** | Track recruiters, hiring managers, referrals, last contacted |
+|| **Scheduler** | Interview schedule with dates, times, prep links |
+|| **Daily Journal** | Daily standup-style log for your job hunt |
+|| **Data Portability** | Export/import JSON, automatic backups, schema migrations |
+|| **PWA** | Installable app with offline service worker |
+|| **Keyboard Shortcuts** | Ctrl/Cmd + letter navigation across pages |
+|| **Hermes Plugin** | Native AI tools for cover letters, research, negotiation, stories |
+
+---
+
+## 📱 Live Demo
+
+Deploy to GitHub Pages automatically via the included CI workflow, or run locally.
+
+```bash
+# Run locally
+npm install
+npm run dev
+```
+
+---
+
+## 📝 Quick Start
+
+### 1. Clone & Install
 
 ```bash
 git clone https://github.com/piyush97/interview-prep-portal.git
 cd interview-prep-portal
 npm install
-npm run dev
 ```
 
-Open http://localhost:5173/interview-prep-portal/
+### 2. Run
 
-### Build for Production
+```bash
+npm run dev
+# Open http://localhost:5173/interview-prep-portal/
+```
+
+### 3. Test
+
+```bash
+npm test
+```
+
+### 4. Build
 
 ```bash
 npm run build
-npm run preview
 ```
-
-The built files are in `dist/` — deploy to any static host.
 
 ---
 
-## Testing
+## 📦 Docker
 
 ```bash
-# Run all tests
-npm test
+# Run with Docker Compose
+docker-compose up --build
 
-# Watch mode
-npm run test:watch
-
-# Run specific file
-npx vitest run src/test/store.test.ts
+# Open http://localhost:8766
 ```
 
-**Test stack:** Vitest + React Testing Library + jsdom.  
-**Coverage:** 40+ tests covering store logic, components, and UI behavior.
+Or with plain Docker:
 
-Tests follow **strict TDD** (Red-Green-Refactor). See [test-driven-development skill](./.hermes/skills/software-development/test-driven-development/SKILL.md) for methodology.
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Framework | [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
-| Build | [Vite 8](https://vite.dev/) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com/) |
-| Routing | [React Router 7](https://reactrouter.com/) |
-| Icons | [Lucide React](https://lucide.dev/) |
-| Testing | [Vitest 4](https://vitest.dev/) + [React Testing Library](https://testing-library.com/react) |
-| Persistence | localStorage (zero backend) |
-
----
-
-## Project Structure
-
-```
-src/
-├── components/     # Reusable UI (Sidebar, Modal, StatusBadge, Layout)
-├── pages/          # Route pages (Dashboard, Applications, Learn, Flashcards, etc.)
-├── test/           # Unit & component tests
-├── store.ts        # Data layer (localStorage CRUD, default data)
-├── types.ts        # TypeScript interfaces
-├── App.tsx         # Route definitions
-├── main.tsx        # Entry point
-└── index.css       # Tailwind imports
+```bash
+docker build -t interview-prep-portal .
+docker run -p 8766:80 interview-prep-portal
 ```
 
 ---
 
-## Extending with AI Agents
+## 🤖 Hermes Agent Plugin
 
-This portal is designed to be AI-agent friendly:
+This project is designed to be a **first-class Hermes Agent citizen**.
 
-- **All data is JSON** — agents can read/write `localStorage` via the exported store functions
-- **Structured types** — every entity has a TypeScript interface in `types.ts`
-- **Seed content** — learning paths, flashcards, and resources are plain data arrays in `store.ts`
-- **TDD workflow** — tests validate every store operation and component
+### Install
 
-### Adding new flashcards
+```bash
+bash scripts/install-plugin.sh
+hermes plugins enable career-prep
+```
+
+### In-session Commands
+
+```
+/prep                 Show all commands
+/prep evaluate URL    Evaluate a job description
+/prep cover CO ROLE   Generate a cover letter
+/prep research CO     Research a company
+/prep scan            Find matching jobs
+/prep stories         Generate STAR interview stories
+/prep negotiate       Get negotiation scripts
+/prep portal          Open the web dashboard
+/prep status          Show your pipeline stats
+```
+
+### CLI Commands
+
+```bash
+hermes career-prep serve         # Start web portal
+hermes career-prep status        # Your stats
+hermes career-prep evaluate URL  # Evaluate a JD
+hermes career-prep cover CO ROLE # Generate cover letter
+hermes career-prep research CO   # Research company
+```
+
+### Available Tools
+
+| Tool | Purpose |
+|------|---------|
+| `evaluate_jd` | Score a JD against your profile |
+| `generate_cover_letter` | Tailored cover letter |
+| `research_company` | Company deep-dive |
+| `scan_jobs` | Search job boards |
+| `generate_interview_stories` | STAR stories |
+| `generate_negotiation_script` | Negotiation talking points |
+| `serve_portal` | Start/stop web dashboard |
+| `portal_status` | Pipeline stats |
+
+---
+
+### Keyboard Shortcuts
+
+Press `Ctrl` (Windows/Linux) or `Cmd` (Mac) plus:
+
+| Key | Page |
+|-----|------|
+| `D` | Dashboard |
+| `A` | Applications |
+| `I` | Interviews |
+| `S` | Skills |
+| `F` | Flashcards |
+| `R` | Resources |
+| `E` | JD Evaluator |
+| `O` | Offers |
+| `J` | Journal |
+| `,` | Settings |
+
+---
+
+## 📂 Project Structure
+
+```
+interview-prep-portal/
+├── public/              # Static assets
+├── src/
+│   ├── components/      # UI components
+│   ├── pages/           # Route pages
+│   ├── store.ts         # localStorage data layer
+│   ├── types.ts         # TypeScript types
+│   └── test/            # Tests
+├── plugin/              # Hermes Agent plugin
+├── scripts/             # Install & utility scripts
+├── docs/                # Detailed documentation
+├── .github/workflows/   # CI/CD + issue templates
+├── Dockerfile
+├── docker-compose.yml
+├── nginx.conf
+├── .env.example
+├── README.md
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+└── LICENSE
+```
+
+---
+
+## 🔧 Customization
+
+### Your Profile
+
+Open **Settings** in the portal, or edit `src/store.ts`:
 
 ```typescript
-// In store.ts, add to defaultFlashcards array:
-{
-  id: "fc-mycard",
-  question: "What is a Bloom Filter?",
-  answer: "A probabilistic data structure for set membership testing. False positives possible, false negatives impossible. Uses multiple hash functions.",
-  category: "system-design",
-  deck: "System Design",
-  difficulty: "hard",
-  level: 1  // Start at 1 (needs practice)
-}
+const defaultProfile: UserProfile = {
+  name: "Your Name",
+  title: "Your Role",
+  summary: "Your one-line pitch",
+  targetRate: 120,
+  targetSalary: 160000,
+  location: "Remote / Toronto",
+  skills: [...],
+};
 ```
 
-### Adding new learning paths
+### Learning Content
 
-```typescript
-// In store.ts, add to defaultLearningPaths:
-{
-  id: "lp-my-path",
-  title: "Kubernetes for AI Workloads",
-  description: "Deploying and scaling LLM inference on Kubernetes",
-  category: "devops",
-  priority: "medium",
-  completedModules: [],
-  modules: [
-    {
-      id: "lp-m1",
-      title: "K8s Fundamentals",
-      description: "Pods, deployments, services, configmaps",
-      duration: "3hrs",
-      resources: [
-        { title: "K8s Docs", url: "https://kubernetes.io/docs/", type: "doc" }
-      ]
-    }
-  ]
-}
+Add flashcards, learning paths, or resources in `src/store.ts`.
+
+### Themes
+
+Toggle between light and dark themes in the Settings page.
+
+---
+
+## 📊 Data & Privacy
+
+- **No backend**: All data is stored in your browser's localStorage
+- **Export anytime**: Settings → Export JSON
+- **Import**: Drag-and-drop JSON backup
+- **Migrate**: Automatic schema migrations on version updates
+- **Private**: Your data never leaves your machine unless you export it
+
+---
+
+## 🧪 Testing
+
+```bash
+npm test          # Run all tests
+npm run test:watch # Watch mode
+```
+
+We use:
+
+- Vitest
+- React Testing Library
+- jsdom
+
+---
+
+## 🚀 Deploy
+
+### GitHub Pages
+
+1. Push to `main`
+2. GitHub Actions builds and deploys automatically
+3. Visit `https://yourusername.github.io/interview-prep-portal/`
+
+### Other Hosts
+
+```bash
+npm run build
+# Deploy the `dist/` folder to Netlify, Vercel, Cloudflare Pages, etc.
 ```
 
 ---
 
-## Roadmap
+## 🎯 Roadmap
 
-- [x] Application tracking with status pipeline
-- [x] Interview prep with company-specific Q&A
-- [x] Skills matrix with gap analysis
-- [x] Resume version management
-- [x] Company research
-- [x] Structured learning paths with resources
-- [x] Flashcards with spaced repetition
-- [x] Curated resource library
-- [x] Data export/import
-- [x] Comprehensive test suite
-- [ ] Dark mode
-- [ ] AI-powered interview question generator
-- [ ] GitHub Gist sync for data portability
-- [ ] Collaborative resume feedback
+- [ ] AI-native JD parsing from URLs
+- [ ] Cloud sync option (encrypted)
+- [ ] Mobile app (PWA improvements)
+- [ ] Resume PDF generation
+- [ ] LinkedIn integration
+- [ ] Calendar sync for interviews
+- [ ] More learning paths (ML ops, platform engineering)
+- [ ] Multi-language support
+
+See [ROADMAP.md](docs/ROADMAP.md) for details.
 
 ---
 
-## Contributing
+## 👨‍💼 Built For
 
-PRs welcome! This project follows TDD — please write tests before code.
-
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/amazing`)
-3. Write a failing test (RED)
-4. Implement the feature (GREEN)
-5. Refactor if needed
-6. Run `npm test` to verify everything passes
-7. Commit and push
-8. Open a Pull Request
+- Software Engineers
+- AI/ML Engineers
+- Full-Stack Developers
+- Technical Leads
+- Staff+ Engineers
+- Anyone running a serious job search
 
 ---
 
-## License
+## 📖 Documentation
 
-MIT — use freely, modify freely, share freely.
+- [Architecture](docs/ARCHITECTURE.md)
+- [Hermes Plugin Guide](docs/HERMES_PLUGIN.md)
+- [Data Model](docs/DATA_MODEL.md)
+- [Contributing](CONTRIBUTING.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Changelog](CHANGELOG.md)
 
-Built by [Piyush Mehta](https://github.com/piyush97) for the job-seeking community.
+---
+
+## 💝 Contributing
+
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 📜 License
+
+MIT License. See [LICENSE](LICENSE).
+
+## 💫 Acknowledgements
+
+- Inspired by [career-ops](https://github.com/santifer/career-ops)
+- Built with React, TypeScript, Tailwind CSS, Vite, and Hermes Agent

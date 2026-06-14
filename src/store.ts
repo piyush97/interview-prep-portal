@@ -1,6 +1,6 @@
 import type {
   AppData, Application, InterviewPrep, Skill, CompanyResearch, ResumeVersion,
-  LearningPath, Flashcard, CuratedResource
+  LearningPath, Flashcard, CuratedResource, UserProfile, StandaloneContact, Offer, JournalEntry
 } from "./types";
 
 const STORAGE_KEY = "interview-prep-portal-data";
@@ -258,7 +258,28 @@ const defaultResources: CuratedResource[] = [
   { id: "r28", title: "High Growth Engineer Newsletter", url: "https://careercutler.substack.com/", description: "Jordan Cutler's newsletter on engineering career growth, promotions, and strategy", category: "soft-skills", type: "newsletter", tags: ["career", "growth", "advice"] },
 ];
 
+const defaultProfile: UserProfile = {
+  name: "Piyush Mehta",
+  title: "Senior Software Engineer",
+  summary: "AI/LLM/Agentic workflows, MCP, React, TypeScript, Python, Azure. 6+ years building production systems.",
+  email: "work.piyush.mehta@gmail.com",
+  phone: "",
+  linkedin: "https://linkedin.com/in/piyush24",
+  github: "https://github.com/piyush97",
+  website: "https://piyushmehta.com",
+  location: "Kitchener, ON / Remote",
+  targetRate: 100,
+  targetSalary: 160000,
+  workAuthorization: "Canadian PR",
+  relocation: "No",
+  availability: "2 weeks",
+  preferences: ["remote", "ai-first", "c2c-friendly"],
+};
+
 const defaultData: AppData = {
+  version: "1.0.0",
+  profile: defaultProfile,
+  theme: "system",
   applications: [],
   interviews: [],
   skills: [
@@ -283,6 +304,10 @@ const defaultData: AppData = {
   learningPaths: defaultLearningPaths,
   flashcards: defaultFlashcards,
   resources: defaultResources,
+  contacts: [],
+  offers: [],
+  journal: [],
+  lastBackup: undefined,
 };
 
 function loadData(): AppData {
@@ -290,18 +315,29 @@ function loadData(): AppData {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return {
-        ...defaultData,
-        ...parsed,
-        skills: parsed.skills?.length ? parsed.skills : defaultData.skills,
-        learningPaths: parsed.learningPaths?.length ? parsed.learningPaths : defaultData.learningPaths,
-        flashcards: parsed.flashcards?.length ? parsed.flashcards : defaultData.flashcards,
-        resources: parsed.resources?.length ? parsed.resources : defaultData.resources,
-      };
+      return migrateData(parsed);
     }
   } catch { /* ignore */ }
   return JSON.parse(JSON.stringify(defaultData));
 }
+
+function migrateData(parsed: any): AppData {
+  return {
+    ...defaultData,
+    ...parsed,
+    version: parsed.version || defaultData.version,
+    profile: parsed.profile || defaultData.profile,
+    theme: parsed.theme || defaultData.theme,
+    skills: parsed.skills?.length ? parsed.skills : defaultData.skills,
+    learningPaths: parsed.learningPaths?.length ? parsed.learningPaths : defaultData.learningPaths,
+    flashcards: parsed.flashcards?.length ? parsed.flashcards : defaultData.flashcards,
+    resources: parsed.resources?.length ? parsed.resources : defaultData.resources,
+    contacts: parsed.contacts || defaultData.contacts,
+    offers: parsed.offers || defaultData.offers,
+    journal: parsed.journal || defaultData.journal,
+  };
+}
+
 
 function saveData(data: AppData): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -417,6 +453,61 @@ export function getResourcesByCategory(category: string): CuratedResource[] {
   return getData().resources.filter(r => r.category === category);
 }
 
+// --- Profile & Settings ---
+export function getProfile(): UserProfile { return getData().profile; }
+export function updateProfile(profile: Partial<UserProfile>): void {
+  const data = getData(); data.profile = { ...data.profile, ...profile }; persist();
+}
+export function getTheme(): "light" | "dark" | "system" { return getData().theme; }
+export function setTheme(theme: "light" | "dark" | "system"): void { getData().theme = theme; persist(); }
+
+// --- Contacts CRUD ---
+export function getContacts(): StandaloneContact[] {
+  return getData().contacts.sort((a, b) => new Date(b.lastContacted).getTime() - new Date(a.lastContacted).getTime());
+}
+export function addContact(contact: StandaloneContact): void { getData().contacts.push(contact); persist(); }
+export function updateContact(id: string, updates: Partial<StandaloneContact>): void {
+  const data = getData(); const idx = data.contacts.findIndex(c => c.id === id);
+  if (idx !== -1) { data.contacts[idx] = { ...data.contacts[idx], ...updates }; persist(); }
+}
+export function deleteContact(id: string): void { const data = getData(); data.contacts = data.contacts.filter(c => c.id !== id); persist(); }
+
+// --- Offers CRUD ---
+export function getOffers(): Offer[] {
+  return getData().offers.sort((a, b) => b.score - a.score);
+}
+export function addOffer(offer: Offer): void { getData().offers.push(offer); persist(); }
+export function updateOffer(id: string, updates: Partial<Offer>): void {
+  const data = getData(); const idx = data.offers.findIndex(o => o.id === id);
+  if (idx !== -1) { data.offers[idx] = { ...data.offers[idx], ...updates }; persist(); }
+}
+export function deleteOffer(id: string): void { const data = getData(); data.offers = data.offers.filter(o => o.id !== id); persist(); }
+export function calculateOfferScore(offer: Offer): number {
+  // Simple scoring: base + bonus*1.5 + equity*0.5 + pto*2000
+  const totalComp = offer.baseSalary + offer.bonus * 1.5 + offer.equity * 0.5;
+  const remoteBonus = offer.remote === "fully-remote" ? 5000 : offer.remote === "hybrid" ? 2500 : 0;
+  const ptoValue = offer.pto * 2000;
+  return Math.round(totalComp + remoteBonus + ptoValue);
+}
+
+// --- Journal CRUD ---
+export function getJournal(): JournalEntry[] {
+  return getData().journal.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+export function addJournal(entry: JournalEntry): void { getData().journal.push(entry); persist(); }
+export function updateJournal(id: string, updates: Partial<JournalEntry>): void {
+  const data = getData(); const idx = data.journal.findIndex(j => j.id === id);
+  if (idx !== -1) { data.journal[idx] = { ...data.journal[idx], ...updates }; persist(); }
+}
+export function deleteJournal(id: string): void { const data = getData(); data.journal = data.journal.filter(j => j.id !== id); persist(); }
+export function needsBackup(): boolean {
+  const data = getData();
+  if (!data.lastBackup) return true;
+  const daysSince = (Date.now() - new Date(data.lastBackup).getTime()) / (1000 * 60 * 60 * 24);
+  return daysSince >= 7;
+}
+export function recordBackup(): void { getData().lastBackup = new Date().toISOString(); persist(); }
+
 // --- Export / Import ---
 export function exportData(): string {
   return JSON.stringify(getData(), null, 2);
@@ -425,15 +516,7 @@ export function importData(json: string): boolean {
   try {
     const parsed = JSON.parse(json);
     if (!parsed.applications || !parsed.skills) return false;
-    // Preserve seeded content if not in import
-    const current = getData();
-    _data = {
-      ...defaultData,
-      ...parsed,
-      learningPaths: parsed.learningPaths || current.learningPaths || defaultData.learningPaths,
-      flashcards: parsed.flashcards || current.flashcards || defaultData.flashcards,
-      resources: parsed.resources || current.resources || defaultData.resources,
-    };
+    _data = migrateData(parsed);
     persist();
     return true;
   } catch { return false; }
@@ -442,6 +525,7 @@ export function resetData(): void {
   _data = JSON.parse(JSON.stringify(defaultData));
   persist();
 }
+
 
 // --- Dashboard Stats ---
 export function getDashboardStats() {

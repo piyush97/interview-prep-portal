@@ -11,6 +11,10 @@ import {
   BrainCircuit,
   Globe,
   Search,
+  Users,
+  Trophy,
+  Settings,
+  Scale,
 } from "lucide-react";
 
 const links = [
@@ -21,6 +25,11 @@ const links = [
   { to: "/flashcards", label: "Flashcards", icon: BrainCircuit },
   { to: "/resources", label: "Resources", icon: Globe },
   { to: "/evaluate", label: "JD Evaluator", icon: Search },
+  { to: "/compare", label: "Compare Jobs", icon: Scale },
+  { to: "/contacts", label: "Contacts", icon: Users },
+  { to: "/offers", label: "Offers", icon: Trophy },
+  { to: "/journal", label: "Journal", icon: BookOpen },
+  { to: "/settings", label: "Settings", icon: Settings },
   { to: "/skills", label: "Skills", icon: Library },
   { to: "/resume", label: "Resume", icon: FileText },
   { to: "/research", label: "Research", icon: Building2 },

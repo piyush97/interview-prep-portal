@@ -163,6 +163,9 @@ export interface CuratedResource {
 }
 
 export interface AppData {
+  version: string;
+  profile: UserProfile;
+  theme: "light" | "dark" | "system";
   applications: Application[];
   interviews: InterviewPrep[];
   skills: Skill[];
@@ -171,4 +174,74 @@ export interface AppData {
   learningPaths: LearningPath[];
   flashcards: Flashcard[];
   resources: CuratedResource[];
+  contacts: StandaloneContact[];
+  offers: Offer[];
+  journal: JournalEntry[];
+  lastBackup?: string;
 }
+
+export interface UserProfile {
+  name: string;
+  title: string;
+  summary: string;
+  email: string;
+  phone: string;
+  linkedin: string;
+  github: string;
+  website: string;
+  location: string;
+  targetRate: number;
+  targetSalary: number;
+  workAuthorization: string;
+  relocation: string;
+  availability: string;
+  preferences: string[];
+}
+
+export interface StandaloneContact {
+  id: string;
+  name: string;
+  role: string;
+  company?: string;
+  email?: string;
+  linkedin?: string;
+  phone?: string;
+  notes?: string;
+  status: "cold" | "warm" | "inactive";
+  lastContacted: string;
+}
+
+export interface Offer {
+  id: string;
+  applicationId?: string;
+  company: string;
+  role: string;
+  level?: string;
+  baseSalary: number;
+  bonus: number;
+  equity: number;
+  equityDesc?: string;
+  benefits?: string;
+  location?: string;
+  remote: "fully-remote" | "hybrid" | "onsite";
+  pto: number;
+  startDate?: string;
+  deadline?: string;
+  expiryDate?: string;
+  notes?: string;
+  score: number;
+  selected?: boolean;
+}
+
+export interface JournalEntry {
+  id: string;
+  date: string;
+  content: string;
+  tags: string[];
+  wins?: string[];
+  blockers?: string[];
+  tomorrow?: string[];
+  mood?: number;
+  notes?: string;
+}
+

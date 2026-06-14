@@ -7,6 +7,11 @@ import {
   getResources, getResourcesByCategory,
   getDashboardStats,
   exportData, importData, resetData,
+  getProfile, updateProfile, getTheme, setTheme,
+  getContacts, addContact, deleteContact,
+  getOffers, addOffer, calculateOfferScore,
+  getJournal, addJournal,
+  needsBackup, recordBackup,
 } from "../store";
 import type { Application } from "../types";
 
@@ -238,6 +243,80 @@ describe("Export / Import", () => {
     addApplication(mockApp("a1", "Co", "Dev"));
     resetData();
     expect(getApplications()).toHaveLength(0);
+  });
+});
+
+// ─── Profile & Theme ───
+
+describe("Profile & Theme", () => {
+  it("returns default profile", () => {
+    const p = getProfile();
+    expect(p.name).toBeTruthy();
+    expect(p.email).toBeTruthy();
+  });
+
+  it("updates profile fields", () => {
+    updateProfile({ name: "Test User", targetRate: 200 });
+    expect(getProfile().name).toBe("Test User");
+    expect(getProfile().targetRate).toBe(200);
+  });
+
+  it("saves and retrieves theme", () => {
+    setTheme("dark");
+    expect(getTheme()).toBe("dark");
+  });
+});
+
+// ─── Contacts ───
+
+describe("Contacts Store", () => {
+  it("adds and retrieves contacts", () => {
+    addContact({ id: "c1", name: "Alice", role: "Recruiter", status: "warm", lastContacted: new Date().toISOString() });
+    expect(getContacts()).toHaveLength(1);
+  });
+
+  it("deletes contacts", () => {
+    addContact({ id: "c1", name: "Alice", role: "Recruiter", status: "warm", lastContacted: new Date().toISOString() });
+    deleteContact("c1");
+    expect(getContacts()).toHaveLength(0);
+  });
+});
+
+// ─── Offers ───
+
+describe("Offers Store", () => {
+  it("calculates offer score", () => {
+    const score = calculateOfferScore({
+      id: "o1", company: "Co", role: "Dev", baseSalary: 160000, bonus: 20000, equity: 10000, remote: "fully-remote", pto: 20, score: 0,
+    });
+    expect(score).toBeGreaterThan(0);
+  });
+
+  it("adds and retrieves offers", () => {
+    addOffer({ id: "o1", company: "Co", role: "Dev", baseSalary: 100000, bonus: 0, equity: 0, remote: "hybrid", pto: 15, score: 0 });
+    expect(getOffers()).toHaveLength(1);
+  });
+});
+
+// ─── Journal ───
+
+describe("Journal Store", () => {
+  it("adds and retrieves entries", () => {
+    addJournal({ id: "j1", date: new Date().toISOString().split("T")[0], content: "Applied to 3 roles", tags: ["application"] });
+    expect(getJournal()).toHaveLength(1);
+  });
+});
+
+// ─── Backup ───
+
+describe("Backup", () => {
+  it("reports backup needed initially", () => {
+    expect(needsBackup()).toBe(true);
+  });
+
+  it("records backup", () => {
+    recordBackup();
+    expect(needsBackup()).toBe(false);
   });
 });
 
