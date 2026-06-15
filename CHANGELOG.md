@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 v1.3.x users do **not** need to do anything. The localStorage app data format is unchanged. The new Backend Profile is additive. To use the new AI features:
 
-1. `pip install -e ".[backend]"` to install the backend package
+1. `uv sync` to install the backend deps
 2. `python3 -m backend.cli serve` to start the backend
 3. Visit `/onboarding` to create your profile
 4. All v1.3.x pages still work as before

@@ -163,7 +163,7 @@ def create_app(
         except ImportError:
             raise HTTPException(
                 status_code=500,
-                detail="PyYAML not installed. `pip install pyyaml` to load YAML profiles.",
+                detail="PyYAML not installed. `uv add pyyaml` to fix.",
             )
         try:
             data = yaml.safe_load(req.yaml_text)

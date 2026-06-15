@@ -35,36 +35,34 @@ describe("Sidebar", () => {
     expect(screen.getByText("Research")).toBeInTheDocument();
   });
 
-  it("does NOT hardcode user name (v1.4.0 — name comes from profile)", () => {
+  it("does NOT hardcode user name — name comes from backend", () => {
     render(
       <MemoryRouter>
         <Sidebar />
       </MemoryRouter>
     );
-    // In v1.4.0 the name comes from the backend profile.
-    // When the backend is unreachable (the test environment), no name is shown —
-    // the old "Piyush Mehta" hardcoding is gone.
     expect(screen.queryByText("Piyush Mehta")).not.toBeInTheDocument();
   });
 
-  it("renders brand name", async () => {
+  it("renders brand name (one or more elements match)", async () => {
     render(
       <MemoryRouter>
         <Sidebar />
       </MemoryRouter>
     );
-    expect(screen.getByText("Interview Prep Portal")).toBeInTheDocument();
+    const matches = screen.getAllByText("Interview Prep Portal");
+    expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("shows v1.4.0 fallback when backend is unreachable", async () => {
+  it("does NOT show version string in UI", async () => {
     render(
       <MemoryRouter>
         <Sidebar />
       </MemoryRouter>
     );
-    // The header should NOT hardcode "Piyush Mehta" anymore
+    expect(screen.queryByText("v1.4.0 — Universal")).not.toBeInTheDocument();
+    expect(screen.queryByText("v1.4.0")).not.toBeInTheDocument();
     expect(screen.queryByText("Piyush Mehta")).not.toBeInTheDocument();
-    expect(screen.getByText("Interview Prep Portal")).toBeInTheDocument();
   });
 
   it("groups nav items under category headings", () => {

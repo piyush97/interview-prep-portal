@@ -520,14 +520,14 @@ export default function Settings() {
         </div>
       )}
 
-      {/* ---- v1.4.0: Backend Profile Section ---- */}
+            {/* v1.4.0: Backend Profile Section */}
       <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Server className="w-5 h-5 text-indigo-600" />
-            <h2 className="text-lg font-semibold text-slate-900">Backend Profile (v1.4.0)</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Backend Profile</h2>
             <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
-              Universal — works for any profession
+              Works for any profession
             </span>
           </div>
           <div className="flex items-center gap-2">

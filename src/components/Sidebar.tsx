@@ -112,7 +112,7 @@ export default function Sidebar() {
           <div>
             <h1 className="font-semibold text-gray-900 text-sm">Interview Prep Portal</h1>
             <p className="text-xs text-gray-500">
-              {profileName || "v1.4.0 — Universal"}
+              {profileName || "Interview Prep Portal"}
             </p>
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-gray-100">
         <p className="text-xs text-gray-400 text-center">
-          Interview Prep Portal v1.4.0
+          Interview Prep Portal
         </p>
       </div>
     </aside>

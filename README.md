@@ -78,7 +78,7 @@ interview-prep-portal/
 git clone https://github.com/piyush97/interview-prep-portal.git
 cd interview-prep-portal
 npm install
-pip install -e .[backend]   # installs the backend in editable mode
+uv sync                    # installs the backend deps
 ```
 
 ### 2. Start the backend (one terminal)
@@ -423,7 +423,7 @@ PRs welcome. Read `PLAN.md` first to understand the architecture.
 git clone https://github.com/your-fork/interview-prep-portal.git
 cd interview-prep-portal
 npm install
-pip install -e ".[dev]"
+uv sync --dev
 
 # Make changes, run tests, commit
 pytest backend/tests/
