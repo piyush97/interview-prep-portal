@@ -118,10 +118,11 @@ def create_app(
         lifespan=lifespan,
     )
 
-    # Allow the React dev server (port 5173) and any local access
+    # Allow any local dev server (localhost/127.0.0.1 on any port)
+    import re
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:8766"],
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
