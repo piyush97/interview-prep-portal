@@ -158,7 +158,7 @@ export default function Settings() {
   // --- Render helpers ---
   const renderIdentity = () =>
     profile && (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 rounded">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
         <Field
           label="Name"
           value={profile.identity.name}
@@ -204,7 +204,7 @@ export default function Settings() {
 
   const renderCareer = () =>
     profile && (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 rounded">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
         <Field
           label="Current Title"
           value={profile.career.current_title}
@@ -246,7 +246,7 @@ export default function Settings() {
 
   const renderSkills = () =>
     profile && (
-      <div className="grid grid-cols-1 gap-3 p-3 bg-slate-50 rounded">
+      <div className="grid grid-cols-1 gap-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
         <ListField
           label="Core Skills"
           values={profile.skills.core}
@@ -267,11 +267,11 @@ export default function Settings() {
 
   const renderWorkHistory = () =>
     profile && (
-      <div className="space-y-3 p-3 bg-slate-50 rounded">
+      <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
         {profile.work_history.map((job, idx) => (
-          <div key={idx} className="border border-slate-200 rounded p-3 bg-white space-y-2">
+          <div key={idx} className="border border-slate-200 dark:border-slate-600 rounded p-3 bg-white dark:bg-slate-800 space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-500">Job #{idx + 1}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Job #{idx + 1}</span>
               <button
                 onClick={() =>
                   updateProfileField(
@@ -334,11 +334,11 @@ export default function Settings() {
 
   const renderEducation = () =>
     profile && (
-      <div className="space-y-3 p-3 bg-slate-50 rounded">
+      <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
         {profile.education.map((edu, idx) => (
-          <div key={idx} className="border border-slate-200 rounded p-3 bg-white space-y-2">
+          <div key={idx} className="border border-slate-200 dark:border-slate-600 rounded p-3 bg-white dark:bg-slate-800 space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-500">Entry #{idx + 1}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Entry #{idx + 1}</span>
               <button
                 onClick={() =>
                   updateProfileField(
@@ -387,7 +387,7 @@ export default function Settings() {
 
   const renderCompensation = () =>
     profile && (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 rounded">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
         <Field
           label="Currency"
           value={profile.compensation.currency}
@@ -412,7 +412,7 @@ export default function Settings() {
             onChange={(e) => updateProfileField("compensation.negotiable", e.target.checked)}
             id="negotiable"
           />
-          <label htmlFor="negotiable" className="text-sm text-slate-700">
+          <label htmlFor="negotiable" className="text-sm text-slate-700 dark:text-slate-300">
             Negotiable
           </label>
         </div>
@@ -421,7 +421,7 @@ export default function Settings() {
 
   const renderPreferences = () =>
     profile && (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-3 bg-slate-50 rounded">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
         {(
           [
             ["remote", "Open to remote"],
@@ -450,13 +450,13 @@ export default function Settings() {
 
   const renderAgent = () =>
     profile && (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 rounded">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Backend</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Backend</label>
           <select
             value={profile.agent.backend}
             onChange={(e) => updateProfileField("agent.backend", e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg bg-white"
+            className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800"
           >
             <option value="offline">offline (no AI — uses canned responses)</option>
             <option value="hermes">hermes (Hermes Agent CLI)</option>
@@ -502,7 +502,7 @@ export default function Settings() {
 
   return (
     <div className="space-y-8 max-w-4xl">
-      <h1 className="text-2xl font-bold text-slate-900">Settings & Profile</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Settings & Profile</h1>
 
       {backupNeeded && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
@@ -521,11 +521,11 @@ export default function Settings() {
       )}
 
             {/* v1.4.0: Backend Profile Section */}
-      <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+      <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Server className="w-5 h-5 text-indigo-600" />
-            <h2 className="text-lg font-semibold text-slate-900">Backend Profile</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Backend Profile</h2>
             <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
               Works for any profession
             </span>
@@ -542,7 +542,7 @@ export default function Settings() {
               </span>
             )}
             {backendStatus === "checking" && (
-              <span className="text-xs text-slate-500">Checking…</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Checking…</span>
             )}
             <button
               onClick={checkBackend}
@@ -572,7 +572,7 @@ export default function Settings() {
         {backendStatus === "up" && profile && (
           <>
             <div className="flex justify-between items-center pt-2">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 This is the profile the backend uses to generate cover letters, JD evaluations,
                 and company research. <span className="font-semibold">{profile.identity.name || "(unnamed)"}</span>
               </p>
@@ -657,7 +657,7 @@ export default function Settings() {
         )}
 
         {backendStatus === "up" && !profile && !profileLoading && (
-          <div className="text-sm text-slate-500">
+          <div className="text-sm text-slate-500 dark:text-slate-400">
             <Sparkles className="inline w-4 h-4 mr-1" />
             Backend is up but no profile loaded. Try re-checking.
           </div>
@@ -665,9 +665,9 @@ export default function Settings() {
       </section>
 
       {/* ---- Local App Profile (unchanged) ---- */}
-      <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+      <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">App Profile (local data)</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">App Profile (local data)</h2>
           <button
             onClick={saveLocalProfile}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -676,7 +676,7 @@ export default function Settings() {
             {saved ? "Saved" : "Save App Profile"}
           </button>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           These fields are stored in your browser only. They feed the Resume page and contact
           cards. The Backend Profile (above) feeds AI tools.
         </p>
@@ -750,7 +750,7 @@ export default function Settings() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Summary</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Summary</label>
           <textarea
             value={localProfile.summary}
             onChange={(e) => handleLocalChange("summary", e.target.value)}
@@ -759,7 +759,7 @@ export default function Settings() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
             Preferences (comma-separated)
           </label>
           <input
@@ -777,15 +777,15 @@ export default function Settings() {
       </section>
 
       {/* ---- Theme ---- */}
-      <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-900">Theme</h2>
+      <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Theme</h2>
         <div className="flex gap-2">
           {["light", "dark", "system"].map((t) => (
             <button
               key={t}
               onClick={() => handleTheme(t as any)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg border capitalize ${
-                theme === t ? "bg-blue-50 border-blue-300 text-blue-700" : "hover:bg-slate-50"
+                theme === t ? "bg-blue-50 border-blue-300 text-blue-700" : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
               }`}
             >
               {t === "light" ? (
@@ -802,16 +802,16 @@ export default function Settings() {
       </section>
 
       {/* ---- Data Management ---- */}
-      <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-900">Data Management</h2>
+      <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Data Management</h2>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={downloadBackup}
-            className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-slate-50"
+            className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50"
           >
             <Download className="w-4 h-4" /> Export Backup
           </button>
-          <label className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-slate-50 cursor-pointer">
+          <label className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer">
             <Upload className="w-4 h-4" /> Import Backup
             <input type="file" accept=".json" onChange={handleImport} className="hidden" />
           </label>
@@ -841,7 +841,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>
       <input
         type={type}
         value={value}
@@ -865,7 +865,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">{label}</label>
       <input
         type={type}
         value={value}
@@ -887,8 +887,8 @@ function ListField({
 }) {
   return (
     <div className="col-span-1 md:col-span-2">
-      <label className="block text-xs font-medium text-slate-600 mb-1">
-        {label} <span className="text-slate-400 font-normal">(comma-separated)</span>
+      <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+        {label} <span className="text-slate-400 dark:text-slate-500 font-normal">(comma-separated)</span>
       </label>
       <input
         type="text"
@@ -914,15 +914,15 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-slate-200 rounded-lg">
+    <div className="border border-slate-200 dark:border-slate-600 rounded-lg">
       <button
         onClick={onToggle}
-        className="w-full flex justify-between items-center px-4 py-2 hover:bg-slate-50"
+        className="w-full flex justify-between items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50"
       >
         <span className="text-sm font-semibold text-slate-800">{title}</span>
         {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
-      {open && <div className="border-t border-slate-200">{children}</div>}
+      {open && <div className="border-t border-slate-200 dark:border-slate-600">{children}</div>}
     </div>
   );
 }

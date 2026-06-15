@@ -178,15 +178,15 @@ export default function Onboarding() {
 
       {step === "welcome" && (
         <Card title="Welcome to Interview Prep Portal" icon={<Sparkles className="w-6 h-6 text-indigo-600" />}>
-          <p className="text-slate-700 mb-4">
+          <p className="text-slate-700 dark:text-slate-300 mb-4">
             This portal is <strong>profession-agnostic</strong> — it works for any job seeker, not
             just software engineers. You bring your own profile, your own AI agent, and the portal
             gives you cover letters, JD evaluations, and company research tailored to you.
           </p>
-          <p className="text-slate-700 mb-4">
+          <p className="text-slate-700 dark:text-slate-300 mb-4">
             In the next few minutes we'll:
           </p>
-          <ol className="list-decimal list-inside space-y-2 text-slate-700 mb-6">
+          <ol className="list-decimal list-inside space-y-2 text-slate-700 dark:text-slate-300 mb-6">
             <li>Check that the Python backend is running</li>
             <li>Pick a starter template (or start blank)</li>
             <li>Fill in your identity, career, and skills</li>
@@ -199,7 +199,7 @@ export default function Onboarding() {
 
       {step === "backend" && (
         <Card title="Backend Connection" icon={<Server className="w-6 h-6 text-indigo-600" />}>
-          <p className="text-slate-700 mb-4">
+          <p className="text-slate-700 dark:text-slate-300 mb-4">
             The AI tools (cover letters, JD evaluator, company research) need the Python backend
             running. Let's check the connection.
           </p>
@@ -235,7 +235,7 @@ export default function Onboarding() {
 
       {step === "persona" && (
         <Card title="Choose a starter template" icon={<Sparkles className="w-6 h-6 text-indigo-600" />}>
-          <p className="text-slate-700 mb-4">
+          <p className="text-slate-700 dark:text-slate-300 mb-4">
             Pick the template closest to your profession. You can edit everything on the next
             steps and later in <strong>Settings → Backend Profile</strong>.
           </p>
@@ -249,7 +249,7 @@ export default function Onboarding() {
                 }}
                 disabled={busy}
                 className={`text-left p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition ${
-                  selectedPersona === p.id ? "border-indigo-500 bg-indigo-50" : "border-slate-200"
+                  selectedPersona === p.id ? "border-indigo-500 bg-indigo-50" : "border-slate-200 dark:border-slate-600"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -279,7 +279,7 @@ export default function Onboarding() {
                 agent: { backend: "offline", model: "", command: "", endpoint: "", api_key_env: "", max_tokens: 2048, temperature: 0.7 },
               });
             }}
-            className="text-sm text-slate-600 hover:text-slate-900 underline"
+            className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-100 underline"
           >
             Or start with a blank profile →
           </button>
@@ -301,7 +301,7 @@ export default function Onboarding() {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Years of experience" value={years} onChange={setYears} type="number" />
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Level</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Level</label>
               <select
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
@@ -331,12 +331,12 @@ export default function Onboarding() {
 
       {step === "skills" && (
         <Card title="Anything else?" icon={<Sparkles className="w-6 h-6 text-indigo-600" />}>
-          <p className="text-slate-700 mb-3">
+          <p className="text-slate-700 dark:text-slate-300 mb-3">
             You can add work history, education, growing skills, certifications, and compensation
             in <strong>Settings → Backend Profile</strong> after onboarding. For now, the basics
             you entered on the previous step are enough to start using the tools.
           </p>
-          <div className="bg-slate-50 rounded p-3 text-sm text-slate-600 space-y-1">
+          <div className="bg-slate-50 dark:bg-slate-700/40 rounded p-3 text-sm text-slate-600 space-y-1">
             <p><strong>Name:</strong> {name}</p>
             <p><strong>Title:</strong> {title}</p>
             <p><strong>Experience:</strong> {years} years ({level})</p>
@@ -349,7 +349,7 @@ export default function Onboarding() {
 
       {step === "agent" && (
         <Card title="Pick an AI agent" icon={<Server className="w-6 h-6 text-indigo-600" />}>
-          <p className="text-slate-700 mb-3">
+          <p className="text-slate-700 dark:text-slate-300 mb-3">
             The backend uses your chosen agent to generate cover letters, evaluate JDs, and do
             company research. You can change this later in <strong>Settings → Backend Profile → AI Agent</strong>.
           </p>
@@ -366,7 +366,7 @@ export default function Onboarding() {
               <label
                 key={id}
                 className={`block p-3 border rounded-lg cursor-pointer ${
-                  backendChoice === id ? "border-indigo-500 bg-indigo-50" : "border-slate-200"
+                  backendChoice === id ? "border-indigo-500 bg-indigo-50" : "border-slate-200 dark:border-slate-600"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -395,10 +395,10 @@ export default function Onboarding() {
 
       {step === "done" && (
         <Card title="You're all set! 🎉" icon={<Check className="w-6 h-6 text-green-600" />}>
-          <p className="text-slate-700 mb-4">
+          <p className="text-slate-700 dark:text-slate-300 mb-4">
             Your profile is saved. Try out the tools:
           </p>
-          <ul className="space-y-2 text-slate-700 mb-6">
+          <ul className="space-y-2 text-slate-700 dark:text-slate-300 mb-6">
             <li>
               <button
                 onClick={() => navigate("/evaluate")}
@@ -449,10 +449,10 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 space-y-4">
       <div className="flex items-center gap-2">
         {icon}
-        <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{title}</h2>
       </div>
       {children}
     </div>
@@ -474,7 +474,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>
       <input
         type={type}
         value={value}
@@ -504,7 +504,7 @@ function NavButtons({
       {onBack ? (
         <button
           onClick={onBack}
-          className="flex items-center gap-1 px-4 py-2 text-slate-600 hover:text-slate-900"
+          className="flex items-center gap-1 px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-100"
         >
           <ChevronLeft size={16} /> Back
         </button>

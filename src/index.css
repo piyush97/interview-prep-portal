@@ -2,7 +2,84 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-html.dark body {
-  background-color: #0f172a;
-  color: #e2e8f0;
+/* ── Light / Dark base ── */
+
+:root {
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-dim: #94a3b8;
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-accent-bg: #eef2ff;
+  --color-accent-text: #3730a3;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-amber-bg: #fffbeb;
+  --color-amber-border: #fde68a;
+  --color-amber-text: #92400e;
+  --color-green-bg: #f0fdf4;
+  --color-green-border: #bbf7d0;
+  --color-green-text: #166534;
+}
+
+.dark {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-border: #334155;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-text-dim: #64748b;
+  --color-accent: #818cf8;
+  --color-accent-hover: #6366f1;
+  --color-accent-bg: #1e1b4b;
+  --color-accent-text: #c7d2fe;
+  --color-danger: #fca5a5;
+  --color-danger-bg: #1c1917;
+  --color-amber-bg: #1c1917;
+  --color-amber-border: #78350f;
+  --color-amber-text: #fde68a;
+  --color-green-bg: #052e16;
+  --color-green-border: #14532d;
+  --color-green-text: #86efac;
+}
+
+html {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-text-dim);
+  border-radius: 6px;
+}
+
+/* ── Input / textarea / select ── */
+input, textarea, select {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  ring-color: var(--color-accent);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--color-text-dim);
+}
+
+/* ── Selection ── */
+::selection {
+  background-color: var(--color-accent);
+  color: #fff;
 }

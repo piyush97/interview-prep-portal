@@ -13,6 +13,9 @@ function applyTheme() {
   document.documentElement.classList.toggle("dark", isDark);
 }
 
+// Listen for OS theme changes (handles "system" mode + macOS auto-switch)
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+
 function KeyboardShortcuts() {
   const navigate = useNavigate();
   useEffect(() => {

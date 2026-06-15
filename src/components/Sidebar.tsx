@@ -22,8 +22,6 @@ import {
 import { getReminders } from "../store";
 import { backend, type Profile } from "../lib/backend";
 
-// Big Mick v1.3.2 YELLOW fix: 16 sidebar items are now grouped under 5 categories
-// so power users can still see everything, but new users get a clearer mental map.
 const sections = [
   {
     label: "Pipeline",
@@ -80,7 +78,6 @@ export default function Sidebar() {
     const interval = setInterval(update, 5000);
     window.addEventListener("storage", update);
 
-    // v1.4.0: load profile name from backend (was hardcoded "Piyush Mehta")
     let profileInterval: ReturnType<typeof setInterval> | null = null;
     backend.getProfile().then((p) => {
       setProfile(p);
@@ -88,7 +85,6 @@ export default function Sidebar() {
         backend.getProfile().then(setProfile).catch(() => {});
       }, 10_000);
     }).catch(() => {
-      // Backend not running — fall back to no name
       setProfile(null);
     });
 
@@ -102,16 +98,16 @@ export default function Sidebar() {
   const profileName = profile?.identity?.name?.trim() || "";
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
+    <aside className="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 flex flex-col transition-colors">
       {/* Header */}
-      <div className="p-5 border-b border-gray-100">
+      <div className="p-5 border-b border-gray-100 dark:border-slate-700">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center">
             <Briefcase size={16} className="text-white" />
           </div>
           <div>
-            <h1 className="font-semibold text-gray-900 text-sm">Interview Prep Portal</h1>
-            <p className="text-xs text-gray-500">
+            <h1 className="font-semibold text-gray-900 dark:text-slate-100 text-sm">Interview Prep Portal</h1>
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               {profileName || "Interview Prep Portal"}
             </p>
           </div>
@@ -122,7 +118,7 @@ export default function Sidebar() {
       <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
         {sections.map((section) => (
           <div key={section.label}>
-            <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+            <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
               {section.label}
             </div>
             <div className="space-y-0.5">
@@ -137,8 +133,8 @@ export default function Sidebar() {
                     to={link.to}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? "bg-indigo-50 text-indigo-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                        : "text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-slate-200"
                     }`}
                   >
                     <Icon size={16} />
@@ -150,10 +146,10 @@ export default function Sidebar() {
                             {pendingReminders}
                           </span>
                         )}
-                        {isActive && <ChevronRight size={14} className="text-indigo-400" />}
+                        {isActive && <ChevronRight size={14} className="text-indigo-400 dark:text-indigo-300" />}
                       </span>
                     ) : (
-                      isActive && <ChevronRight size={14} className="ml-auto text-indigo-400" />
+                      isActive && <ChevronRight size={14} className="ml-auto text-indigo-400 dark:text-indigo-300" />
                     )}
                   </NavLink>
                 );
@@ -164,8 +160,8 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-100">
-        <p className="text-xs text-gray-400 text-center">
+      <div className="p-4 border-t border-gray-100 dark:border-slate-700">
+        <p className="text-xs text-gray-400 dark:text-slate-500 text-center">
           Interview Prep Portal
         </p>
       </div>

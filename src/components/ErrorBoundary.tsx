@@ -37,20 +37,20 @@ export default class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="min-h-[60vh] flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-red-200 p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
-            </div>
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">Something went wrong</h2>
-            <p className="text-sm text-slate-600 mb-1">The portal hit an unexpected error.</p>
-            <p className="text-xs text-slate-500 mb-4 font-mono bg-slate-50 p-2 rounded break-words">
-              {this.state.error?.message || "Unknown error"}
-            </p>
-            <div className="flex gap-2 justify-center">
-              <button
-                onClick={this.handleReset}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 text-sm"
-              >
+          <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-red-200 dark:border-red-900 p-6 text-center">
+          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Something went wrong</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">The portal hit an unexpected error.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 font-mono bg-slate-50 dark:bg-slate-700/40 p-2 rounded break-words">
+            {this.state.error?.message || "Unknown error"}
+          </p>
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={this.handleReset}
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 text-sm"
+            >
                 Try Again
               </button>
               <button
