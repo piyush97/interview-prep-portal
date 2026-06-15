@@ -16,8 +16,7 @@ Fixes #(issue number)
 
 ## Checklist
 
-- [ ] Tests pass (`npm test`)
-- [ ] Build passes (`npm run build`)
+- [ ] Full verification passes (`npm run verify`)
 - [ ] README/docs updated if needed
 - [ ] TypeScript types updated
 - [ ] No lint errors

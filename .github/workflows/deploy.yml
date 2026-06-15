@@ -28,25 +28,22 @@ jobs:
           node-version: 22
           cache: npm
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
       - run: npm ci
 
       - name: Audit dependencies
         run: npm audit --audit-level=high
         continue-on-error: true
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npm run typecheck
-
-      - name: Run tests
-        run: |
-          npm run test:js
-          python3 -m pytest plugin-tests/ -v
-
-      - name: Build
-        run: npm run build
+      - name: Verify app and backend
+        run: npm run verify
 
       - name: Check bundle size
         run: |
