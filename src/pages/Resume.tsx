@@ -18,7 +18,7 @@ export default function Resume() {
     const r = getResumes();
     setResumes(r);
     if (r.length > 0 && !selected) setSelected(r[0].id);
-  }, []);
+  }, [selected]);
 
   const refresh = () => { setResumes(getResumes()); };
 

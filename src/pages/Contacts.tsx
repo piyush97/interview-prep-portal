@@ -74,7 +74,8 @@ function ContactForm({ onSubmit, onCancel }: { onSubmit: (c: StandaloneContact) 
     id: crypto.randomUUID(), name: "", role: "", company: "", email: "", linkedin: "",
     status: "cold", notes: "", lastContacted: new Date().toISOString(),
   });
-  const update = (field: keyof StandaloneContact, value: any) => setForm(f => ({ ...f, [field]: value }));
+  const update = (field: keyof StandaloneContact, value: StandaloneContact[keyof StandaloneContact]) =>
+    setForm(f => ({ ...f, [field]: value }));
 
   return (
     <div className="space-y-3">

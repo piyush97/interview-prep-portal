@@ -1,9 +1,17 @@
 import { StrictMode, useEffect } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import { getTheme } from "./store";
+
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+declare global {
+  interface Window {
+    __INTERVIEW_PREP_ROOT__?: Root;
+  }
+}
 
 function applyTheme() {
   const theme = getTheme();
@@ -48,13 +56,17 @@ function KeyboardShortcuts() {
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => { /* ignore */ });
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => { /* ignore */ });
   });
 }
 
-createRoot(document.getElementById("root")!).render(
+const container = document.getElementById("root")!;
+const root = window.__INTERVIEW_PREP_ROOT__ ?? createRoot(container);
+window.__INTERVIEW_PREP_ROOT__ = root;
+
+root.render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename || undefined}>
       <KeyboardShortcuts />
       <App />
     </BrowserRouter>

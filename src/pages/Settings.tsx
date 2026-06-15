@@ -30,11 +30,19 @@ import {
 } from "lucide-react";
 
 type BackendStatus = "checking" | "up" | "down";
+type Theme = "light" | "dark" | "system";
+type MutableRecord = Record<string, unknown>;
+
+const themeOptions: Theme[] = ["light", "dark", "system"];
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export default function Settings() {
   // Local app data (unchanged from v1.x)
   const [localProfile, setLocalProfile] = useState<UserProfile>(getLocalProfile());
-  const [theme, setThemeState] = useState<"light" | "dark" | "system">(getTheme());
+  const [theme, setThemeState] = useState<Theme>(getTheme());
   const [saved, setSaved] = useState(false);
   const [backupNeeded, setBackupNeeded] = useState(needsBackup());
   const [importError, setImportError] = useState("");
@@ -62,7 +70,7 @@ export default function Settings() {
     checkBackend();
   }, []);
 
-  const checkBackend = async () => {
+  async function checkBackend() {
     setBackendStatus("checking");
     const up = await isBackendUp();
     setBackendStatus(up ? "up" : "down");
@@ -72,16 +80,16 @@ export default function Settings() {
         const p = await backend.getProfile();
         setProfile(p);
         setProfileError("");
-      } catch (e: any) {
-        setProfileError(e.message || "Failed to load profile");
+      } catch (e: unknown) {
+        setProfileError(getErrorMessage(e, "Failed to load profile"));
       } finally {
         setProfileLoading(false);
       }
     }
-  };
+  }
 
   // --- Local profile handlers ---
-  const handleLocalChange = (field: keyof UserProfile, value: any) => {
+  const handleLocalChange = (field: keyof UserProfile, value: UserProfile[keyof UserProfile]) => {
     setLocalProfile((p) => ({ ...p, [field]: value }));
   };
   const saveLocalProfile = () => {
@@ -89,7 +97,7 @@ export default function Settings() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
-  const handleTheme = (t: "light" | "dark" | "system") => {
+  const handleTheme = (t: Theme) => {
     setTheme(t);
     setThemeState(t);
     document.documentElement.classList.remove("dark", "light");
@@ -126,12 +134,16 @@ export default function Settings() {
   };
 
   // --- Backend profile handlers ---
-  const updateProfileField = (path: string, value: any) => {
+  const updateProfileField = (path: string, value: unknown) => {
     if (!profile) return;
     const next = structuredClone(profile);
     const parts = path.split(".");
-    let cur: any = next;
-    for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]];
+    let cur: MutableRecord = next as unknown as MutableRecord;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const child = cur[parts[i]];
+      if (!child || typeof child !== "object") return;
+      cur = child as MutableRecord;
+    }
     cur[parts[parts.length - 1]] = value;
     setProfile(next);
   };
@@ -145,8 +157,8 @@ export default function Settings() {
       setProfile(saved);
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 2000);
-    } catch (e: any) {
-      setProfileError(e.message || "Save failed");
+    } catch (e: unknown) {
+      setProfileError(getErrorMessage(e, "Save failed"));
     } finally {
       setProfileLoading(false);
     }
@@ -780,10 +792,10 @@ export default function Settings() {
       <section className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border p-6 space-y-4">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Theme</h2>
         <div className="flex gap-2">
-          {["light", "dark", "system"].map((t) => (
+          {themeOptions.map((t) => (
             <button
               key={t}
-              onClick={() => handleTheme(t as any)}
+              onClick={() => handleTheme(t)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg border capitalize ${
                 theme === t ? "bg-blue-50 border-blue-300 text-blue-700" : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
               }`}

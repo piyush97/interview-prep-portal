@@ -82,7 +82,8 @@ function OfferForm({ onSubmit, onCancel }: { onSubmit: (o: Offer) => void; onCan
     baseSalary: 0, bonus: 0, equity: 0, pto: 15, remote: "hybrid", benefits: "", deadline: "", notes: "", score: 0,
   });
 
-  const update = (field: keyof Offer, value: any) => setForm(f => ({ ...f, [field]: value }));
+  const update = (field: keyof Offer, value: Offer[keyof Offer]) =>
+    setForm(f => ({ ...f, [field]: value }));
 
   return (
     <div className="space-y-4">

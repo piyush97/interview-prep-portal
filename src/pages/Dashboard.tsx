@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboardStats, getApplications, getSkills } from "../store";
 import StatusBadge from "../components/StatusBadge";
-import type { Application, InterviewPrep } from "../types";
+import type { Application, DashboardStats } from "../types";
 import {
   Briefcase,
   CalendarCheck,
@@ -12,23 +12,12 @@ import {
   AlertCircle,
   BookOpen,
   Brain,
+  ClipboardCheck,
+  ArrowRight,
 } from "lucide-react";
 
-interface Stats {
-  totalApplications: number;
-  activeApplications: number;
-  interviews: number;
-  offers: number;
-  rejected: number;
-  skillsProgress: number;
-  upcomingInterviews: InterviewPrep[];
-  studyModules: number;
-  completedModules: number;
-  flashcardsDue: number;
-}
-
 export default function Dashboard() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentApps, setRecentApps] = useState<Application[]>([]);
   const navigate = useNavigate();
 
@@ -56,7 +45,58 @@ export default function Dashboard() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Dashboard</h1>
-        <p className="text-gray-500 dark:text-slate-400 mt-1">Your interview prep at a glance</p>
+        <p className="text-gray-500 dark:text-slate-400 mt-1">Pipeline, prep, and next best action</p>
+      </div>
+
+      {/* Readiness + Next Actions */}
+      <div className="grid grid-cols-[minmax(220px,0.8fr)_minmax(0,1.2fr)] gap-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Search Readiness</p>
+              <p className="text-4xl font-bold text-gray-900 dark:text-slate-100 mt-1">{stats.readinessScore}%</p>
+            </div>
+            <div className="w-11 h-11 bg-cyan-500 rounded-lg flex items-center justify-center">
+              <ClipboardCheck size={22} className="text-white" />
+            </div>
+          </div>
+          <div className="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2">
+            <div
+              className="bg-cyan-500 h-2 rounded-full transition-all"
+              style={{ width: `${stats.readinessScore}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-3">
+            Based on profile, resume, pipeline, research, practice, and network coverage.
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-900 dark:text-slate-100">Next Best Actions</h2>
+            <button
+              onClick={() => navigate(stats.nextActions[0]?.href || "/onboarding")}
+              className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+            >
+              Start <ArrowRight size={14} className="inline ml-1" />
+            </button>
+          </div>
+          <div className="space-y-2">
+            {stats.nextActions.map((action) => (
+              <button
+                key={action.id}
+                onClick={() => navigate(action.href)}
+                className="w-full text-left p-3 rounded-lg border border-gray-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/30 transition-colors"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`w-2 h-2 rounded-full ${priorityDot(action.priority)}`} />
+                  <span className="text-sm font-medium text-gray-900 dark:text-slate-100">{action.title}</span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-slate-400 pl-4">{action.detail}</p>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Stat Cards */}
@@ -67,7 +107,7 @@ export default function Dashboard() {
             <div
               key={card.label}
               onClick={() => navigate(card.href)}
-              className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md dark:hover:shadow-slate-900/50 transition-shadow cursor-pointer"
+              className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md dark:hover:shadow-slate-900/50 transition-shadow cursor-pointer"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-10 h-10 ${card.color} rounded-lg flex items-center justify-center`}>
@@ -84,7 +124,7 @@ export default function Dashboard() {
       {/* Study Progress Cards */}
       <div className="grid grid-cols-2 gap-4">
         <div onClick={() => navigate("/learn")}
-          className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md dark:hover:shadow-slate-900/50 transition-shadow cursor-pointer">
+          className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md dark:hover:shadow-slate-900/50 transition-shadow cursor-pointer">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
               <BookOpen size={20} className="text-white" />
@@ -100,7 +140,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div onClick={() => navigate("/flashcards")}
-          className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md dark:hover:shadow-slate-900/50 transition-shadow cursor-pointer">
+          className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md dark:hover:shadow-slate-900/50 transition-shadow cursor-pointer">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-violet-500 rounded-lg flex items-center justify-center">
               <Brain size={20} className="text-white" />
@@ -116,7 +156,7 @@ export default function Dashboard() {
 
       {/* Skills Progress + Weak Areas */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-gray-900 dark:text-slate-100">Skills Progress</h2>
             <Target size={18} className="text-gray-400 dark:text-slate-500" />
@@ -137,7 +177,7 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-gray-900 dark:text-slate-100">Needs Work</h2>
             <AlertCircle size={18} className="text-amber-400 dark:text-amber-300" />
@@ -157,7 +197,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Applications */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-gray-900 dark:text-slate-100">Recent Applications</h2>
           <button onClick={() => navigate("/applications")}
@@ -191,4 +231,14 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+function priorityDot(priority: "critical" | "high" | "medium" | "low") {
+  const colors = {
+    critical: "bg-red-500",
+    high: "bg-amber-500",
+    medium: "bg-sky-500",
+    low: "bg-slate-300 dark:bg-slate-500",
+  };
+  return colors[priority];
 }

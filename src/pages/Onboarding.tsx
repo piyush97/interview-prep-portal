@@ -58,6 +58,10 @@ const PERSONAS: Array<{
   },
 ];
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("welcome");
@@ -83,7 +87,7 @@ export default function Onboarding() {
     checkBackend();
   }, []);
 
-  const checkBackend = async () => {
+  async function checkBackend() {
     setBackendStatus("checking");
     setError("");
     const h = await backend.health();
@@ -107,7 +111,7 @@ export default function Onboarding() {
     } else {
       setBackendStatus("down");
     }
-  };
+  }
 
   const loadPersona = async (file: string) => {
     setBusy(true);
@@ -131,8 +135,8 @@ export default function Onboarding() {
       setLevel(parsed.career.level || "Mid");
       setCoreSkills(parsed.skills.core.join(", "));
       setTargetRoles(parsed.target_roles.join(", "));
-    } catch (e: any) {
-      setError(e.message || "Failed to load persona");
+    } catch (e: unknown) {
+      setError(getErrorMessage(e, "Failed to load persona"));
     } finally {
       setBusy(false);
     }
@@ -154,8 +158,8 @@ export default function Onboarding() {
       const saved = await backend.saveProfile(updated);
       setProfile(saved);
       setStep("done");
-    } catch (e: any) {
-      setError(e.message || "Save failed");
+    } catch (e: unknown) {
+      setError(getErrorMessage(e, "Save failed"));
     } finally {
       setBusy(false);
     }

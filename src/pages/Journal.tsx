@@ -72,7 +72,8 @@ function JournalForm({ onSubmit, onCancel }: { onSubmit: (e: JournalEntry) => vo
   const [form, setForm] = useState<Partial<JournalEntry>>({
     id: crypto.randomUUID(), date: new Date().toISOString().split("T")[0], content: "", tags: [],
   });
-  const update = (field: keyof JournalEntry, value: any) => setForm(f => ({ ...f, [field]: value }));
+  const update = (field: keyof JournalEntry, value: JournalEntry[keyof JournalEntry]) =>
+    setForm(f => ({ ...f, [field]: value }));
 
   return (
     <div className="space-y-3">

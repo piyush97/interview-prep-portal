@@ -1,6 +1,7 @@
 import type {
   AppData, Application, InterviewPrep, Skill, CompanyResearch, ResumeVersion,
-  LearningPath, Flashcard, CuratedResource, UserProfile, StandaloneContact, Offer, JournalEntry, Reminder, ApplicationDocument
+  LearningPath, Flashcard, CuratedResource, UserProfile, StandaloneContact, Offer, JournalEntry, Reminder, ApplicationDocument,
+  DashboardAction, DashboardStats, StoryBankEntry
 } from "./types";
 
 const STORAGE_KEY = "interview-prep-portal-data";
@@ -259,21 +260,21 @@ const defaultResources: CuratedResource[] = [
 ];
 
 const defaultProfile: UserProfile = {
-  name: "Piyush Mehta",
-  title: "Senior Software Engineer",
-  summary: "AI/LLM/Agentic workflows, MCP, React, TypeScript, Python, Azure. 6+ years building production systems.",
-  email: "work.piyush.mehta@gmail.com",
+  name: "",
+  title: "",
+  summary: "",
+  email: "",
   phone: "",
-  linkedin: "https://linkedin.com/in/piyush24",
-  github: "https://github.com/piyush97",
-  website: "https://piyushmehta.com",
-  location: "Kitchener, ON / Remote",
-  targetRate: 100,
-  targetSalary: 160000,
-  workAuthorization: "Canadian PR",
-  relocation: "No",
-  availability: "2 weeks",
-  preferences: ["remote", "ai-first", "c2c-friendly"],
+  linkedin: "",
+  github: "",
+  website: "",
+  location: "",
+  targetRate: 0,
+  targetSalary: 0,
+  workAuthorization: "",
+  relocation: "",
+  availability: "",
+  preferences: [],
 };
 
 const defaultData: AppData = {
@@ -282,22 +283,15 @@ const defaultData: AppData = {
   theme: "system",
   applications: [],
   interviews: [],
+  stories: [],
   skills: [
-    { id: "s1", name: "React / Next.js", category: "frontend", level: 5, targetLevel: 5, priority: "high", notes: "Strong, 6+ years", resources: [] },
-    { id: "s2", name: "TypeScript", category: "frontend", level: 5, targetLevel: 5, priority: "high", notes: "Daily driver", resources: [] },
-    { id: "s3", name: "Python", category: "backend", level: 4, targetLevel: 5, priority: "high", notes: "AI/ML work", resources: [] },
-    { id: "s4", name: "Node.js / Bun", category: "backend", level: 4, targetLevel: 5, priority: "high", notes: "APIs and backends", resources: [] },
-    { id: "s5", name: "LangChain / LLMs", category: "ai-ml", level: 4, targetLevel: 5, priority: "high", notes: "MCP, agents, RAG", resources: [] },
-    { id: "s6", name: "Azure AI", category: "cloud", level: 3, targetLevel: 4, priority: "high", notes: "Certified AI Engineer", resources: [] },
-    { id: "s7", name: "PostgreSQL", category: "database", level: 3, targetLevel: 4, priority: "medium", notes: "Solid basics", resources: [] },
-    { id: "s8", name: "Docker / Containers", category: "devops", level: 3, targetLevel: 4, priority: "medium", notes: "Proxmox homelab", resources: [] },
-    { id: "s9", name: "MCP / Agentic Workflows", category: "ai-ml", level: 4, targetLevel: 5, priority: "high", notes: "Building MCP servers", resources: [] },
-    { id: "s10", name: "System Design", category: "soft-skills", level: 3, targetLevel: 4, priority: "high", notes: "Need more practice", resources: [] },
-    { id: "s11", name: "Astro", category: "frontend", level: 4, targetLevel: 4, priority: "medium", notes: "Personal site", resources: [] },
-    { id: "s12", name: "Azure OpenAI / GPT", category: "ai-ml", level: 4, targetLevel: 5, priority: "high", notes: "API integration", resources: [] },
-    { id: "s13", name: "C# / .NET", category: "backend", level: 2, targetLevel: 3, priority: "low", notes: "BDO background", resources: [] },
-    { id: "s14", name: "RAG / Vector DBs", category: "ai-ml", level: 4, targetLevel: 5, priority: "high", notes: "Key interview topic", resources: [] },
-    { id: "s15", name: "System Architecture", category: "soft-skills", level: 3, targetLevel: 4, priority: "high", notes: "For solution architect roles", resources: [] },
+    { id: "s1", name: "Role-specific fundamentals", category: "soft-skills", level: 2, targetLevel: 5, priority: "high", notes: "Core skills for the target role", resources: [] },
+    { id: "s2", name: "Interview storytelling", category: "soft-skills", level: 2, targetLevel: 5, priority: "high", notes: "STAR stories with metrics and reflection", resources: [] },
+    { id: "s3", name: "Company research", category: "soft-skills", level: 2, targetLevel: 4, priority: "high", notes: "Products, customers, values, competitors, recent news", resources: [] },
+    { id: "s4", name: "Resume targeting", category: "tools", level: 2, targetLevel: 4, priority: "high", notes: "Role-specific resume versions and keywords", resources: [] },
+    { id: "s5", name: "Networking and follow-up", category: "soft-skills", level: 2, targetLevel: 4, priority: "medium", notes: "Recruiter, referral, and hiring-manager touchpoints", resources: [] },
+    { id: "s6", name: "Offer negotiation", category: "soft-skills", level: 1, targetLevel: 4, priority: "medium", notes: "Compensation, scope, benefits, and deadline strategy", resources: [] },
+    { id: "s7", name: "AI-assisted job search", category: "ai-ml", level: 2, targetLevel: 4, priority: "medium", notes: "Use AI tools for research, drafts, and practice while preserving judgment", resources: [] },
   ],
   companies: [],
   resumes: [],
@@ -339,7 +333,11 @@ function ensureId<T extends { id: string }>(obj: T, prefix: string): T {
   return obj;
 }
 
-function migrateData(parsed: any): AppData {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function migrateData(parsed: Partial<AppData>): AppData {
   const migrated: AppData = {
     ...defaultData,
     ...parsed,
@@ -350,6 +348,7 @@ function migrateData(parsed: any): AppData {
     learningPaths: parsed.learningPaths?.length ? parsed.learningPaths : defaultData.learningPaths,
     flashcards: parsed.flashcards?.length ? parsed.flashcards : defaultData.flashcards,
     resources: parsed.resources?.length ? parsed.resources : defaultData.resources,
+    stories: parsed.stories || defaultData.stories,
     contacts: parsed.contacts || defaultData.contacts,
     offers: parsed.offers || defaultData.offers,
     journal: parsed.journal || defaultData.journal,
@@ -358,7 +357,17 @@ function migrateData(parsed: any): AppData {
   if (migrated.applications?.length) {
     migrated.applications = migrated.applications.map(ensureApplicationDefaults);
   }
+  if (migrated.stories?.length) {
+    migrated.stories = migrated.stories.map(ensureStoryDefaults);
+  }
   return migrated;
+}
+
+function ensureStoryDefaults(story: StoryBankEntry): StoryBankEntry {
+  if (!Array.isArray(story.metrics)) story.metrics = [];
+  if (!Array.isArray(story.tags)) story.tags = [];
+  if (!Array.isArray(story.targetRoles)) story.targetRoles = [];
+  return story;
 }
 
 function ensureApplicationDefaults(app: Application): Application {
@@ -462,6 +471,39 @@ export function deleteInterview(id: string): boolean {
   const before = data.interviews.length;
   data.interviews = data.interviews.filter(i => i.id !== id);
   if (data.interviews.length === before) return false;
+  persist();
+  return true;
+}
+
+// --- Story Bank CRUD ---
+export function getStories(): StoryBankEntry[] {
+  return [...getData().stories].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+}
+export function addStory(story: StoryBankEntry): StoryBankEntry {
+  if (!isNonEmptyString(story.title)) throw new Error("Story requires a title");
+  const now = new Date().toISOString();
+  const s = ensureStoryDefaults(ensureId({
+    ...story,
+    createdAt: story.createdAt || now,
+    updatedAt: story.updatedAt || now,
+  }, "stry"));
+  getData().stories.push(s);
+  persist();
+  return s;
+}
+export function updateStory(id: string, updates: Partial<StoryBankEntry>): boolean {
+  const data = getData();
+  const idx = data.stories.findIndex(s => s.id === id);
+  if (idx === -1) return false;
+  data.stories[idx] = ensureStoryDefaults({ ...data.stories[idx], ...updates, id, updatedAt: new Date().toISOString() });
+  persist();
+  return true;
+}
+export function deleteStory(id: string): boolean {
+  const data = getData();
+  const before = data.stories.length;
+  data.stories = data.stories.filter(s => s.id !== id);
+  if (data.stories.length === before) return false;
   persist();
   return true;
 }
@@ -744,10 +786,10 @@ export function exportData(): string {
 export function importData(json: string): boolean {
   if (typeof json !== "string" || !json.trim()) return false;
   try {
-    const parsed = JSON.parse(json);
+    const parsed: unknown = JSON.parse(json);
     if (!parsed || typeof parsed !== "object") return false;
-    if (!Array.isArray(parsed.applications) || !Array.isArray(parsed.skills)) return false;
-    _data = migrateData(parsed);
+    if (!isRecord(parsed) || !Array.isArray(parsed.applications) || !Array.isArray(parsed.skills)) return false;
+    _data = migrateData(parsed as Partial<AppData>);
     persist();
     return true;
   } catch {
@@ -760,8 +802,149 @@ export function resetData(): void {
 }
 
 
+function profileCompleteness(profile: UserProfile): number {
+  const fields = [
+    profile.name,
+    profile.title,
+    profile.summary,
+    profile.email || profile.linkedin || profile.website,
+    profile.location,
+    profile.availability,
+  ];
+  const filled = fields.filter(isNonEmptyString).length;
+  return filled / fields.length;
+}
+
+function daysUntil(date: string): number {
+  const target = new Date(date).getTime();
+  if (Number.isNaN(target)) return Number.POSITIVE_INFINITY;
+  return Math.ceil((target - Date.now()) / (1000 * 60 * 60 * 24));
+}
+
+function buildNextActions(data: AppData): DashboardAction[] {
+  const actions: DashboardAction[] = [];
+  const activeApps = data.applications.filter(a => !["rejected", "accepted", "withdrawn"].includes(a.status));
+  const interviewApps = data.applications.filter(a => ["phone-screen", "technical", "onsite"].includes(a.status));
+  const overdueFollowUps = data.applications.filter(a => a.followUpDate && daysUntil(a.followUpDate) <= 0);
+  const upcomingPrep = data.interviews.filter(i => daysUntil(i.date) >= 0).sort((a, b) => daysUntil(a.date) - daysUntil(b.date));
+
+  if (profileCompleteness(data.profile) < 0.67) {
+    actions.push({
+      id: "profile",
+      title: "Complete your job-search profile",
+      detail: "AI outputs and resume targeting improve once identity, target role, location, and contact fields are filled.",
+      href: "/onboarding",
+      priority: "critical",
+    });
+  }
+
+  if (data.resumes.length === 0) {
+    actions.push({
+      id: "resume",
+      title: "Create a targeted resume version",
+      detail: "Add one base resume, then clone it per role so every application has proof matched to the JD.",
+      href: "/resume",
+      priority: "high",
+    });
+  }
+
+  if (data.applications.length === 0) {
+    actions.push({
+      id: "capture",
+      title: "Capture your first opportunity",
+      detail: "Paste a JD, score the fit, and save it into the pipeline before analysis slows you down.",
+      href: "/evaluate",
+      priority: "high",
+    });
+  } else if (activeApps.length === 0) {
+    actions.push({
+      id: "pipeline",
+      title: "Refill the active pipeline",
+      detail: "All tracked opportunities are closed. Add new roles or revisit saved leads.",
+      href: "/applications",
+      priority: "high",
+    });
+  }
+
+  if (overdueFollowUps.length > 0) {
+    actions.push({
+      id: "follow-up",
+      title: `Follow up on ${overdueFollowUps.length} opportunity${overdueFollowUps.length === 1 ? "" : "ies"}`,
+      detail: "Overdue follow-ups are the easiest pipeline leak to plug.",
+      href: "/reminders",
+      priority: "critical",
+    });
+  }
+
+  if (interviewApps.length > 0 && data.interviews.length === 0) {
+    actions.push({
+      id: "prep",
+      title: "Build prep plans for active interviews",
+      detail: "Phone, technical, and onsite stages need question banks, company research, and a rehearsal plan.",
+      href: "/interviews",
+      priority: "critical",
+    });
+  } else if (upcomingPrep[0] && daysUntil(upcomingPrep[0].date) <= 3) {
+    actions.push({
+      id: "rehearse",
+      title: "Rehearse next interview",
+      detail: `${upcomingPrep[0].company} is coming up soon. Drill likely questions and tighten your story bank.`,
+      href: "/interviews",
+      priority: "high",
+    });
+  }
+
+  if (data.companies.length === 0 && data.applications.length > 0) {
+    actions.push({
+      id: "research",
+      title: "Add company research",
+      detail: "Research turns generic answers into specific reasons, questions, and personalization hooks.",
+      href: "/research",
+      priority: "medium",
+    });
+  }
+
+  if (data.contacts.length === 0) {
+    actions.push({
+      id: "contacts",
+      title: "Track recruiters and referrals",
+      detail: "A lightweight contact list keeps warm leads, referral asks, and thank-you notes from disappearing.",
+      href: "/contacts",
+      priority: "medium",
+    });
+  }
+
+  if (data.flashcards.some(f => f.level < 5)) {
+    actions.push({
+      id: "flashcards",
+      title: "Review due flashcards",
+      detail: `${data.flashcards.filter(f => f.level < 5).length} prompts are ready for practice.`,
+      href: "/flashcards",
+      priority: "low",
+    });
+  }
+
+  const priorityRank: Record<DashboardAction["priority"], number> = {
+    critical: 0,
+    high: 1,
+    medium: 2,
+    low: 3,
+  };
+  return actions.sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority]).slice(0, 5);
+}
+
+function calculateReadinessScore(data: AppData): number {
+  const profile = profileCompleteness(data.profile) * 20;
+  const resume = Math.min(data.resumes.length, 1) * 15;
+  const pipeline = Math.min(data.applications.filter(a => !["rejected", "withdrawn"].includes(a.status)).length / 5, 1) * 20;
+  const interviewPrep = Math.min((data.interviews.length + data.companies.length) / 3, 1) * 20;
+  const practice = Math.min(data.flashcards.filter(f => f.level >= 4).length / Math.max(data.flashcards.length, 1), 1) * 15;
+  const network = Math.min(data.contacts.length / 5, 1) * 10;
+  return Math.round(profile + resume + pipeline + interviewPrep + practice + network);
+}
+
 // --- Dashboard Stats ---
-export function getDashboardStats() {
+export function getDashboardStats(): DashboardStats {
   const data = getData();
   const apps = data.applications;
   return {
@@ -775,6 +958,8 @@ export function getDashboardStats() {
     studyModules: data.learningPaths.reduce((sum, p) => sum + p.modules.length, 0),
     completedModules: data.learningPaths.reduce((sum, p) => sum + p.completedModules.length, 0),
     flashcardsDue: data.flashcards.filter(f => f.level < 5).length,
+    readinessScore: calculateReadinessScore(data),
+    nextActions: buildNextActions(data),
   };
 }
 

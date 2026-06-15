@@ -2,18 +2,85 @@ import { useState } from "react";
 import { Search, Loader, Save, Plus, Sparkles, AlertTriangle } from "lucide-react";
 import { addApplication } from "../store";
 import { extractFromJD } from "../utils/extract";
+import { backend } from "../lib/backend";
+import type { Application } from "../types";
+
+function generateId() {
+  return crypto.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+function keywordHits(text: string, words: string[]) {
+  const lower = text.toLowerCase();
+  return words.filter((word) => lower.includes(word.toLowerCase()));
+}
+
+function buildLocalEvaluation(text: string, extracted: { company: string; role: string; url: string }) {
+  const role = extracted.role || "Target role";
+  const company = extracted.company || "Company";
+  const mustHaves = keywordHits(text, [
+    "required", "must have", "minimum", "license", "certification", "portfolio", "degree",
+    "years", "experience", "communication", "leadership", "stakeholder", "customer",
+  ]);
+  const prepSignals = keywordHits(text, [
+    "case study", "technical interview", "presentation", "panel", "assignment", "portfolio",
+    "onsite", "behavioral", "coding", "scenario", "clinical", "sales", "writing",
+  ]);
+  const riskSignals = keywordHits(text, [
+    "fast-paced", "wear many hats", "startup", "on-call", "travel", "contract",
+    "commission", "night", "weekend", "relocation", "clearance",
+  ]);
+  const fitScore = Math.max(2, Math.min(5, 5 - Math.floor(riskSignals.length / 3)));
+
+  return `# Job Evaluation
+
+A) ROLE SUMMARY
+${company} is hiring for ${role}. This looks like a role where success depends on matching the must-have requirements, proving relevant outcomes, and preparing examples around the work described in the JD.
+
+B) CV MATCH
+Score: ${fitScore}/5
+
+Matching signals to confirm:
+- Mirror the exact title and domain language from the posting.
+- Pull 3-5 accomplishments that prove the highest-priority requirements.
+- Convert responsibilities into evidence: tools used, people served, outcomes, and scale.
+
+Requirements detected:
+${mustHaves.length ? mustHaves.map((word) => `- ${word}`).join("\n") : "- No explicit must-have language detected. Review the JD manually for non-obvious requirements."}
+
+C) LEVEL STRATEGY
+Position yourself at the level implied by ownership, scope, and decision-making in the JD. If the role mentions cross-functional leadership, metrics, or ambiguous problem-solving, prepare examples where you owned outcomes rather than tasks.
+
+D) COMPENSATION
+Extract the visible range if present. If no range is listed, ask for the approved range before a late-stage interview and compare it against your location, level, schedule, and benefits.
+
+E) PERSONALIZATION
+- Explain why this company, team, customer, or mission is specifically interesting.
+- Map one past result to one business problem in the JD.
+- Ask one sharp question about priorities for the first 90 days.
+
+F) INTERVIEW PREP
+Likely prep areas:
+${prepSignals.length ? prepSignals.map((word) => `- ${word}`).join("\n") : "- Behavioral examples, role fundamentals, and company-specific questions."}
+
+Risks to clarify:
+${riskSignals.length ? riskSignals.map((word) => `- ${word}`).join("\n") : "- No obvious risk language detected."}
+
+Overall: ${fitScore}/5 - VERDICT: MAYBE`;
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "";
+}
 
 export default function JDEvaluator() {
   const [input, setInput] = useState("");
   const [evaluating, setEvaluating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [resultSource, setResultSource] = useState("");
   const [error, setError] = useState("");
   const [extracted, setExtracted] = useState({ company: "", role: "", url: "" });
   const [saved, setSaved] = useState(false);
 
-  // Big Mick v1.3.2 YELLOW fix: smart extraction.
-  // The old inline regex grabbed "TestCo. We need 5" as the company name.
-  // Now uses src/utils/extract.ts with proper sentence-boundary detection.
   const tryExtract = (text: string) => {
     const { company, role, url } = extractFromJD(text);
     setExtracted({ company, role, url });
@@ -21,28 +88,32 @@ export default function JDEvaluator() {
 
   const handleSave = () => {
     if (!extracted.company || !extracted.role) {
-      alert("Could not extract company and role. Please edit manually after saving.");
+      setError("Add a company and role before saving to the pipeline.");
+      return;
     }
     try {
-      addApplication({
+      const now = new Date().toISOString();
+      const application: Application = {
+        id: generateId(),
         company: extracted.company || "Unknown",
         role: extracted.role || "Unknown",
         url: extracted.url,
         jdText: input.trim(),
         status: "saved",
-        dateApplied: new Date().toISOString(),
-        score: 4,
+        dateApplied: now,
+        score: resultSource.startsWith("AI backend") ? 5 : 3,
         contacts: [],
         documents: [],
-        notes: "Saved from JD Evaluator — needs manual review",
-        timeline: [{ date: new Date().toISOString(), type: "saved", description: "Created from JD Evaluator" }],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as any);
+        notes: `Saved from JD Evaluator. ${resultSource || "Needs manual review."}`,
+        timeline: [{ date: now, type: "saved", description: "Created from JD Evaluator" }],
+        createdAt: now,
+        updatedAt: now,
+      };
+      addApplication(application);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (e: any) {
-      setError(e.message || "Save failed");
+    } catch (e: unknown) {
+      setError(errorMessage(e) || "Save failed");
     }
   };
 
@@ -59,69 +130,13 @@ export default function JDEvaluator() {
     setResult(null);
 
     try {
-      // Simulated evaluation template — Hermes agent handles full AI analysis
-      const evaluation = `# Job Evaluation
-
-## A) Role Summary
-Based on the job description, this role involves ${input.trim().slice(0, 100)}...
-
-**Estimated Level**: Senior / Staff
-**Relevant for You**: Potentially — evaluate below.
-
----
-
-## B) CV Match Score: ⭐⭐⭐ / 5
-
-### Matching Skills
-- AI/LLM expertise — strong alignment
-- React/TypeScript — daily driver
-- Python — primary language
-- MCP & Agentic workflows — core competency
-
-### Gaps
-- Evaluate specific tech stack requirements
-- Check for cloud platforms not yet mastered
-- Verify years-of-experience match
-
----
-
-## C) Level Strategy
-**Current level**: Senior Software Engineer (Contract)
-**Target level**: Staff / Lead for FTE, Senior+ for C2C
-
-Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/agent stack.
-
----
-
-## D) Compensation
-- **C2C rate**: Target $100-130/hr
-- **FTE range**: $140-180K CAD + equity
-- **Market check**: Compare with Levels.fyi for similar roles
-
----
-
-## E) Personalization Hooks
-1. Your experience building MCP servers for industrial data bridges
-2. Azure AI certification + production LLM deployment experience
-3. Full-stack capability: React UI → TypeScript API → Python ML pipeline
-
----
-
-## F) Interview Prep Roadmap
-1. **System Design**: Review scaling patterns for AI platforms
-2. **MCP Deep Dive**: Prepare to explain protocol architecture
-3. **Behavioral**: Prepare STAR stories for "tell me about a time"
-4. **Technical**: Expect live coding in TypeScript/Python
-
----
-
-## Overall Score: Analyze further before applying
-
-**Verdict**: 📝 Review details before deciding — use the full Hermes agent evaluation for deeper analysis.`;
-
-      setResult(evaluation);
-    } catch (e: any) {
-      setError(e.message || "Evaluation failed");
+      const response = await backend.evaluateJD(input.trim());
+      setResult(response.evaluation);
+      setResultSource(`AI backend: ${response.agent}${response.model ? ` / ${response.model}` : ""}`);
+    } catch (e: unknown) {
+      setResult(buildLocalEvaluation(input.trim(), extracted));
+      setResultSource("Local heuristic fallback. Start the backend for profile-aware AI analysis.");
+      setError(errorMessage(e) ? "Backend unavailable. Showing local heuristic analysis." : "");
     } finally {
       setEvaluating(false);
     }
@@ -131,7 +146,7 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">JD Evaluator</h1>
-        <p className="text-gray-500 mt-1">Paste a job description — get scored, matched, and prepped</p>
+        <p className="text-gray-500 mt-1">Paste a job description, score fit, and save the opportunity</p>
       </div>
 
       {/* Primary action: paste + extract + save */}
@@ -201,7 +216,7 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
 
         <div className="flex items-center justify-between mt-3">
           <p className="text-xs text-gray-400">
-            ✨ Save now, evaluate later — the goal is to capture the opportunity fast.
+            Save now, evaluate deeply later. Capture the opportunity before context disappears.
           </p>
           <button
             onClick={handleEvaluate}
@@ -228,7 +243,7 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Sparkles size={18} className="text-amber-500" />
-              AI-Suggested Evaluation
+              Evaluation
             </h2>
             <button
               onClick={() => { setResult(null); setInput(""); }}
@@ -240,10 +255,8 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-start gap-2">
             <AlertTriangle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-amber-800">
-              <strong>Template output.</strong> This is a structured scaffold based on common
-              evaluation patterns. For real AI analysis, use{" "}
-              <code className="bg-amber-100 px-1 rounded">/prep evaluate</code> in your Hermes
-              session.
+              <strong>{resultSource.startsWith("AI backend") ? "Profile-aware output." : "Local fallback."}</strong>{" "}
+              {resultSource}
             </p>
           </div>
           <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
@@ -256,10 +269,10 @@ Position yourself as: **AI-First Full-Stack Engineer** — emphasize the MCP/age
       <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-indigo-800 mb-2">How to use the JD Evaluator</h3>
         <ul className="space-y-1 text-sm text-indigo-700">
-          <li>• Paste the full JD (not just the URL) for best results</li>
-          <li>• The portal auto-extracts company + role — edit before saving if needed</li>
-          <li>• Save first, evaluate second — opportunity capture &gt; analysis paralysis</li>
-          <li>• For real AI evaluation, run <code className="bg-indigo-100 px-1 rounded">/prep evaluate</code> in Hermes</li>
+          <li>Paste the full JD for best extraction and scoring</li>
+          <li>The portal auto-extracts company and role, then lets you edit before saving</li>
+          <li>Backend analysis uses your profile; local fallback keeps the workflow usable offline</li>
+          <li>Save promising roles to Applications so follow-up, prep, contacts, and notes stay connected</li>
         </ul>
       </div>
     </div>

@@ -73,6 +73,21 @@ export interface InterviewQuestion {
   category: "technical" | "behavioral" | "system-design" | "general";
 }
 
+export interface StoryBankEntry {
+  id: string;
+  title: string;
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+  reflection: string;
+  metrics: string[];
+  tags: string[];
+  targetRoles: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Skill {
   id: string;
   name: string;
@@ -181,6 +196,7 @@ export interface AppData {
   theme: "light" | "dark" | "system";
   applications: Application[];
   interviews: InterviewPrep[];
+  stories: StoryBankEntry[];
   skills: Skill[];
   companies: CompanyResearch[];
   resumes: ResumeVersion[];
@@ -269,3 +285,25 @@ export interface JournalEntry {
   notes?: string;
 }
 
+export interface DashboardAction {
+  id: string;
+  title: string;
+  detail: string;
+  href: string;
+  priority: "critical" | "high" | "medium" | "low";
+}
+
+export interface DashboardStats {
+  totalApplications: number;
+  activeApplications: number;
+  interviews: number;
+  offers: number;
+  rejected: number;
+  skillsProgress: number;
+  upcomingInterviews: InterviewPrep[];
+  studyModules: number;
+  completedModules: number;
+  flashcardsDue: number;
+  readinessScore: number;
+  nextActions: DashboardAction[];
+}

@@ -18,6 +18,7 @@ import {
   Scale,
   Users,
   Sparkles,
+  BookMarked,
 } from "lucide-react";
 import { getReminders } from "../store";
 import { backend, type Profile } from "../lib/backend";
@@ -38,6 +39,7 @@ const sections = [
     label: "Prep",
     links: [
       { to: "/interviews", label: "Interview Prep", icon: GraduationCap },
+      { to: "/stories", label: "Story Bank", icon: BookMarked },
       { to: "/learn", label: "Learn", icon: BookOpen },
       { to: "/flashcards", label: "Flashcards", icon: BrainCircuit },
       { to: "/resources", label: "Resources", icon: Globe },

@@ -19,6 +19,7 @@ import Offers from "./pages/Offers";
 import Contacts from "./pages/Contacts";
 import Journal from "./pages/Journal";
 import CompareJobs from "./pages/CompareJobs";
+import StoryBank from "./pages/StoryBank";
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/applications" element={<Applications />} />
           <Route path="/applications/:id" element={<ApplicationDetail />} />
           <Route path="/interviews" element={<InterviewPrep />} />
+          <Route path="/stories" element={<StoryBank />} />
           <Route path="/skills" element={<Skills />} />
           <Route path="/resume" element={<Resume />} />
           <Route path="/research" element={<Research />} />
@@ -36,7 +38,7 @@ export default function App() {
           <Route path="/flashcards" element={<Flashcards />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/evaluate" element={<JDEvaluator />} />
-        <Route path="/reminders" element={<Reminders />} />
+          <Route path="/reminders" element={<Reminders />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/offers" element={<Offers />} />

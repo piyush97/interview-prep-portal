@@ -12,6 +12,7 @@ import {
   getOffers, addOffer, calculateOfferScore,
   getJournal, addJournal,
   needsBackup, recordBackup,
+  getStories, addStory, updateStory, deleteStory,
 } from "../store";
 import type { Application } from "../types";
 
@@ -75,7 +76,8 @@ describe("Skills Store", () => {
   it("starts with pre-seeded skills", () => {
     const skills = getSkills();
     expect(skills.length).toBeGreaterThan(0);
-    expect(skills.some(s => s.name.includes("React"))).toBe(true);
+    expect(skills.some(s => s.name.includes("Interview storytelling"))).toBe(true);
+    expect(skills.some(s => s.name.includes("Resume targeting"))).toBe(true);
   });
 
   it("updates skill level", () => {
@@ -212,6 +214,14 @@ describe("Dashboard Stats", () => {
     expect(stats.studyModules).toBeGreaterThan(0);
     expect(stats.flashcardsDue).toBeGreaterThan(0);
   });
+
+  it("surfaces readiness and next best actions", () => {
+    const stats = getDashboardStats();
+    expect(stats.readinessScore).toBeGreaterThanOrEqual(0);
+    expect(stats.readinessScore).toBeLessThanOrEqual(100);
+    expect(stats.nextActions.length).toBeGreaterThan(0);
+    expect(stats.nextActions[0].href).toBeTruthy();
+  });
 });
 
 // ─── Export / Import ───
@@ -251,8 +261,9 @@ describe("Export / Import", () => {
 describe("Profile & Theme", () => {
   it("returns default profile", () => {
     const p = getProfile();
-    expect(p.name).toBeTruthy();
-    expect(p.email).toBeTruthy();
+    expect(p.name).toBe("");
+    expect(p.email).toBe("");
+    expect(p.title).not.toMatch(/Software Engineer/i);
   });
 
   it("updates profile fields", () => {
@@ -420,5 +431,68 @@ describe("Data integrity", () => {
     const sorted = [...decks].sort();
     expect(decks).toEqual(sorted);
     expect(new Set(decks).size).toBe(decks.length);
+  });
+});
+
+// ─── Story Bank ───
+
+describe("Story Bank Store", () => {
+  it("starts empty", () => {
+    expect(getStories()).toHaveLength(0);
+  });
+
+  it("adds, updates, sorts, and deletes stories", () => {
+    addStory({
+      id: "story-old",
+      title: "Old launch",
+      situation: "Legacy launch risk",
+      task: "Improve readiness",
+      action: "Built plan",
+      result: "Reduced risk",
+      reflection: "Plan earlier",
+      metrics: [],
+      tags: ["launch"],
+      targetRoles: ["PM"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z",
+    });
+    addStory({
+      id: "story-new",
+      title: "New retention win",
+      situation: "Churn was rising",
+      task: "Find cause",
+      action: "Analyzed cohorts",
+      result: "Reduced churn 12%",
+      reflection: "Segment early",
+      metrics: ["12% churn reduction"],
+      tags: ["analytics"],
+      targetRoles: ["Product"],
+      createdAt: "2024-02-01T00:00:00Z",
+      updatedAt: "2024-02-01T00:00:00Z",
+    });
+
+    expect(getStories()[0].id).toBe("story-new");
+    expect(updateStory("story-old", { title: "Updated launch" })).toBe(true);
+    expect(getStories().find((story) => story.id === "story-old")?.title).toBe("Updated launch");
+    expect(deleteStory("story-new")).toBe(true);
+    expect(deleteStory("missing")).toBe(false);
+    expect(getStories()).toHaveLength(1);
+  });
+
+  it("rejects stories without titles", () => {
+    expect(() => addStory({
+      id: "bad-story",
+      title: " ",
+      situation: "",
+      task: "",
+      action: "",
+      result: "",
+      reflection: "",
+      metrics: [],
+      tags: [],
+      targetRoles: [],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z",
+    })).toThrow(/title/i);
   });
 });

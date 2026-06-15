@@ -99,33 +99,38 @@ Quick summary of your application pipeline and study progress.
 
 ## User Profile
 
-Configure your profile in the Interview Prep Portal web dashboard for personalized evaluations. The default profile is:
+Configure your profile in the Interview Prep Portal web dashboard for personalized evaluations. The default profile is intentionally blank so the tools do not leak a maintainer persona into another job seeker's materials.
 
-- **Name**: Piyush Mehta
-- **Role**: Senior Software Engineer (AI/LLM/Agentic workflows)
-- **Tech**: React, TypeScript, Python, Azure, MCP, LangChain, RAG
-- **Target**: C2C/contract roles, $88-130+/hr, Toronto/Remote
-- **Level**: Senior → Staff, 6+ years experience
+Fill in:
+- **Identity**: name, contact, location, work authorization
+- **Career**: current title, level, industry, target roles
+- **Skills**: core skills, growing skills, certifications
+- **Compensation**: salary/rate targets, negotiability
+- **Work history**: concrete outcomes, tools, scope, and story seeds
+- **Agent**: Hermes, Claude Code, Codex, HTTP, or offline mode
 
-Edit via `src/store.ts` in the portal repo or through the web dashboard settings.
+Edit through Settings or Onboarding. The backend profile file is the source of truth for AI-generated materials.
 
 ## Architecture
 
 ```
-User → Hermes Agent → /prep slash → Tool dispatch → API/web calls
+User → Hermes Agent → /prep slash → Tool dispatch → local backend
                          │
                     ┌────┴────┐
-                    │ Tools   │
+                    │ Plugin │
                     ├─────────┤
-                    │ evaluate_jd          → Hermes subprocess
-                    │ cover_letter         → Hermes subprocess
-                    │ research_company     → Hermes subprocess
-                    │ scan_jobs            → Hermes subprocess
-                    │ interview_stories    → Hermes subprocess
-                    │ negotiation_script   → Hermes subprocess
-                    │ serve_portal         → Vite preview
-                    │ portal_status        → localStorage read
+                    │ evaluate_jd          → POST /api/evaluate_jd
+                    │ cover_letter         → POST /api/cover_letter
+                    │ research_company     → POST /api/research_company
+                    │ scan_jobs            → POST /api/scan_jobs
+                    │ interview_stories    → POST /api/interview_stories
+                    │ negotiation_script   → POST /api/negotiation_script
+                    │ portal_status        → GET /health + /profile
                     └─────────┘
+                         │
+                    Python backend
+                         │
+                    Profile + chosen AI agent
                          │
                     Web Portal (React SPA)
                     localhost:8766

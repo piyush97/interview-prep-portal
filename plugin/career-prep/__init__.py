@@ -63,8 +63,8 @@ def on_session_start(session_id: str, model: str, platform: str):
         return (
             "🔹 Career Prep Portal available: Use /prep to access job evaluation, "
             "cover letter generation, company research, interview prep, and more.\n"
-            "Portfolio: Piyush Mehta — AI/LLM/Agentic workflows, MCP, React, TypeScript, Python, Azure.\n"
-            "Rate target: $88-130+/hr C2C or $120-170K CAD FTE."
+            "Profile-aware tools read from the local backend profile. Use /prep status "
+            "to confirm the active candidate, target role, and AI backend."
         )
 
 
