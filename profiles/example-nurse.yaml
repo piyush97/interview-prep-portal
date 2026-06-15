@@ -1,0 +1,88 @@
+schema_version: 1
+identity:
+  name: Bob Smith
+  pronouns: he/him
+  location: Toronto, ON
+  work_authorization: Canadian PR
+  contact:
+    email: bob.smith@example.com
+    phone: "+1-647-555-0123"
+    linkedin: linkedin.com/in/bobsmith-rn
+career:
+  current_title: ICU Nurse (Senior)
+  years_experience: 8
+  level: Senior
+  industry: Healthcare
+target_roles:
+  - Nurse Practitioner
+  - Charge Nurse
+  - Clinical Educator
+target_industries:
+  - Healthcare
+  - Public Health
+  - Clinical Research
+work_types:
+  - FTE
+skills:
+  core:
+    - ACLS
+    - BLS
+    - Patient Assessment
+    - Ventilator Management
+    - Code Blue Response
+    - Central Line Care
+    - Hemodynamic Monitoring
+  growing:
+    - Epic (advanced)
+    - Clinical research workflows
+  certifications:
+    - RN (College of Nurses of Ontario)
+    - CCRN (Critical Care Registered Nurse)
+    - TNCC (Trauma Nursing Core Course)
+compensation:
+  currency: CAD
+  fte_target: 115000
+  contract_target_hourly: 65
+  negotiable: true
+work_history:
+  - company: St. Michael's Hospital
+    title: ICU Nurse
+    start: '2018-06'
+    end: present
+    highlights:
+      - Led 12-bed ICU during COVID-19 surge, coordinated team of 8 RNs
+      - Reduced central line-associated bloodstream infections 40% by designing a checklist protocol adopted unit-wide
+      - Preceptor for 6 new graduate nurses; 100% retention after 1 year
+    tech:
+      - Epic
+      - Philips IntelliVue monitors
+      - Alaris IV pumps
+  - company: Toronto General Hospital
+    title: RN — Cardiology
+    start: '2016-09'
+    end: '2018-06'
+    highlights:
+      - Cared for post-op cardiac surgery patients (CABG, valve replacements)
+      - Member of Rapid Response Team
+    tech:
+      - Meditech
+education:
+  - school: University of Toronto
+    credential: BScN (Bachelor of Science in Nursing)
+    year: 2016
+preferences:
+  remote: false
+  hybrid: false
+  onsite: true
+  willing_to_relocate: false
+  visa_sponsorship_needed: false
+  notice_period: 1 month
+stories_seed:
+  - Handled a code blue solo on night shift, patient survived to discharge
+  - Led unit during COVID surge when manager was away — kept morale + outcomes stable
+  - Built a sepsis screening tool that caught 12 early cases in 6 months
+agent:
+  backend: hermes
+  model: deepseek/deepseek-v4-flash
+  max_tokens: 4000
+  temperature: 0.7

@@ -1,0 +1,88 @@
+schema_version: 1
+identity:
+  name: Alex Chen
+  pronouns: they/them
+  location: Toronto, ON
+  work_authorization: Canadian PR
+  contact:
+    email: alex.chen@example.com
+    linkedin: linkedin.com/in/alexchen-b2b
+career:
+  current_title: Senior B2B Marketing Manager
+  years_experience: 9
+  level: Senior
+  industry: SaaS
+target_roles:
+  - Director of Marketing
+  - Head of Demand Generation
+  - VP Marketing (Series A-C)
+target_industries:
+  - B2B SaaS
+  - Developer Tools
+  - Enterprise Software
+work_types:
+  - FTE
+skills:
+  core:
+    - Demand Generation
+    - Pipeline & Revenue Forecasting
+    - Content Marketing
+    - SEO/SEM
+    - Marketing Automation (HubSpot, Marketo)
+    - Account-Based Marketing (ABM)
+    - Sales-Marketing Alignment
+    - Team Leadership (5-8 people)
+  growing:
+    - Product Marketing
+    - Brand Strategy
+    - PLG (Product-Led Growth)
+  certifications:
+    - HubSpot Inbound Marketing
+    - Google Analytics
+compensation:
+  currency: CAD
+  fte_target: 165000
+  contract_target_hourly: 0
+  negotiable: true
+work_history:
+  - company: DevShop Inc. (B2B SaaS, 200 employees)
+    title: Senior Marketing Manager
+    start: '2021-04'
+    end: present
+    highlights:
+      - Scaled MQL volume 3.2x while reducing CAC 28%
+      - Launched ABM program targeting Fortune 500, $4.2M influenced pipeline in year 1
+      - Built and manage team of 5 (content, demand gen, ops, design, events)
+    tech:
+      - HubSpot
+      - Marketo
+      - Salesforce
+      - 6sense
+      - Looker
+  - company: CloudOps
+    title: Marketing Manager
+    start: '2018-08'
+    end: '2021-03'
+    highlights:
+      - Owned content engine that grew organic traffic 240% in 18 months
+      - Launched first paid acquisition program, $1.2M ARR in year 1
+education:
+  - school: York University
+    credential: BBA (Marketing)
+    year: 2016
+preferences:
+  remote: true
+  hybrid: true
+  onsite: false
+  willing_to_relocate: false
+  visa_sponsorship_needed: false
+  notice_period: 2 weeks
+stories_seed:
+  - Turned around an underperforming demand gen function in 90 days
+  - Built a content engine that became the top pipeline source for 2 years
+  - Hired and grew a team from 1 to 5
+agent:
+  backend: hermes
+  model: deepseek/deepseek-v4-flash
+  max_tokens: 4000
+  temperature: 0.7

@@ -1,0 +1,71 @@
+schema_version: 1
+identity:
+  name: Your Name Here
+  pronouns: ""
+  location: Toronto, ON
+  work_authorization: Canadian PR
+  contact:
+    email: you@example.com
+    linkedin: linkedin.com/in/yourhandle
+career:
+  current_title: Software Engineer
+  years_experience: 4
+  level: Mid
+  industry: SaaS
+target_roles:
+  - Senior Software Engineer
+  - Full-Stack Engineer
+target_industries:
+  - Developer Tools
+  - AI Infrastructure
+work_types:
+  - FTE
+  - C2C
+skills:
+  core:
+    - TypeScript
+    - Python
+    - React
+    - PostgreSQL
+  growing:
+    - Kubernetes
+    - Rust
+  certifications:
+    - AWS Solutions Architect Associate
+compensation:
+  currency: CAD
+  fte_target: 145000
+  contract_target_hourly: 95
+  negotiable: true
+work_history:
+  - company: ExampleCorp
+    title: Software Engineer
+    start: '2022-03'
+    end: present
+    highlights:
+      - Led migration of monolith to micro-frontends, reducing deploy time 70%
+      - Built internal CLI used by 80+ engineers
+    tech:
+      - TypeScript
+      - Node.js
+      - PostgreSQL
+      - AWS
+education:
+  - school: University of Waterloo
+    credential: BSc Computer Science
+    year: 2021
+preferences:
+  remote: true
+  hybrid: true
+  onsite: false
+  willing_to_relocate: false
+  visa_sponsorship_needed: false
+  notice_period: 2 weeks
+stories_seed:
+  - Migrated a 5-year-old legacy service to a new stack with zero downtime
+  - Mentored 2 junior engineers through their first year
+agent:
+  backend: hermes
+  model: deepseek/deepseek-v4-flash
+  max_tokens: 4000
+  temperature: 0.7

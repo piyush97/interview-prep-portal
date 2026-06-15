@@ -17,8 +17,10 @@ import {
   Settings,
   Scale,
   Users,
+  Sparkles,
 } from "lucide-react";
 import { getReminders } from "../store";
+import { backend, type Profile } from "../lib/backend";
 
 // Big Mick v1.3.2 YELLOW fix: 16 sidebar items are now grouped under 5 categories
 // so power users can still see everything, but new users get a clearer mental map.
@@ -61,6 +63,7 @@ const sections = [
   {
     label: "Config",
     links: [
+      { to: "/onboarding", label: "Onboarding", icon: Sparkles },
       { to: "/settings", label: "Settings", icon: Settings },
     ],
   },
@@ -69,17 +72,34 @@ const sections = [
 export default function Sidebar() {
   const location = useLocation();
   const [pendingReminders, setPendingReminders] = useState(0);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     const update = () => setPendingReminders(getReminders().filter((r) => r.status !== "done").length);
     update();
     const interval = setInterval(update, 5000);
     window.addEventListener("storage", update);
+
+    // v1.4.0: load profile name from backend (was hardcoded "Piyush Mehta")
+    let profileInterval: ReturnType<typeof setInterval> | null = null;
+    backend.getProfile().then((p) => {
+      setProfile(p);
+      profileInterval = setInterval(() => {
+        backend.getProfile().then(setProfile).catch(() => {});
+      }, 10_000);
+    }).catch(() => {
+      // Backend not running — fall back to no name
+      setProfile(null);
+    });
+
     return () => {
       clearInterval(interval);
       window.removeEventListener("storage", update);
+      if (profileInterval) clearInterval(profileInterval);
     };
   }, [location.pathname]);
+
+  const profileName = profile?.identity?.name?.trim() || "";
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -91,7 +111,9 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="font-semibold text-gray-900 text-sm">Interview Prep Portal</h1>
-            <p className="text-xs text-gray-500">Piyush Mehta</p>
+            <p className="text-xs text-gray-500">
+              {profileName || "v1.4.0 — Universal"}
+            </p>
           </div>
         </div>
       </div>
@@ -144,7 +166,7 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-gray-100">
         <p className="text-xs text-gray-400 text-center">
-          Interview Prep Portal v1.3.2
+          Interview Prep Portal v1.4.0
         </p>
       </div>
     </aside>

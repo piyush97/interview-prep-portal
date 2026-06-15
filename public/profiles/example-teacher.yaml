@@ -1,0 +1,88 @@
+schema_version: 1
+identity:
+  name: Maria Rodriguez
+  pronouns: she/her
+  location: Vancouver, BC
+  work_authorization: Canadian Citizen
+  contact:
+    email: maria.rodriguez@example.com
+    linkedin: linkedin.com/in/mariarodriguez-edu
+career:
+  current_title: High School Math Teacher
+  years_experience: 7
+  level: Senior
+  industry: K-12 Education
+target_roles:
+  - Curriculum Designer (EdTech)
+  - Instructional Coach
+  - Education Program Manager
+target_industries:
+  - EdTech
+  - Education Non-profit
+  - Corporate Training
+work_types:
+  - FTE
+  - Contract
+skills:
+  core:
+    - Classroom Management
+    - Curriculum Design (Common Core, BC Math)
+    - Differentiated Instruction
+    - Assessment Design
+    - Parent Communication
+    - Google Classroom
+  growing:
+    - Learning Analytics
+    - Instructional Design (ADDIE model)
+    - Canvas LMS administration
+  certifications:
+    - BC Teaching Certificate
+    - Google Certified Educator Level 1
+compensation:
+  currency: CAD
+  fte_target: 95000
+  contract_target_hourly: 60
+  negotiable: true
+work_history:
+  - company: Vancouver School District (SD39)
+    title: Math Teacher (Grade 9-12)
+    start: '2018-09'
+    end: present
+    highlights:
+      - Designed new Grade 10 math curriculum adopted across 4 schools
+      - Improved pass rate for at-risk students from 62% to 84% over 2 years via small-group intervention
+      - Led 1:1 tutoring program with 12 university-student volunteers
+    tech:
+      - Google Classroom
+      - Desmos
+      - Geogebra
+      - Canvas
+  - company: Mathnasium
+    title: Math Tutor
+    start: '2017-01'
+    end: '2018-06'
+    highlights:
+      - Tutored 30+ students grades 3-12
+education:
+  - school: Simon Fraser University
+    credential: BEd (Secondary Mathematics)
+    year: 2018
+  - school: University of British Columbia
+    credential: BSc (Mathematics)
+    year: 2016
+preferences:
+  remote: true
+  hybrid: true
+  onsite: false
+  willing_to_relocate: false
+  visa_sponsorship_needed: false
+  notice_period: End of school year (June)
+stories_seed:
+  - Turned around a failing classroom through a daily warm-up routine
+  - Built a parent communication system that cut response time in half
+  - Designed a free tutoring program that ran for 2 years
+agent:
+  backend: claude
+  model: claude-sonnet-4-6
+  max_tokens: 4000
+  temperature: 0.7

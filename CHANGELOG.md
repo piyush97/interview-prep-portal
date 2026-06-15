@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-06-15 — "Universal"
+
+### Added
+
+- **Agent-agnostic backend** — `backend/agents.py` ships a dispatcher supporting `hermes`, `claude`, `codex`, `http`, and `offline` backends. Switch your AI by editing one YAML field.
+- **Profile-agnostic prompts** — the AI tools read from a YAML profile (`~/.interview-prep-portal/profile.yaml`), not hardcoded prompts. Works for any profession.
+- **4 starter personas** — `profiles/example-software-engineer.yaml`, `example-nurse.yaml`, `example-teacher.yaml`, `example-marketer.yaml`. Try them with `python3 -m backend.cli profile init --from profiles/example-nurse.yaml`.
+- **FastAPI backend** — `backend/server.py` exposes 10 REST endpoints (`/health`, `/profile`, `/profile/schema`, `/profile/from_yaml`, `/api/{evaluate_jd,cover_letter,research_company,scan_jobs,interview_stories,negotiation_script}`).
+- **MCP server** — `backend/mcp_server.py` exposes the same 6 AI tools as MCP for Claude Desktop, Cursor, etc.
+- **`prep` CLI** — `backend/cli.py` with `serve`, `profile {show,validate,init,path}`, `agent test`, `mcp`, `version`.
+- **Onboarding wizard** — `src/pages/Onboarding.tsx` is a 7-step first-run flow: welcome → backend check → pick persona → identity → career → skills → agent. Reachable from sidebar (`/onboarding`).
+- **Settings page rewrite** — `src/pages/Settings.tsx` now talks to the Python backend (`GET/PUT /profile`), shows backend connection status, and lets you edit the universal profile (identity, career, skills, work history, education, compensation, preferences, AI agent).
+- **TypeScript backend client** — `src/lib/backend.ts` with typed `Profile` matching the Python Pydantic schema.
+- **New backend endpoint** — `POST /profile/from_yaml` parses a YAML profile string and returns the validated Profile dict (used by the Onboarding wizard to load starter personas).
+- **Public profiles** — `public/profiles/` mirrors `profiles/` so the Onboarding wizard can fetch starter YAMLs at runtime.
+
+### Changed
+
+- **Sidebar header no longer hardcodes "Piyush Mehta"** — it reads the profile name from the backend, or falls back to "v1.4.0 — Universal" if the backend is down.
+- **Sidebar version bumped** from v1.3.2 to v1.4.0.
+- **Sidebar adds "Onboarding" link** under the Config section.
+- **README rewritten** — covers the new architecture, agent selection, profile format, MCP, and 5-minute quickstart. Designed for non-engineers.
+- **Plugin (`~/.hermes/plugins/career-prep`)** rewritten from 401 lines to 224 lines as a thin HTTP shim. Old `subprocess.run(["hermes", "run", ...])` calls replaced with `urllib.request.urlopen(http://localhost:8766/api/...)`. The `hermes run` → `hermes chat -q` bug from v1.3.x is fixed.
+
+### Removed
+
+- Hardcoded "Piyush" / "Senior Software Engineer" prompts. The AI tools now read from your profile. The default seed profile is a nurse (Bob Smith) to prove the system is profession-agnostic.
+- `subprocess` calls from the plugin. The plugin is now a stateless HTTP client.
+
+### Tests
+
+- **133 backend pytest tests** (up from 115). New: 3 tests for `POST /profile/from_yaml`.
+- **110 JS vitest tests** (up from 109). New: 1 Sidebar test for the dynamic profile name.
+- **243 total tests, all green.**
+
+### Migration from v1.3.x
+
+v1.3.x users do **not** need to do anything. The localStorage app data format is unchanged. The new Backend Profile is additive. To use the new AI features:
+
+1. `pip install -e ".[backend]"` to install the backend package
+2. `python3 -m backend.cli serve` to start the backend
+3. Visit `/onboarding` to create your profile
+4. All v1.3.x pages still work as before
+
+---
+
 ## [1.2.0] - 2026-06-13
 
 ### Added

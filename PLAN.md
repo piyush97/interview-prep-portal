@@ -1,6 +1,6 @@
 # Interview Prep Portal — v1.4.0 "Universal" Plan
 
-**Status:** Ready for implementation (TDD-driven)
+**Status:** ✅ **Complete and shipped as v1.4.0 (release tagged).** All 14 todos closed. 243 tests green (133 Python + 110 JS). Backend is agent-agnostic, profile-agnostic, MCP-native. React Onboarding wizard ships. See CHANGELOG entry for v1.4.0.
 **Branch:** `main` (target)
 **Tag:** `v1.4.0`
 **Goal:** Make the portal usable by any job-seeker (any profession, any level) with any AI agent (Hermes, Claude Code, Codex, anything that speaks CLI or HTTP), via an MCP-compatible local backend.
