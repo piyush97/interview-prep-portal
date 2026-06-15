@@ -220,7 +220,7 @@ export default function Onboarding() {
             <div className="bg-amber-50 border border-amber-200 rounded p-4 text-sm text-amber-900 space-y-2">
               <p className="font-semibold">○ Backend not running</p>
               <p>Start it in a terminal:</p>
-              <pre className="bg-amber-100 px-2 py-1 rounded text-xs font-mono">python3 -m backend.cli serve</pre>
+              <pre className="bg-amber-100 px-2 py-1 rounded text-xs font-mono">uv run python -m backend.cli serve</pre>
               <button
                 onClick={checkBackend}
                 className="flex items-center gap-1 text-amber-700 hover:text-amber-900"

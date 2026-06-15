@@ -84,7 +84,7 @@ uv sync                    # installs the backend deps
 ### 2. Start the backend (one terminal)
 
 ```bash
-python3 -m backend.cli serve
+uv run python -m backend.cli serve
 ```
 
 You should see:
@@ -153,7 +153,7 @@ agent:
 
 Test your agent at any time:
 ```bash
-python3 -m backend.cli agent test --backend hermes
+uv run python -m backend.cli agent test --backend hermes
 ```
 
 ---
@@ -229,16 +229,16 @@ agent:
 
 ```bash
 # Initialize from a starter template
-python3 -m backend.cli profile init --from profiles/example-nurse.yaml
+uv run python -m backend.cli profile init --from profiles/example-nurse.yaml
 
 # Or interactive (asks you questions)
-python3 -m backend.cli profile init --interactive
+uv run python -m backend.cli profile init --interactive
 
 # Validate
-python3 -m backend.cli profile validate
+uv run python -m backend.cli profile validate
 
 # Pretty-print
-python3 -m backend.cli profile show
+uv run python -m backend.cli profile show
 ```
 
 ---
@@ -256,8 +256,8 @@ python3 -m backend.cli profile show
 
 Try one:
 ```bash
-python3 -m backend.cli profile init --from profiles/example-nurse.yaml --force
-python3 -m backend.cli profile show
+uv run python -m backend.cli profile init --from profiles/example-nurse.yaml --force
+uv run python -m backend.cli profile show
 ```
 
 ---
@@ -293,7 +293,7 @@ The plugin is a **thin HTTP shim** (~224 lines). It doesn't do AI itself — it 
 The same tools are also exposed as an **MCP server** for Claude Desktop, Cursor, etc.:
 
 ```bash
-python3 -m backend.cli mcp
+uv run python -m backend.cli mcp
 ```
 
 Add to your MCP client config:
@@ -387,7 +387,7 @@ For production hardening (input validation, error boundary, CI, healthcheck), se
 
 The Python backend isn't reachable. Start it:
 ```bash
-python3 -m backend.cli serve
+uv run python -m backend.cli serve
 ```
 
 ### "AI backend is offline" in tool output
@@ -396,7 +396,7 @@ Your profile's `agent.backend` is set to `offline` or the agent CLI isn't instal
 
 Test which backends are available:
 ```bash
-python3 -m backend.cli version
+uv run python -m backend.cli version
 ```
 
 ### Cover letter starts with "Dear Hiring Manager" instead of addressing a specific person
@@ -407,7 +407,7 @@ The backend's prompts always address a specific person if you pass one. If the o
 
 Validate it:
 ```bash
-python3 -m backend.cli profile validate
+uv run python -m backend.cli profile validate
 ```
 
 Errors are usually a missing required field (e.g. `career.years_experience`) or a wrong type (string vs int).

@@ -561,7 +561,7 @@ export default function Settings() {
               The AI features need the Python backend running. Start it in another terminal:
             </p>
             <pre className="mt-2 bg-amber-100 px-2 py-1 rounded text-xs font-mono">
-              python3 -m backend.cli serve
+              uv run python -m backend.cli serve
             </pre>
             <p className="mt-2 text-xs text-amber-800">
               The backend is what actually calls your AI agent. The React app is just the UI.
