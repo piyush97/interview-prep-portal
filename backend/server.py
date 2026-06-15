@@ -22,6 +22,7 @@ from contextlib import asynccontextmanager
 from typing import Any, Callable
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from . import __version__
@@ -115,6 +116,15 @@ def create_app(
         version=__version__,
         description="Agent-agnostic backend for the Interview Prep Portal React app",
         lifespan=lifespan,
+    )
+
+    # Allow the React dev server (port 5173) and any local access
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:8766"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     # --- Health ---
