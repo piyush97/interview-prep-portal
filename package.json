@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.2.0",
   "type": "module",
-  "description": "AI-powered interview preparation dashboard for software engineers. Track applications, evaluate JDs, practice with flashcards, compare offers, and run your entire job search.",
+  "description": "Local-first interview preparation dashboard for job seekers. Track applications, evaluate JDs, practice answers, compare offers, and run your job search.",
   "keywords": [
     "interview",
     "job-search",

@@ -105,6 +105,13 @@ describe("Flashcards Store", () => {
     expect(getFlashcards().length).toBeGreaterThan(0);
   });
 
+  it("does not seed person- or employer-specific behavioral examples", () => {
+    const seedText = JSON.stringify(getFlashcards());
+    ["BDO", "Nuclei", "OPG", "Piyush"].forEach((token) => {
+      expect(seedText).not.toContain(token);
+    });
+  });
+
   it("lists unique decks", () => {
     const decks = getFlashcardDecks();
     expect(decks).toContain("System Design");

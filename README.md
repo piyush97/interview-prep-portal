@@ -1,460 +1,304 @@
-# 🎯 Interview Prep Portal — v1.4.0 "Universal"
+# Interview Prep Portal
 
-> An open-source interview preparation dashboard for **any** job seeker — not just software engineers. Works for nurses, teachers, marketers, designers, accountants, you name it.
->
-> **You bring your own AI agent** (Hermes, Claude Code, Codex, or any OpenAI-compatible HTTP endpoint). The portal handles the data, structure, and prep workflow; your agent handles the writing.
+Local-first job search and interview preparation workspace for people using AI, people avoiding AI, and everyone in between.
 
-Track applications, evaluate job descriptions, generate cover letters, practice with flashcards, compare offers, manage contacts, schedule interviews, and run your entire job search like a senior architect.
+The portal helps you turn job descriptions into a working prep system: applications, resume fit, interview plans, STAR stories, answer coaching, reminders, contacts, offers, and learning resources. It works across professions because the default profile is blank and the AI layer reads from your own profile instead of baked-in prompts.
 
----
+## Why It Exists
 
-## 🚀 What changed in v1.4.0
+Most job-search tools stop at tracking applications. Interview Prep Portal tries to close the loop:
 
-v1.4.0 is a **major architecture rewrite** that makes the portal:
+1. Capture an opportunity.
+2. Understand the role.
+3. Match the resume to the JD.
+4. Generate a prep packet.
+5. Build a story bank.
+6. Practice answers with feedback.
+7. Track follow-ups, contacts, offers, and decisions.
 
-- **Profession-agnostic** — the AI tools (cover letters, JD evaluation, etc.) read from a YAML profile you control. Hardcoded "Piyush" prompts are gone. Ships with 4 starter personas: software engineer, healthcare professional, educator, marketer.
-- **Agent-agnostic** — pick any AI backend. The portal's Python backend ships adapters for **Hermes, Claude Code, Codex, generic HTTP, and offline (no AI)**. You choose; you can switch later.
-- **MCP-native** — the same 6 tools are also exposed as an MCP server, so any MCP client (Claude Desktop, Cursor, etc.) can use them.
-- **CLI-first** — there's a `prep` CLI for backend management, profile init/validate, agent testing.
-- **Onboarding wizard** — first-run flow that walks you through setup. No more "edit the YAML file".
+Everything is designed to remain useful offline. AI can improve drafts and research, but core workflows have deterministic local fallbacks.
 
-What **stayed the same**:
-- 100% client-side app data (localStorage) — no account, no cloud, no lock-in
-- All v1.3.x features: applications, flashcards, learning paths, JD evaluator, offers, contacts, journal, reminders
-- React 19 + TypeScript + Vite + Tailwind
+## Product Highlights
 
----
+| Area | What you get |
+| --- | --- |
+| Dashboard | Readiness score, next best actions, application and prep status |
+| Applications | Pipeline tracking, timeline, contacts, documents, notes, follow-up dates |
+| JD Evaluator | Backend AI when available, local heuristic fallback when offline |
+| Application Detail | Prep packet export, resume-to-JD match matrix, checklist |
+| Interview Prep | Blank prep or generated prep from a saved application/JD |
+| Answer Coach | Scores answer structure, evidence, action language, and role relevance |
+| Story Bank | Reusable STAR stories with metrics, tags, and target roles |
+| Resume | Multiple resume versions for role targeting |
+| Research | Company research notes, products, people, culture, interview process |
+| Practice | Flashcards, learning paths, curated resources |
+| Career Ops | Contacts, reminders, journal, offer comparison, job comparison |
+| Integrations | Optional Python backend, MCP server, and Hermes plugin shim |
 
-## 📦 What's in the box
+## Core Workflow
 
-| Component | Tech | Purpose |
-|---|---|---|
-| `src/` | React 19 + TypeScript + Vite + Tailwind | The portal web app (UI) |
-| `backend/` | Python 3.11+ + FastAPI + Pydantic v2 | The agent-agnostic backend (does the AI calls) |
-| `mcp_server.py` | Python + mcp SDK | Exposes the same tools as MCP for Claude Desktop, etc. |
-| `profiles/` | YAML | 4 starter personas (engineer, nurse, teacher, marketer) |
-| `~/.hermes/plugins/career-prep/` | Python | (Optional) Hermes Agent plugin — thin HTTP shim to the backend |
+### 1. Capture A Role
 
-```
-interview-prep-portal/
-├── src/                       # React app
-│   ├── pages/                 # Dashboard, Applications, Settings, Onboarding, ...
-│   ├── components/            # Sidebar, Layout, ErrorBoundary, ...
-│   ├── lib/backend.ts         # TypeScript client for the Python backend
-│   └── store.ts               # localStorage-backed state
-├── backend/                   # Python FastAPI backend
-│   ├── profile.py             # Pydantic profile model (universal)
-│   ├── agents.py              # Hermes / Claude / Codex / HTTP / offline dispatcher
-│   ├── prompts.py             # Tool prompt builders (profile-agnostic)
-│   ├── tools.py               # 6 AI tools
-│   ├── server.py              # FastAPI on :8766
-│   ├── mcp_server.py          # MCP server (8 tools)
-│   ├── cli.py                 # `prep` CLI
-│   └── tests/                 # 133 pytest tests
-├── profiles/                  # 4 example personas
-│   ├── example-software-engineer.yaml
-│   ├── example-nurse.yaml
-│   ├── example-teacher.yaml
-│   └── example-marketer.yaml
-├── public/                    # Static assets (incl. profiles/ for the wizard)
-├── PLAN.md                    # v1.4.0 architecture plan
-└── README.md                  # you are here
-```
+Paste a job description in **JD Evaluator** or add an application manually. The portal extracts company, role, URL, and saves the JD for later prep.
 
----
+### 2. Check Resume Fit
 
-## ⚡ Quickstart (5 minutes)
+Open the saved application and compare any resume version against the JD. The match matrix shows:
 
-### Prerequisites
+- score
+- matched terms
+- missing terms
+- evidence lines from the resume
 
-- **Node.js 20+** for the React app
-- **Python 3.11+** for the backend
-- *(Optional)* One of: `hermes` CLI, `claude` CLI, `codex` CLI, or an OpenAI-compatible API endpoint
-- *(Optional)* [Hermes Agent](https://hermes-agent.nousresearch.com/docs) for the plugin integration
+### 3. Build A Prep Packet
 
-### 1. Clone & install
+Application detail pages generate a markdown prep packet with:
+
+- snapshot
+- readiness checklist
+- detected prep signals
+- contacts
+- notes
+- saved JD
+
+### 4. Create Interview Prep
+
+Go to **Interview Prep** and choose either:
+
+- **From Application**: generate research notes and five likely questions from a saved role
+- **Blank Prep**: start manually
+
+Generated prep uses the saved JD, application status, interview date, and best matching story from the Story Bank.
+
+### 5. Practice With Evidence
+
+Use the Story Bank to store STAR stories. In Interview Prep, insert a story into an answer, then let Answer Coach flag missing structure, metrics, reflection, or role relevance.
+
+## Quickstart
+
+### Requirements
+
+- Node.js 20+
+- Python 3.11+
+- uv
+- Optional: Hermes, Claude Code, Codex CLI, or an OpenAI-compatible HTTP endpoint
+
+### Install
 
 ```bash
 git clone https://github.com/piyush97/interview-prep-portal.git
 cd interview-prep-portal
 npm install
-uv sync                    # installs the backend deps
+uv sync
 ```
 
-### 2. Start the backend (one terminal)
-
-```bash
-uv run python -m backend.cli serve
-```
-
-You should see:
-```
-Starting Interview Prep Portal backend on http://0.0.0.0:8766
-Profile: /home/you/.interview-prep-portal/profile.yaml
-INFO:     Uvicorn running on http://0.0.0.0:8766
-```
-
-**No profile yet?** That's fine — the Onboarding wizard will create one.
-
-### 3. Start the React app (another terminal)
+### Start The React App
 
 ```bash
 npm run dev
 ```
 
-Open <http://localhost:5173>.
+Open the local URL printed by Vite. In this repo the app is also built for the `/interview-prep-portal/` base path.
 
-### 4. Run the Onboarding wizard
+### Start The Optional Backend
 
-Navigate to **Config → Onboarding** in the sidebar. The wizard will:
-
-1. Verify the backend is reachable
-2. Let you pick a starter template (engineer / healthcare / educator / marketer) or start blank
-3. Walk you through identity, career, skills, and AI agent choice
-4. Save your profile to `~/.interview-prep-portal/profile.yaml`
-
-### 5. Try the tools
-
-| Tool | What it does | CLI | UI |
-|---|---|---|---|
-| **JD Evaluator** | Paste a JD, get an A-F analysis | `curl -X POST http://localhost:8766/api/evaluate_jd -d '{"jd_text": "..."}'` | `/evaluate` |
-| **Cover Letter** | Tailored letter for a company + role | `curl -X POST http://localhost:8766/api/cover_letter -d '{"company": "Acme", "role": "Senior Engineer"}'` | (via plugin) |
-| **Company Research** | Deep-dive on a company before interview | `curl -X POST http://localhost:8766/api/research_company -d '{"company": "Acme"}'` | (via plugin) |
-| **Job Scan** | Search LinkedIn, Indeed, Wellfound | `curl -X POST http://localhost:8766/api/scan_jobs -d '{"location": "Remote"}'` | (via plugin) |
-| **Interview Stories** | STAR+Reflection stories | `curl -X POST http://localhost:8766/api/interview_stories` | (via plugin) |
-| **Negotiation Script** | Anchoring, leverage, pushback | `curl -X POST http://localhost:8766/api/negotiation_script -d '{"offer_details": "..."}'` | (via plugin) |
-
----
-
-## 🤖 Choosing your AI agent
-
-The portal is **agent-agnostic** — you pick which LLM powers the tools.
-
-Edit your profile at `~/.interview-prep-portal/profile.yaml`:
-
-```yaml
-agent:
-  backend: hermes          # hermes | claude | codex | http | offline
-  model: deepseek-v4-flash
-  command: ""              # leave blank to autodetect
-  endpoint: ""             # only for http
-  api_key_env: ""          # only for http
-  max_tokens: 2048
-  temperature: 0.7
-```
-
-| Backend | What it is | Setup |
-|---|---|---|
-| `offline` | No AI; returns canned text | None. Default. |
-| `hermes` | [Hermes Agent](https://hermes-agent.nousresearch.com/docs) CLI | `pip install hermes-agent` and set `OPENAI_API_KEY` |
-| `claude` | [Claude Code](https://claude.ai/code) CLI | `npm i -g @anthropic-ai/claude-code` and login |
-| `codex` | [Codex CLI](https://github.com/openai/codex) | `npm i -g @openai/codex` and login |
-| `http` | Any OpenAI-compatible endpoint | Set `endpoint` and `api_key_env` |
-
-Test your agent at any time:
-```bash
-uv run python -m backend.cli agent test --backend hermes
-```
-
----
-
-## 👤 Your profile
-
-Your profile is a YAML file at `~/.interview-prep-portal/profile.yaml`. It's the single source of truth for **who you are** — every AI tool reads from it.
-
-```yaml
-schema_version: 1
-
-identity:
-  name: Jane Doe
-  pronouns: she/her
-  location: Toronto, ON
-  work_authorization: Canadian PR
-  contact:
-    email: jane@example.com
-    phone: "+1-555-0100"
-    linkedin: https://linkedin.com/in/janedoe
-    portfolio: https://janedoe.dev
-
-career:
-  current_title: ICU Nurse (Senior)
-  years_experience: 8
-  level: Senior
-  industry: Healthcare
-
-target_roles: [Nurse Practitioner, Clinical Educator]
-target_industries: [Healthcare, Public Health]
-work_types: [FTE]
-
-skills:
-  core: [ACLS, BLS, Patient Assessment, Ventilator Management]
-  growing: [Epic (advanced), Clinical research]
-  certifications: [RN, CCRN, TNCC]
-
-compensation:
-  currency: CAD
-  fte_target: 115000
-  contract_target_hourly: 65
-  negotiable: true
-
-work_history:
-  - company: Sunnybrook Hospital
-    title: ICU Nurse
-    start: "2018-03"
-    end: present
-    highlights:
-      - Led COVID-ICU surge response team (2021-2022)
-      - Trained 12 new grad nurses in ventilator management
-    tech: [Epic, Hamilton G5, Prismaflex]
-
-education:
-  - school: University of Toronto
-    credential: BScN, Honours
-    year: 2017
-
-preferences:
-  remote: false
-  hybrid: false
-  onsite: true
-  willing_to_relocate: false
-  visa_sponsorship_needed: false
-  notice_period: 1 month
-
-agent:
-  backend: hermes
-  model: deepseek-v4-flash
-```
-
-**Don't write YAML by hand.** Use the Onboarding wizard (`/onboarding`) or the CLI:
+The UI works without the backend, but AI-backed tools and profile editing need it.
 
 ```bash
-# Initialize from a starter template
-uv run python -m backend.cli profile init --from profiles/example-nurse.yaml
+uv run python -m backend.cli serve
+```
 
-# Or interactive (asks you questions)
+Backend default:
+
+```text
+http://localhost:8766
+```
+
+## AI And Profile Setup
+
+The backend reads your profile from:
+
+```text
+~/.interview-prep-portal/profile.yaml
+```
+
+Create one through **Settings** or **Onboarding**, or use the CLI:
+
+```bash
 uv run python -m backend.cli profile init --interactive
-
-# Validate
 uv run python -m backend.cli profile validate
-
-# Pretty-print
 uv run python -m backend.cli profile show
 ```
 
----
+Supported agent backends:
 
-## 🪪 Starter personas
+| Backend | Use when |
+| --- | --- |
+| `offline` | You want deterministic local outputs only |
+| `hermes` | You use Hermes Agent CLI |
+| `claude` | You use Claude Code CLI |
+| `codex` | You use Codex CLI |
+| `http` | You have an OpenAI-compatible endpoint |
 
-`profiles/` ships 4 ready-to-use profiles. Each demonstrates the portal works for a different profession:
-
-| File | For |
-|---|---|
-| `example-software-engineer.yaml` | AI/ML, full-stack, backend, frontend, DevOps, mobile |
-| `example-nurse.yaml` | RN, NP, pharmacist, therapist, technician — ICU focus |
-| `example-teacher.yaml` | K-12 teacher, professor, instructional designer, corporate trainer |
-| `example-marketer.yaml` | B2B/B2C marketing, growth, content, sales, partnerships |
-
-Try one:
-```bash
-uv run python -m backend.cli profile init --from profiles/example-nurse.yaml --force
-uv run python -m backend.cli profile show
-```
-
----
-
-## 🔌 Hermes Agent plugin (optional)
-
-If you use [Hermes Agent](https://hermes-agent.nousresearch.com/docs), the portal installs a thin plugin that exposes the same 6 tools inside your chat session:
+Test an agent:
 
 ```bash
-# One-shot install
-bash scripts/install-plugin.sh
-hermes plugins enable career-prep
+uv run python -m backend.cli agent test --backend offline
 ```
 
-Then in any Hermes session:
+## Data Model
 
-```
-/prep evaluate https://example.com/job/123
-/prep cover Acme "Senior Engineer"
-/prep research Acme
-/prep scan --location Remote
-/prep stories --focus leadership
-/prep negotiate "Offer: $80k USD, FTE, Toronto"
-/prep status
-```
+The app is intentionally local-first:
 
-The plugin is a **thin HTTP shim** (~224 lines). It doesn't do AI itself — it just forwards to the backend, which uses your profile. Switch AI backends without touching the plugin.
+| Data | Storage |
+| --- | --- |
+| Portal data | Browser localStorage |
+| Backend profile | `~/.interview-prep-portal/profile.yaml` |
+| AI provider secrets | Your shell environment or local agent login |
 
----
+No account, hosted database, or cloud sync is required.
 
-## 🛠 MCP server (optional)
+## Optional Integrations
 
-The same tools are also exposed as an **MCP server** for Claude Desktop, Cursor, etc.:
+### MCP Server
+
+Expose the backend tools to MCP clients:
 
 ```bash
 uv run python -m backend.cli mcp
 ```
 
-Add to your MCP client config:
-```json
-{
-  "mcpServers": {
-    "interview-prep": {
-      "command": "python3",
-      "args": ["-m", "backend.cli", "mcp"]
-    }
-  }
-}
-```
+### Hermes Plugin
 
----
-
-## 🧪 Development
-
-### Run tests
+The Hermes plugin is optional. It forwards slash commands and tool calls to the local backend.
 
 ```bash
-# Backend (133 tests)
-python3 -m pytest backend/tests/ -v
+bash scripts/install-plugin.sh
+hermes plugins enable career-prep
+```
 
-# React (110 tests)
-npm test
+Example commands:
 
-# TypeScript + production build
+```text
+/prep evaluate https://example.com/job/123
+/prep cover Acme "Program Manager"
+/prep research Acme
+/prep stories --focus leadership
+/prep negotiate "Offer: 120k base, hybrid, deadline Friday"
+/prep status
+```
+
+## Development
+
+### Main Commands
+
+```bash
+npm run dev
 npm run build
+npm run typecheck
+npm run lint
+npm run test
+npm run verify
 ```
 
-### Project structure
+`npm run verify` runs:
 
+1. TypeScript typecheck
+2. ESLint
+3. Vitest
+4. Python plugin tests
+5. Production build
+
+### More Backend Tests
+
+```bash
+uv run --extra dev pytest backend/tests/ plugin-tests/ -v
 ```
+
+### Project Map
+
+```text
 src/
-├── pages/            # One file per route
-├── components/       # Shared UI
-├── lib/backend.ts    # TS client for backend
-├── store.ts          # localStorage state
-├── types.ts          # TypeScript types
-└── test/             # Vitest tests
+  components/        Shared UI
+  pages/             Route-level screens
+  utils/             Deterministic analysis and generation helpers
+  lib/backend.ts     Browser client for the Python backend
+  store.ts           localStorage-backed app state
+  types.ts           Shared TypeScript types
+
+backend/
+  agents.py          Hermes, Claude, Codex, HTTP, offline dispatch
+  cli.py             prep CLI
+  mcp_server.py      MCP tool surface
+  profile.py         Profile schema and persistence
+  prompts.py         Profile-aware prompt builders
+  server.py          FastAPI HTTP backend
+  tools.py           Backend tool implementations
+
+plugin/
+  career-prep/       Optional Hermes plugin shim
 ```
 
-### Architecture
+## Design Principles
 
-```
-┌─────────────────┐       ┌──────────────────┐       ┌─────────────────┐
-│  React Web App  │       │  Python Backend  │       │   AI Agent      │
-│  (TypeScript)   │ HTTPS │  (FastAPI:8766)  │  sub  │ hermes|claude|  │
-│                 │ ────► │                  │ ────► │ codex|http|     │
-│  - Dashboard    │       │  - profile (YAML)│       │ offline         │
-│  - Applications │       │  - prompts       │       │                 │
-│  - Settings     │       │  - tools         │       │  (or your own)  │
-│  - Onboarding   │       │  - MCP server    │       │                 │
-└─────────────────┘       └──────────────────┘       └─────────────────┘
-       │                            │
-       │                            └─────► ~/.interview-prep-portal/profile.yaml
-       └────── localStorage (app data, separate from profile)
-```
+- Local-first by default.
+- Useful without AI.
+- AI outputs must be profile-aware.
+- Defaults must be profession-neutral.
+- Prep should connect to evidence, not generic advice.
+- Deterministic fallbacks should be testable.
+- No new dependency unless it earns its weight.
 
-Key design choices:
+## Troubleshooting
 
-1. **Profile is separate from app data.** Your profile is on disk (YAML) so the AI tools can read it. App data (applications, flashcards, journal) lives in browser localStorage. They never mix.
-2. **Backend does the AI, not the browser.** Keeps API keys server-side, lets you switch agents without rebuilding the React app.
-3. **Profile-agnostic prompts.** The prompts read from the profile. No "Piyush" or "Senior Engineer" baked in. Replace the profile, get a different cover letter.
+### Backend Not Reachable
 
----
+Start it:
 
-## 🌐 Deployment
-
-The portal is designed to run **locally**. The React app is a static bundle, and the Python backend is a uvicorn process. There is no cloud component, no database, no auth.
-
-If you want to share it with friends:
-
-```bash
-# Build the static assets
-npm run build
-
-# The dist/ folder can be served from any static host
-# (GitHub Pages, Netlify, Cloudflare Pages, etc.)
-# Just point the backend at the same host:port
-```
-
-For production hardening (input validation, error boundary, CI, healthcheck), see the v1.2.0 release notes in the commit log.
-
----
-
-## 🐛 Troubleshooting
-
-### "Backend not running" in Settings
-
-The Python backend isn't reachable. Start it:
 ```bash
 uv run python -m backend.cli serve
 ```
 
-### "AI backend is offline" in tool output
+Then check:
 
-Your profile's `agent.backend` is set to `offline` or the agent CLI isn't installed. Edit `~/.interview-prep-portal/profile.yaml` and set `agent.backend` to `hermes` / `claude` / `codex` / `http`.
-
-Test which backends are available:
 ```bash
-uv run python -m backend.cli version
+curl http://localhost:8766/health
 ```
 
-### Cover letter starts with "Dear Hiring Manager" instead of addressing a specific person
+### AI Output Looks Generic
 
-The backend's prompts always address a specific person if you pass one. If the output is generic, the company name was missing from the request.
+Check profile completeness:
 
-### Profile is invalid after editing
-
-Validate it:
 ```bash
 uv run python -m backend.cli profile validate
+uv run python -m backend.cli profile show
 ```
 
-Errors are usually a missing required field (e.g. `career.years_experience`) or a wrong type (string vs int).
+Then make sure your backend choice is not `offline` if you expect model-generated output.
 
----
+### Browser Data Looks Wrong
 
-## 🤝 Contributing
+The portal stores app data in localStorage. Export/import from Settings before resetting data.
 
-PRs welcome. Read `PLAN.md` first to understand the architecture.
+### Tests Fail In Python Cache Paths
+
+Use the repo-local uv cache:
 
 ```bash
-# Fork, then:
-git clone https://github.com/your-fork/interview-prep-portal.git
-cd interview-prep-portal
-npm install
-uv sync --dev
-
-# Make changes, run tests, commit
-pytest backend/tests/
-npm test
-npm run build
-git commit -m "feat: ..."
-git push
-
-# Open a PR
+UV_CACHE_DIR=.uv-cache uv run --extra dev pytest plugin-tests/ -v
 ```
 
-**Style:**
-- Python: type hints everywhere, pytest for tests, one assertion per test where reasonable
-- TypeScript: strict mode, functional components, no `any` (use `unknown` + narrowing)
-- Follows Big Mick v1.3.x fixes (UX audit by @santifer)
+## Contributing
 
----
+Before opening a PR:
 
-## 📜 License
+```bash
+npm run verify
+uv run --extra dev pytest backend/tests/ plugin-tests/ -v
+```
 
-MIT — fork it, modify it, sell it, whatever. Just don't blame us if you bomb the interview.
+Keep changes small and evidence-backed. Update tests when behavior changes. Preserve local-first behavior and profession-neutral defaults.
 
----
+## License
 
-## 🙏 Credits
-
-- [santifer/career-ops](https://github.com/santifer/career-ops) — the Go TUI we learned the A-F JD evaluation pattern from
-- [Anthropic](https://anthropic.com) — Claude for helping with the v1.4.0 architecture
-- [MCP](https://modelcontextprotocol.io) — the protocol that lets any client use our tools
-- The job-search community on Reddit, HN, and Discord — for the war stories
-
----
-
-**v1.4.0 "Universal"** — built so anyone can fork this, point it at their own profile + their own AI, and have a working interview prep system in 5 minutes.
+MIT.
