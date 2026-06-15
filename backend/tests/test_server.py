@@ -174,3 +174,37 @@ class TestProfileFromYAML:
         # Empty string is invalid YAML for a profile mapping
         assert resp.status_code == 422
 
+
+class TestProfileAgentWinsOverDetection:
+    """The server must use the profile's agent.backend, not auto-detection.
+
+    Bug fixed in v1.4.0: server was always calling detect_available_backend()
+    and passing the result as `agent=` to tool functions, which overrode
+    the profile's agent choice. Now the server reads the profile and uses
+    its agent.backend.
+    """
+
+    def test_profile_offline_overrides_detection(self, profile_file):
+        import json
+        from backend.server import create_app
+        profile_file.write_text(json.dumps({
+            "schema_version": 1,
+            "identity": {"name": "Test"},
+            "career": {"current_title": "QA", "years_experience": 1, "level": "Mid", "industry": "Tech"},
+            "target_roles": [], "target_industries": [], "work_types": ["FTE"],
+            "skills": {"core": [], "growing": [], "certifications": []},
+            "compensation": {"currency": "CAD", "fte_target": 0, "contract_target_hourly": 0, "negotiable": True},
+            "work_history": [], "education": [],
+            "preferences": {"remote": True, "hybrid": True, "onsite": False, "willing_to_relocate": False, "visa_sponsorship_needed": False, "notice_period": "2 weeks"},
+            "stories_seed": [],
+            "agent": {"backend": "offline", "model": "", "command": "", "endpoint": "", "api_key_env": "", "max_tokens": 1024, "temperature": 0.7},
+        }))
+        # Server WITHOUT agent_factory — should respect profile
+        app = create_app()
+        c = TestClient(app)
+        r = c.post("/api/cover_letter", json={"company": "X", "role": "Y", "angle": "impact"})
+        assert r.status_code == 200, f"Expected offline to work, got {r.status_code}: {r.text}"
+        body = r.json()
+        assert "cover_letter" in body
+        assert body["agent"] == "offline", f"Wrong agent: {body.get('agent')}"
+

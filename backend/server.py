@@ -94,7 +94,15 @@ def create_app(
     def _agent() -> AgentBackend:
         if agent_factory:
             return agent_factory()
-        return detect_available_backend()
+        # Respect the profile's agent.backend choice. If the profile doesn't
+        # have one (e.g. brand new empty profile), fall back to auto-detection.
+        try:
+            from .profile import load_profile
+            from .tools import _resolve_agent
+            p = load_profile()
+            return _resolve_agent(p, override=None)
+        except Exception:
+            return detect_available_backend()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
