@@ -1,7 +1,7 @@
 {
   "name": "interview-prep-portal",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.4.0",
   "type": "module",
   "description": "Local-first interview preparation dashboard for job seekers. Track applications, evaluate JDs, practice answers, compare offers, and run your job search.",
   "keywords": [
@@ -37,7 +37,7 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run && npm run test:py",
     "test:js": "vitest run",
-    "test:py": "UV_CACHE_DIR=.uv-cache uv run --extra dev pytest plugin-tests/ -v",
+    "test:py": "UV_CACHE_DIR=.uv-cache uv run --extra dev pytest backend/tests/ plugin-tests/ -v",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build",

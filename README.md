@@ -206,13 +206,13 @@ npm run verify
 1. TypeScript typecheck
 2. ESLint
 3. Vitest
-4. Python plugin tests
+4. Python backend and plugin tests
 5. Production build
 
-### More Backend Tests
+### Python Tests
 
 ```bash
-uv run --extra dev pytest backend/tests/ plugin-tests/ -v
+UV_CACHE_DIR=.uv-cache uv run --extra dev pytest backend/tests/ plugin-tests/ -v
 ```
 
 ### Project Map
@@ -285,7 +285,7 @@ The portal stores app data in localStorage. Export/import from Settings before r
 Use the repo-local uv cache:
 
 ```bash
-UV_CACHE_DIR=.uv-cache uv run --extra dev pytest plugin-tests/ -v
+UV_CACHE_DIR=.uv-cache uv run --extra dev pytest backend/tests/ plugin-tests/ -v
 ```
 
 ## Contributing
@@ -294,7 +294,6 @@ Before opening a PR:
 
 ```bash
 npm run verify
-uv run --extra dev pytest backend/tests/ plugin-tests/ -v
 ```
 
 Keep changes small and evidence-backed. Update tests when behavior changes. Preserve local-first behavior and profession-neutral defaults.
