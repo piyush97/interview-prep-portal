@@ -78,6 +78,20 @@ describe("Sidebar", () => {
     expect(screen.getByText("Config")).toBeInTheDocument();
   });
 
+  it("uses a mobile-friendly horizontal nav before the desktop sidebar layout", () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+
+    const sidebar = screen.getByLabelText("Primary navigation");
+    const nav = screen.getByRole("navigation", { name: "Primary" });
+
+    expect(sidebar).toHaveClass("w-full", "lg:w-64");
+    expect(nav).toHaveClass("overflow-x-auto", "lg:overflow-y-auto");
+  });
+
   it("renders all link labels (no items lost in grouping)", () => {
     render(
       <MemoryRouter>

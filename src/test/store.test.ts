@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   getApplications, addApplication, deleteApplication, updateApplication,
   getSkills, updateSkill, addSkill,
@@ -228,6 +228,32 @@ describe("Dashboard Stats", () => {
     expect(stats.readinessScore).toBeLessThanOrEqual(100);
     expect(stats.nextActions.length).toBeGreaterThan(0);
     expect(stats.nextActions[0].href).toBeTruthy();
+  });
+
+  it("surfaces backup health as a dashboard action until backup is recent", () => {
+    expect(getDashboardStats().backupNeeded).toBe(true);
+    expect(getDashboardStats().nextActions.some((action) => action.id === "backup")).toBe(true);
+
+    recordBackup();
+
+    expect(getDashboardStats().backupNeeded).toBe(false);
+    expect(getDashboardStats().nextActions.some((action) => action.id === "backup")).toBe(false);
+  });
+
+  it("surfaces stale backups after seven days", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-16T12:00:00.000Z"));
+
+    try {
+      recordBackup();
+      vi.setSystemTime(new Date("2026-06-23T12:00:01.000Z"));
+
+      const stats = getDashboardStats();
+      expect(stats.backupNeeded).toBe(true);
+      expect(stats.nextActions.some((action) => action.id === "backup")).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

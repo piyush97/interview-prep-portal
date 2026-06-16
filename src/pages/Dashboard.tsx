@@ -14,6 +14,7 @@ import {
   Brain,
   ClipboardCheck,
   ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -49,7 +50,7 @@ export default function Dashboard() {
       </div>
 
       {/* Readiness + Next Actions */}
-      <div className="grid grid-cols-[minmax(220px,0.8fr)_minmax(0,1.2fr)] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(220px,0.8fr)_minmax(0,1.2fr)] gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -69,6 +70,22 @@ export default function Dashboard() {
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-3">
             Based on profile, resume, pipeline, research, practice, and network coverage.
           </p>
+          <button
+            onClick={() => navigate("/settings")}
+            className={`mt-4 w-full flex items-start gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${
+              stats.backupNeeded
+                ? "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-950/30 dark:text-amber-100"
+                : "border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-950/30 dark:text-emerald-100"
+            }`}
+          >
+            <ShieldCheck size={18} className="mt-0.5 shrink-0" />
+            <span>
+              <span className="block text-sm font-medium">
+                {stats.backupNeeded ? "Backup recommended" : "Backup current"}
+              </span>
+              <span className="block text-xs opacity-80">{backupLabel(stats.lastBackup)}</span>
+            </span>
+          </button>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
@@ -100,7 +117,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
@@ -122,7 +139,7 @@ export default function Dashboard() {
       </div>
 
       {/* Study Progress Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div onClick={() => navigate("/learn")}
           className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md dark:hover:shadow-slate-900/50 transition-shadow cursor-pointer">
           <div className="flex items-center gap-3 mb-3">
@@ -155,7 +172,7 @@ export default function Dashboard() {
       </div>
 
       {/* Skills Progress + Weak Areas */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-gray-900 dark:text-slate-100">Skills Progress</h2>
@@ -241,4 +258,14 @@ function priorityDot(priority: "critical" | "high" | "medium" | "low") {
     low: "bg-slate-300 dark:bg-slate-500",
   };
   return colors[priority];
+}
+
+function backupLabel(lastBackup?: string) {
+  if (!lastBackup) return "No backup recorded yet";
+  const backupDate = new Date(lastBackup);
+  if (Number.isNaN(backupDate.getTime())) return "Backup date unavailable";
+  const days = Math.floor((Date.now() - backupDate.getTime()) / (1000 * 60 * 60 * 24));
+  if (days <= 0) return "Backed up today";
+  if (days === 1) return "Backed up yesterday";
+  return `Last backup ${days} days ago`;
 }

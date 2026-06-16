@@ -100,9 +100,12 @@ export default function Sidebar() {
   const profileName = profile?.identity?.name?.trim() || "";
 
   return (
-    <aside className="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 flex flex-col transition-colors">
+    <aside
+      aria-label="Primary navigation"
+      className="flex w-full shrink-0 flex-col border-b border-gray-200 bg-white transition-colors dark:border-slate-700 dark:bg-slate-900 lg:h-screen lg:w-64 lg:border-b-0 lg:border-r"
+    >
       {/* Header */}
-      <div className="p-5 border-b border-gray-100 dark:border-slate-700">
+      <div className="border-b border-gray-100 p-4 dark:border-slate-700 lg:p-5">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center">
             <Briefcase size={16} className="text-white" />
@@ -117,13 +120,13 @@ export default function Sidebar() {
       </div>
 
       {/* Nav grouped by section */}
-      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+      <nav aria-label="Primary" className="flex gap-2 overflow-x-auto p-3 lg:block lg:flex-1 lg:space-y-4 lg:overflow-x-visible lg:overflow-y-auto">
         {sections.map((section) => (
-          <div key={section.label}>
-            <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+          <div key={section.label} className="contents lg:block">
+            <div className="hidden px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500 lg:block">
               {section.label}
             </div>
-            <div className="space-y-0.5">
+            <div className="flex gap-2 lg:block lg:space-y-0.5">
               {section.links.map((link) => {
                 const Icon = link.icon;
                 const isActive = link.to === "/"
@@ -133,7 +136,7 @@ export default function Sidebar() {
                   <NavLink
                     key={link.to}
                     to={link.to}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors lg:gap-3 ${
                       isActive
                         ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
                         : "text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-slate-200"
@@ -148,10 +151,10 @@ export default function Sidebar() {
                             {pendingReminders}
                           </span>
                         )}
-                        {isActive && <ChevronRight size={14} className="text-indigo-400 dark:text-indigo-300" />}
+                        {isActive && <ChevronRight size={14} className="hidden text-indigo-400 dark:text-indigo-300 lg:block" />}
                       </span>
                     ) : (
-                      isActive && <ChevronRight size={14} className="ml-auto text-indigo-400 dark:text-indigo-300" />
+                      isActive && <ChevronRight size={14} className="ml-auto hidden text-indigo-400 dark:text-indigo-300 lg:block" />
                     )}
                   </NavLink>
                 );
@@ -162,7 +165,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-100 dark:border-slate-700">
+      <div className="hidden p-4 border-t border-gray-100 dark:border-slate-700 lg:block">
         <p className="text-xs text-gray-400 dark:text-slate-500 text-center">
           Interview Prep Portal
         </p>

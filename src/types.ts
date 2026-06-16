@@ -306,4 +306,6 @@ export interface DashboardStats {
   flashcardsDue: number;
   readinessScore: number;
   nextActions: DashboardAction[];
+  backupNeeded: boolean;
+  lastBackup?: string;
 }

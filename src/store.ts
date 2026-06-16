@@ -714,10 +714,7 @@ export function deleteJournal(id: string): boolean {
   return true;
 }
 export function needsBackup(): boolean {
-  const data = getData();
-  if (!data.lastBackup) return true;
-  const daysSince = (Date.now() - new Date(data.lastBackup).getTime()) / (1000 * 60 * 60 * 24);
-  return daysSince >= 7;
+  return isBackupNeeded(getData());
 }
 export function recordBackup(): void { getData().lastBackup = new Date().toISOString(); persist(); }
 
@@ -821,6 +818,17 @@ function daysUntil(date: string): number {
   return Math.ceil((target - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
+function daysSince(date: string): number {
+  const target = new Date(date).getTime();
+  if (Number.isNaN(target)) return Number.POSITIVE_INFINITY;
+  return (Date.now() - target) / (1000 * 60 * 60 * 24);
+}
+
+function isBackupNeeded(data: Pick<AppData, "lastBackup">): boolean {
+  if (!data.lastBackup) return true;
+  return daysSince(data.lastBackup) >= 7;
+}
+
 function buildNextActions(data: AppData): DashboardAction[] {
   const actions: DashboardAction[] = [];
   const activeApps = data.applications.filter(a => !["rejected", "accepted", "withdrawn"].includes(a.status));
@@ -835,6 +843,18 @@ function buildNextActions(data: AppData): DashboardAction[] {
       detail: "AI outputs and resume targeting improve once identity, target role, location, and contact fields are filled.",
       href: "/onboarding",
       priority: "critical",
+    });
+  }
+
+  if (isBackupNeeded(data)) {
+    actions.push({
+      id: "backup",
+      title: data.lastBackup ? "Refresh your backup" : "Export your first backup",
+      detail: data.lastBackup
+        ? "Your local job-search data has not been backed up in over a week."
+        : "Protect applications, resumes, prep notes, story bank, contacts, and offers before browser storage changes.",
+      href: "/settings",
+      priority: "high",
     });
   }
 
@@ -960,6 +980,8 @@ export function getDashboardStats(): DashboardStats {
     flashcardsDue: data.flashcards.filter(f => f.level < 5).length,
     readinessScore: calculateReadinessScore(data),
     nextActions: buildNextActions(data),
+    backupNeeded: isBackupNeeded(data),
+    lastBackup: data.lastBackup,
   };
 }
 
