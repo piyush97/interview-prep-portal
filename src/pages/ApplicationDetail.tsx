@@ -1,71 +1,30 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getApplications, getResumes, updateApplication } from "../store";
+import {
+  addApplicationDocument,
+  addCompany,
+  addInterview,
+  addReminder,
+  getApplications,
+  getCompanies,
+  getReminders,
+  getResumes,
+  getStories,
+  updateApplication,
+} from "../store";
 import StatusBadge from "../components/StatusBadge";
 import Modal from "../components/Modal";
 import type { Application, ApplicationStatus, Contact, ResumeVersion, TimelineEvent } from "../types";
-import { ArrowLeft, ExternalLink, UserPlus, Plus, Download, ClipboardCheck, FileSearch } from "lucide-react";
+import { ArrowLeft, ExternalLink, UserPlus, Plus, Download, ClipboardCheck, FileSearch, Wand2, FilePlus2 } from "lucide-react";
 import { analyzeResumeMatch } from "../utils/resumeMatch";
-
-function extractPrepSignals(app: Application) {
-  const text = `${app.jdText || ""} ${app.notes || ""}`.toLowerCase();
-  const signals = [
-    "technical", "case study", "presentation", "panel", "behavioral", "portfolio",
-    "assignment", "coding", "scenario", "stakeholder", "customer", "leadership",
-    "communication", "license", "certification", "degree", "travel", "on-call",
-  ];
-  return signals.filter((signal) => text.includes(signal)).slice(0, 8);
-}
-
-function prepChecklist(app: Application) {
-  const hasJd = Boolean(app.jdText?.trim());
-  const hasContacts = app.contacts.length > 0;
-  const hasFollowUp = Boolean(app.followUpDate);
-  const hasInterview = Boolean(app.interviewDate || ["phone-screen", "technical", "onsite"].includes(app.status));
-  const hasDocs = app.documents.length > 0;
-  const hasNotes = Boolean(app.notes?.trim());
-  return [
-    { label: "JD captured", done: hasJd, detail: hasJd ? "Role requirements saved" : "Paste the full JD for better prep" },
-    { label: "Resume or cover letter attached", done: hasDocs, detail: hasDocs ? `${app.documents.length} document(s)` : "Attach a tailored resume or cover letter" },
-    { label: "Contact path", done: hasContacts, detail: hasContacts ? `${app.contacts.length} contact(s)` : "Add recruiter, referral, or hiring manager" },
-    { label: "Interview plan", done: hasInterview, detail: hasInterview ? "Stage needs prep coverage" : "Create prep once interview is scheduled" },
-    { label: "Follow-up date", done: hasFollowUp, detail: hasFollowUp ? new Date(app.followUpDate || "").toLocaleDateString() : "Set next follow-up" },
-    { label: "Notes and positioning", done: hasNotes, detail: hasNotes ? "Notes available" : "Add why-you/why-them notes" },
-  ];
-}
-
-function buildPrepPacket(app: Application) {
-  const checklist = prepChecklist(app);
-  const signals = extractPrepSignals(app);
-  return `# ${app.company} - ${app.role} Prep Packet
-
-## Snapshot
-- Status: ${app.status}
-- Location: ${app.location || "Not set"}${app.remote ? " (remote)" : ""}
-- Salary: ${app.salaryRange || "Not set"}
-- Job URL: ${app.url || "Not set"}
-
-## Readiness Checklist
-${checklist.map((item) => `- [${item.done ? "x" : " "}] ${item.label}: ${item.detail}`).join("\n")}
-
-## Positioning
-- Why this role: Add 2-3 specific reasons tied to company, team, product, mission, or customers.
-- Why you: Map 3 achievements to the highest-value requirements.
-- Risk to clarify: Ask about scope, interview stages, compensation range, schedule, and success metrics.
-
-## Detected Prep Signals
-${signals.length ? signals.map((signal) => `- ${signal}`).join("\n") : "- No strong signals detected yet. Add the full JD for better extraction."}
-
-## Contacts
-${app.contacts.length ? app.contacts.map((c) => `- ${c.name}${c.role ? `, ${c.role}` : ""}${c.email ? ` (${c.email})` : ""}`).join("\n") : "- Add recruiter, referral, or hiring manager."}
-
-## Notes
-${app.notes || "Add application notes, talking points, recruiter context, and blockers."}
-
-## JD
-${app.jdText || "Paste the job description into the application for a complete packet."}
-`;
-}
+import { buildPrepFromApplication } from "../utils/prepGenerator";
+import {
+  buildCompanyResearchSeed,
+  buildPrepPacket,
+  extractPrepSignals,
+  nextFollowUpDate,
+  prepChecklist,
+} from "../utils/applicationPrepPacket";
 
 function downloadText(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/markdown" });
@@ -87,6 +46,10 @@ function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function generateId(prefix: string) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export default function ApplicationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -97,6 +60,7 @@ export default function ApplicationDetail() {
   const [noteText, setNoteText] = useState("");
   const [resumes, setResumes] = useState<ResumeVersion[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState("");
+  const [prepActionMessage, setPrepActionMessage] = useState("");
 
   useEffect(() => {
     const found = getApplications().find((a) => a.id === id);
@@ -152,6 +116,98 @@ export default function ApplicationDetail() {
     setShowNoteModal(false);
   };
 
+  const updateCurrentApplication = (updates: Partial<Application>) => {
+    const updated = { ...app, ...updates, updatedAt: new Date().toISOString() };
+    updateApplication(app.id, updated);
+    setApp(updated);
+    return updated;
+  };
+
+  const handleBuildPrepWorkspace = () => {
+    const now = new Date();
+    const stories = getStories();
+    const prep = buildPrepFromApplication(app, stories, generateId("prep"), now);
+    addInterview(prep);
+
+    const existingResearch = getCompanies().some((company) => company.company.toLowerCase() === app.company.toLowerCase());
+    if (!existingResearch) {
+      addCompany({
+        id: generateId("co"),
+        company: app.company,
+        url: app.url,
+        industry: "",
+        notes: buildCompanyResearchSeed(app),
+        products: [],
+        techStack: extractPrepSignals(app),
+        people: app.contacts.map((contact) => ({
+          name: contact.name,
+          role: contact.role,
+          linkedin: contact.linkedin,
+          notes: contact.notes,
+        })),
+        culture: "",
+        interviewProcess: prep.stage,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      });
+    }
+
+    const reminderExists = getReminders().some((reminder) => reminder.relatedId === app.id && reminder.type === "follow-up");
+    const closedStatus = ["rejected", "accepted", "withdrawn"].includes(app.status);
+    const followUpDate = app.followUpDate || (!closedStatus ? nextFollowUpDate(now) : undefined);
+    const createdReminder = Boolean(followUpDate && !reminderExists && !closedStatus);
+    if (followUpDate && createdReminder) {
+      addReminder({
+        id: generateId("rm"),
+        title: `Follow up with ${app.company}`,
+        date: followUpDate,
+        status: "pending",
+        type: "follow-up",
+        relatedId: app.id,
+        notes: `Prep packet built for ${app.role}. Confirm next step, stage, and decision timeline.`,
+      });
+    }
+
+    const event: TimelineEvent = {
+      date: now.toISOString(),
+      type: "prep",
+      description: `Prep workspace built: ${[
+        "interview session",
+        existingResearch ? "" : "research seed",
+        createdReminder ? "follow-up reminder" : "",
+      ].filter(Boolean).join(", ")}.`,
+    };
+    updateCurrentApplication({
+      ...(followUpDate ? { followUpDate } : {}),
+      timeline: [...app.timeline, event],
+    });
+    setPrepActionMessage(event.description);
+  };
+
+  const handleSavePrepPacket = () => {
+    const now = new Date();
+    const title = `Prep Packet - ${now.toLocaleDateString()}`;
+    const doc = addApplicationDocument(app.id, {
+      id: generateId("doc"),
+      type: "other",
+      title,
+      content: buildPrepPacket(app, { resumeTitle: selectedResume?.title, resumeMatch }),
+      createdAt: now.toISOString(),
+    });
+    if (!doc) return;
+    const updatedDocuments = [...app.documents, doc];
+    const event: TimelineEvent = {
+      date: now.toISOString(),
+      type: "document",
+      description: `Saved ${title}.`,
+    };
+    updateCurrentApplication({
+      documents: updatedDocuments,
+      timeline: [...app.timeline, event],
+    });
+    setPrepActionMessage("Prep packet saved into application documents.");
+  };
+
   const statuses: ApplicationStatus[] = [
     "saved", "applied", "phone-screen", "technical", "onsite", "offer", "rejected", "accepted", "withdrawn"
   ];
@@ -163,6 +219,8 @@ export default function ApplicationDetail() {
   const resumeMatch = selectedResume && app.jdText
     ? analyzeResumeMatch(stripKnownPostingMetadata(app.jdText, app), selectedResume.content)
     : null;
+  const packetContext = { resumeTitle: selectedResume?.title, resumeMatch };
+  const packetContent = buildPrepPacket(app, packetContext);
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -182,7 +240,7 @@ export default function ApplicationDetail() {
             </a>
           )}
           <button
-            onClick={() => downloadText(packetFilename, buildPrepPacket(app))}
+            onClick={() => downloadText(packetFilename, packetContent)}
             className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700"
           >
             <Download size={14} /> Prep Packet
@@ -300,13 +358,41 @@ export default function ApplicationDetail() {
 
       {/* Prep Packet */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
           <div className="flex items-center gap-2">
             <ClipboardCheck size={18} className="text-indigo-500" />
-            <h3 className="font-semibold text-gray-900">Application Prep Packet</h3>
+            <div>
+              <h3 className="font-semibold text-gray-900">Application Prep Packet</h3>
+              <p className="text-xs text-gray-500">Agent-ready workspace for interview prep, company research, reminders, and exports.</p>
+            </div>
           </div>
-          <span className="text-sm text-gray-500">{prepReady}/{checklist.length} ready</span>
+          <span className="text-sm text-gray-500 whitespace-nowrap">{prepReady}/{checklist.length} ready</span>
         </div>
+        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <button
+            onClick={handleBuildPrepWorkspace}
+            className="flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            <Wand2 size={15} /> Build Workspace
+          </button>
+          <button
+            onClick={handleSavePrepPacket}
+            className="flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <FilePlus2 size={15} /> Save Packet
+          </button>
+          <button
+            onClick={() => navigate("/interviews")}
+            className="flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <ClipboardCheck size={15} /> Open Prep
+          </button>
+        </div>
+        {prepActionMessage && (
+          <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            {prepActionMessage}
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
           {checklist.map((item) => (
             <div key={item.label} className={`rounded-lg border p-3 ${item.done ? "border-emerald-100 bg-emerald-50" : "border-amber-100 bg-amber-50"}`}>
@@ -330,6 +416,17 @@ export default function ApplicationDetail() {
             <p className="text-sm text-gray-500">Add the full JD to detect interview format, role risks, and prep themes.</p>
           )}
         </div>
+        {resumeMatch && (
+          <div className="mt-4 rounded-lg border border-indigo-100 bg-indigo-50 p-4">
+            <h4 className="text-sm font-medium text-indigo-950 mb-2">Packet Resume Summary</h4>
+            <p className="text-sm text-indigo-900">
+              {selectedResume?.title || "Selected resume"} covers {resumeMatch.score}% of detected JD terms.
+              {resumeMatch.missingTerms.length > 0
+                ? ` Tighten: ${resumeMatch.missingTerms.slice(0, 5).map((term) => term.term).join(", ")}.`
+                : " No obvious keyword gaps."}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Contacts */}
