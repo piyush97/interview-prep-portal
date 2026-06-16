@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import JDEvaluator from "../pages/JDEvaluator";
-import { resetData, getApplications } from "../store";
+import { resetData, getApplications, addResume } from "../store";
 
 describe("JDEvaluator", () => {
   beforeEach(() => {
@@ -20,6 +20,66 @@ describe("JDEvaluator", () => {
     render(<MemoryRouter><JDEvaluator /></MemoryRouter>);
     const btn = screen.getByRole("button", { name: /Evaluate/i });
     expect(btn).toBeDisabled();
+  });
+
+  it("prompts users to add a resume before JD fit can be calculated", () => {
+    render(<MemoryRouter><JDEvaluator /></MemoryRouter>);
+
+    expect(screen.getByText("Resume Fit")).toBeInTheDocument();
+    expect(screen.getByText(/Add a resume version first/i)).toBeInTheDocument();
+  });
+
+  it("compares pasted JD text against a selected resume", async () => {
+    addResume({
+      id: "resume-1",
+      title: "Product Resume",
+      targetRole: "Product Manager",
+      content: "Delivered TypeScript dashboards with stakeholder leadership and customer research.",
+      lastUpdated: "2026-06-16T00:00:00.000Z",
+    });
+
+    render(<MemoryRouter><JDEvaluator /></MemoryRouter>);
+    const ta = screen.getByLabelText(/Job Description/i);
+    fireEvent.change(ta, {
+      target: {
+        value:
+          "Role: Product Manager at Acme Health Inc\n" +
+          "Required TypeScript, Python, healthcare workflows, customer research, and stakeholder leadership.",
+      },
+    });
+
+    expect(await screen.findByLabelText("Resume version")).toBeInTheDocument();
+    expect(screen.getByText(/% match/i)).toBeInTheDocument();
+    expect(screen.getByText("Matched")).toBeInTheDocument();
+    expect(screen.getByText("Missing")).toBeInTheDocument();
+    expect(screen.getByText("Evidence lines")).toBeInTheDocument();
+  });
+
+  it("saves resume fit score and selected resume note with the application", async () => {
+    addResume({
+      id: "resume-1",
+      title: "Operator Resume",
+      targetRole: "Operations Manager",
+      content: "Managed customer operations, stakeholder communication, reporting, and onboarding.",
+      lastUpdated: "2026-06-16T00:00:00.000Z",
+    });
+
+    render(<MemoryRouter><JDEvaluator /></MemoryRouter>);
+    const ta = screen.getByLabelText(/Job Description/i);
+    fireEvent.change(ta, {
+      target: {
+        value:
+          "Role: Operations Manager at Acme Health Inc\n" +
+          "Required customer operations, stakeholder communication, reporting, and onboarding experience.",
+      },
+    });
+
+    const saveBtn = await screen.findByRole("button", { name: /Add to Pipeline/i });
+    fireEvent.click(saveBtn);
+
+    await waitFor(() => expect(getApplications()).toHaveLength(1));
+    expect(getApplications()[0].notes).toContain("Resume checked: Operator Resume");
+    expect(getApplications()[0].score).toBeGreaterThanOrEqual(1);
   });
 
   it("extracts company + role from JD text and saves as application", async () => {
