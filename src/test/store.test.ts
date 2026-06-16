@@ -251,6 +251,36 @@ describe("Export / Import", () => {
     expect(getApplications().some(a => a.id === "imp")).toBe(true);
   });
 
+  it("round-trips story bank entries through export/import", () => {
+    addStory({
+      id: "story-export",
+      title: "Saved proof point",
+      situation: "A key workflow was slow.",
+      task: "Improve turnaround.",
+      action: "Mapped blockers and tightened handoffs.",
+      result: "Cycle time improved 18%.",
+      reflection: "Make bottlenecks visible early.",
+      metrics: ["18% faster"],
+      tags: ["operations"],
+      targetRoles: ["Manager"],
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    });
+    const json = exportData();
+
+    resetData();
+    expect(getStories()).toHaveLength(0);
+    expect(importData(json)).toBe(true);
+
+    expect(getStories()).toEqual([
+      expect.objectContaining({
+        id: "story-export",
+        title: "Saved proof point",
+        metrics: ["18% faster"],
+      }),
+    ]);
+  });
+
   it("rejects invalid JSON", () => {
     expect(importData("not json")).toBe(false);
     expect(importData('{"bad": true}')).toBe(false);
