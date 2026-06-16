@@ -27,13 +27,72 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Bot,
+  KeyRound,
+  PlugZap,
 } from "lucide-react";
 
 type BackendStatus = "checking" | "up" | "down";
 type Theme = "light" | "dark" | "system";
 type MutableRecord = Record<string, unknown>;
+type AgentBackend = Profile["agent"]["backend"];
 
 const themeOptions: Theme[] = ["light", "dark", "system"];
+const aiProviderPresets: Array<{
+  id: string;
+  title: string;
+  backend: AgentBackend;
+  model: string;
+  endpoint: string;
+  apiKeyEnv: string;
+  description: string;
+}> = [
+  {
+    id: "hermes",
+    title: "Hermes Agent",
+    backend: "hermes",
+    model: "deepseek/deepseek-v4-flash",
+    endpoint: "",
+    apiKeyEnv: "",
+    description: "Use the local Hermes CLI and whatever subscription or keys Hermes already owns.",
+  },
+  {
+    id: "openclaw",
+    title: "OpenClaw Gateway",
+    backend: "http",
+    model: "",
+    endpoint: "",
+    apiKeyEnv: "OPENCLAW_API_KEY",
+    description: "Route AI calls through your OpenClaw or local OpenAI-compatible gateway.",
+  },
+  {
+    id: "http",
+    title: "Custom AI Gateway",
+    backend: "http",
+    model: "",
+    endpoint: "",
+    apiKeyEnv: "AI_GATEWAY_API_KEY",
+    description: "Use LiteLLM, OpenRouter, LM Studio, a company proxy, or any compatible HTTP gateway.",
+  },
+  {
+    id: "codex",
+    title: "Codex CLI",
+    backend: "codex",
+    model: "gpt-5-codex",
+    endpoint: "",
+    apiKeyEnv: "",
+    description: "Use local Codex CLI auth and model routing.",
+  },
+  {
+    id: "claude",
+    title: "Claude Code",
+    backend: "claude",
+    model: "claude-sonnet-4-6",
+    endpoint: "",
+    apiKeyEnv: "",
+    description: "Use local Claude Code CLI auth and subscription.",
+  },
+];
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -61,7 +120,7 @@ export default function Settings() {
     education: false,
     compensation: false,
     preferences: false,
-    agent: false,
+    agent: true,
   });
 
   useEffect(() => {
@@ -145,6 +204,16 @@ export default function Settings() {
       cur = child as MutableRecord;
     }
     cur[parts[parts.length - 1]] = value;
+    setProfile(next);
+  };
+
+  const applyAgentPreset = (preset: (typeof aiProviderPresets)[number]) => {
+    if (!profile) return;
+    const next = structuredClone(profile);
+    next.agent.backend = preset.backend;
+    next.agent.model = preset.model;
+    next.agent.endpoint = preset.endpoint;
+    next.agent.api_key_env = preset.apiKeyEnv;
     setProfile(next);
   };
 
@@ -462,53 +531,104 @@ export default function Settings() {
 
   const renderAgent = () =>
     profile && (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Backend</label>
-          <select
-            value={profile.agent.backend}
-            onChange={(e) => updateProfileField("agent.backend", e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800"
-          >
-            <option value="offline">offline (no AI — uses canned responses)</option>
-            <option value="hermes">hermes (Hermes Agent CLI)</option>
-            <option value="claude">claude (Claude Code CLI)</option>
-            <option value="codex">codex (Codex CLI)</option>
-            <option value="http">http (custom endpoint)</option>
-          </select>
+      <div className="space-y-4 p-3 bg-slate-50 dark:bg-slate-700/40 rounded">
+        <div className="rounded-lg border border-indigo-100 bg-white p-4 dark:border-indigo-900/60 dark:bg-slate-800">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">
+              <KeyRound size={18} />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Bring your own AI subscription</h3>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Choose Hermes Agent, OpenClaw, Codex, Claude, or your own gateway. Store only the environment variable name here; put raw API keys in the shell that starts the backend.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
+            {aiProviderPresets.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => applyAgentPreset(preset)}
+                className={`rounded-lg border p-3 text-left transition-colors ${
+                  profile.agent.backend === preset.backend &&
+                  profile.agent.model === preset.model &&
+                  profile.agent.api_key_env === preset.apiKeyEnv
+                    ? "border-indigo-400 bg-indigo-50 dark:border-indigo-500 dark:bg-indigo-950/40"
+                    : "border-slate-200 bg-white hover:border-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-indigo-500"
+                }`}
+              >
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                  {preset.id === "openclaw" ? <PlugZap size={15} /> : <Bot size={15} />}
+                  {preset.title}
+                </div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{preset.description}</p>
+              </button>
+            ))}
+          </div>
         </div>
-        <Field
-          label="Model"
-          value={profile.agent.model}
-          onChange={(v) => updateProfileField("agent.model", v)}
-        />
-        <Field
-          label="Command"
-          value={profile.agent.command}
-          onChange={(v) => updateProfileField("agent.command", v)}
-        />
-        <Field
-          label="Endpoint (http only)"
-          value={profile.agent.endpoint}
-          onChange={(v) => updateProfileField("agent.endpoint", v)}
-        />
-        <Field
-          label="API Key Env Var"
-          value={profile.agent.api_key_env}
-          onChange={(v) => updateProfileField("agent.api_key_env", v)}
-        />
-        <Field
-          label="Max Tokens"
-          type="number"
-          value={String(profile.agent.max_tokens)}
-          onChange={(v) => updateProfileField("agent.max_tokens", Number(v))}
-        />
-        <Field
-          label="Temperature"
-          type="number"
-          value={String(profile.agent.temperature)}
-          onChange={(v) => updateProfileField("agent.temperature", Number(v))}
-        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Backend</label>
+            <select
+              value={profile.agent.backend}
+              onChange={(e) => updateProfileField("agent.backend", e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800"
+            >
+              <option value="offline">offline (no AI — uses canned responses)</option>
+              <option value="hermes">hermes (Hermes Agent CLI)</option>
+              <option value="claude">claude (Claude Code CLI)</option>
+              <option value="codex">codex (Codex CLI)</option>
+              <option value="http">http (OpenClaw/custom gateway)</option>
+            </select>
+          </div>
+          <Field
+            label="Model"
+            value={profile.agent.model}
+            onChange={(v) => updateProfileField("agent.model", v)}
+          />
+          <Field
+            label="Command"
+            value={profile.agent.command}
+            onChange={(v) => updateProfileField("agent.command", v)}
+          />
+          <Field
+            label="Endpoint (OpenClaw / http only)"
+            value={profile.agent.endpoint}
+            onChange={(v) => updateProfileField("agent.endpoint", v)}
+          />
+          <Field
+            label="API Key Env Var (no raw key)"
+            value={profile.agent.api_key_env}
+            onChange={(v) => updateProfileField("agent.api_key_env", v)}
+          />
+          <Field
+            label="Max Tokens"
+            type="number"
+            value={String(profile.agent.max_tokens)}
+            onChange={(v) => updateProfileField("agent.max_tokens", Number(v))}
+          />
+          <Field
+            label="Temperature"
+            type="number"
+            value={String(profile.agent.temperature)}
+            onChange={(v) => updateProfileField("agent.temperature", Number(v))}
+          />
+        </div>
+
+        {profile.agent.backend === "http" && (
+          <div className="rounded-lg border border-cyan-200 bg-cyan-50 p-3 text-xs text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100">
+            <p className="font-semibold">Start backend with your subscription key in the environment:</p>
+            <pre className="mt-2 overflow-x-auto rounded bg-white px-2 py-1 font-mono text-cyan-900 dark:bg-slate-900 dark:text-cyan-100">
+              export {profile.agent.api_key_env || "AI_GATEWAY_API_KEY"}="..." && uv run python -m backend.cli serve
+            </pre>
+            <p className="mt-2">
+              The HTTP backend expects a gateway that accepts <code>system</code>, <code>user</code>, <code>model</code>, and <code>max_tokens</code> JSON fields and returns text/content/message.
+            </p>
+          </div>
+        )}
       </div>
     );
 
@@ -567,17 +687,20 @@ export default function Settings() {
         </div>
 
         {backendStatus === "down" && (
-          <div className="bg-amber-50 border border-amber-200 rounded p-4 text-sm text-amber-900">
-            <p className="font-semibold mb-1">Backend not running</p>
-            <p>
-              The AI features need the Python backend running. Start it in another terminal:
-            </p>
-            <pre className="mt-2 bg-amber-100 px-2 py-1 rounded text-xs font-mono">
-              uv run python -m backend.cli serve
-            </pre>
-            <p className="mt-2 text-xs text-amber-800">
-              The backend is what actually calls your AI agent. The React app is just the UI.
-            </p>
+          <div className="space-y-3">
+            <div className="bg-amber-50 border border-amber-200 rounded p-4 text-sm text-amber-900">
+              <p className="font-semibold mb-1">Backend not running</p>
+              <p>
+                The AI features need the Python backend running. Start it in another terminal:
+              </p>
+              <pre className="mt-2 bg-amber-100 px-2 py-1 rounded text-xs font-mono">
+                uv run python -m backend.cli serve
+              </pre>
+              <p className="mt-2 text-xs text-amber-800">
+                The backend is what actually calls your AI agent. The React app is just the UI.
+              </p>
+            </div>
+            <OfflineAgentSetupGuide />
           </div>
         )}
 
@@ -836,6 +959,40 @@ export default function Settings() {
         </div>
         {importError && <p className="text-sm text-red-600">{importError}</p>}
       </section>
+    </div>
+  );
+}
+
+function OfflineAgentSetupGuide() {
+  return (
+    <div className="rounded-lg border border-indigo-100 bg-white p-4 text-sm dark:border-indigo-900/60 dark:bg-slate-800">
+      <div className="flex items-start gap-3">
+        <div className="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">
+          <KeyRound size={18} />
+        </div>
+        <div>
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100">Bring your own AI subscription</h3>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Hermes Agent and local CLI providers use their own login. OpenClaw or a custom gateway should receive raw API keys from your shell, not browser storage.
+          </p>
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-3">
+        <SetupHint title="Hermes Agent" command="prep agent test --backend hermes" />
+        <SetupHint title="OpenClaw Gateway" command={'export OPENCLAW_API_KEY="..." && uv run python -m backend.cli serve'} />
+        <SetupHint title="Custom AI Gateway" command={'export AI_GATEWAY_API_KEY="..." && uv run python -m backend.cli serve'} />
+      </div>
+    </div>
+  );
+}
+
+function SetupHint({ title, command }: { title: string; command: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900">
+      <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">{title}</p>
+      <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded bg-white px-2 py-1 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        {command}
+      </pre>
     </div>
   );
 }

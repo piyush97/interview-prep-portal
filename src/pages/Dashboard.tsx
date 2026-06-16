@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboardStats, getApplications, getSkills } from "../store";
 import StatusBadge from "../components/StatusBadge";
+import { backend, type BackendHealth, type Profile } from "../lib/backend";
 import type { Application, DashboardStats } from "../types";
 import {
   Briefcase,
@@ -15,16 +17,31 @@ import {
   ClipboardCheck,
   ArrowRight,
   ShieldCheck,
+  Bot,
+  KeyRound,
+  PlugZap,
+  Terminal,
 } from "lucide-react";
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentApps, setRecentApps] = useState<Application[]>([]);
+  const [agentHealth, setAgentHealth] = useState<BackendHealth | null>(null);
+  const [agentProfile, setAgentProfile] = useState<Profile | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     setStats(getDashboardStats());
     setRecentApps(getApplications().slice(0, 5));
+    backend.health().then(async (health) => {
+      setAgentHealth(health);
+      if (!health?.ok) return;
+      try {
+        setAgentProfile(await backend.getProfile());
+      } catch {
+        setAgentProfile(null);
+      }
+    });
   }, []);
 
   if (!stats) return null;
@@ -46,7 +63,60 @@ export default function Dashboard() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Dashboard</h1>
-        <p className="text-gray-500 dark:text-slate-400 mt-1">Pipeline, prep, and next best action</p>
+        <p className="text-gray-500 dark:text-slate-400 mt-1">Hermes/OpenClaw-native job-search command center</p>
+      </div>
+
+      {/* Agent Runtime */}
+      <div className="bg-slate-950 dark:bg-slate-900 rounded-lg border border-slate-800 p-5 text-white">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Bot size={20} className="text-cyan-300" />
+              <h2 className="font-semibold">Agent Runtime</h2>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${agentHealth?.ok ? "bg-emerald-400/15 text-emerald-200" : "bg-amber-400/15 text-amber-200"}`}>
+                {agentHealth?.ok ? "Backend connected" : "Backend offline"}
+              </span>
+            </div>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300">
+              Bring Hermes Agent, OpenClaw gateway, Codex, Claude, or a custom AI subscription. The portal keeps profile, pipeline, prep, and offers local while the backend calls your chosen agent.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => navigate("/settings")}
+              className="inline-flex items-center gap-2 rounded-lg bg-cyan-400 px-3 py-2 text-sm font-medium text-slate-950 hover:bg-cyan-300"
+            >
+              <KeyRound size={15} /> Configure AI Keys
+            </button>
+            <button
+              onClick={() => navigate("/onboarding")}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm font-medium text-slate-100 hover:bg-slate-800"
+            >
+              <PlugZap size={15} /> Agent Setup
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <AgentRuntimeTile
+            icon={<Terminal size={16} />}
+            label="Active Agent"
+            value={agentHealth?.agent ? agentLabel(agentHealth.agent) : "Start backend"}
+            detail={agentHealth?.ok ? `REST + MCP ready at ${backend.url}` : "Run: uv run python -m backend.cli serve"}
+          />
+          <AgentRuntimeTile
+            icon={<Bot size={16} />}
+            label="Configured Provider"
+            value={configuredProvider(agentProfile)}
+            detail={providerDetail(agentProfile)}
+          />
+          <AgentRuntimeTile
+            icon={<KeyRound size={16} />}
+            label="Key / Subscription"
+            value={keyStatus(agentProfile)}
+            detail="Raw API keys stay in your shell env, not browser storage or backups."
+          />
+        </div>
       </div>
 
       {/* Readiness + Next Actions */}
@@ -268,4 +338,65 @@ function backupLabel(lastBackup?: string) {
   if (days <= 0) return "Backed up today";
   if (days === 1) return "Backed up yesterday";
   return `Last backup ${days} days ago`;
+}
+
+function AgentRuntimeTile({
+  icon,
+  label,
+  value,
+  detail,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  detail: string;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
+      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+        <span className="text-cyan-300">{icon}</span>
+        {label}
+      </div>
+      <p className="mt-2 text-sm font-semibold text-slate-100">{value}</p>
+      <p className="mt-1 text-xs text-slate-400">{detail}</p>
+    </div>
+  );
+}
+
+function agentLabel(agent: string) {
+  const labels: Record<string, string> = {
+    hermes: "Hermes Agent",
+    http: "OpenClaw / HTTP gateway",
+    claude: "Claude Code",
+    codex: "Codex CLI",
+    offline: "Offline fallback",
+  };
+  return labels[agent] || agent;
+}
+
+function configuredProvider(profile: Profile | null) {
+  if (!profile) return "Profile unavailable";
+  if (profile.agent.backend === "http") {
+    return isOpenClawEndpoint(profile.agent.endpoint) ? "OpenClaw gateway" : "HTTP AI gateway";
+  }
+  return agentLabel(profile.agent.backend);
+}
+
+function providerDetail(profile: Profile | null) {
+  if (!profile) return "Open Settings after backend connects.";
+  if (profile.agent.backend === "http") {
+    return profile.agent.endpoint || "Set gateway endpoint in Settings.";
+  }
+  if (profile.agent.backend === "offline") return "Switch to Hermes, OpenClaw/HTTP, Codex, or Claude for AI output.";
+  return profile.agent.model || "Uses local CLI login/subscription.";
+}
+
+function keyStatus(profile: Profile | null) {
+  if (!profile) return "Not configured";
+  if (profile.agent.backend !== "http") return "CLI login";
+  return profile.agent.api_key_env ? `Env: ${profile.agent.api_key_env}` : "Env var needed";
+}
+
+function isOpenClawEndpoint(endpoint: string) {
+  return endpoint.toLowerCase().includes("openclaw");
 }
