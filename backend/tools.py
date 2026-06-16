@@ -28,6 +28,7 @@ from .prompts import (
     negotiation_script_prompts,
     research_company_prompts,
     scan_jobs_prompts,
+    score_resume_prompts,
 )
 
 logger = logging.getLogger(__name__)
@@ -181,5 +182,37 @@ def generate_negotiation_script(
         "script": resp.text,
         "engagement": "C2C contract" if c2c else "full-time employment",
         "model": resp.model,
+        "agent": backend.name,
+    }
+
+
+def score_resume(
+    resume_text: str,
+    jd_text: str = "",
+    profile: Profile | None = None,
+    agent: AgentBackend | None = None,
+) -> dict[str, Any]:
+    """Score a resume against a job description (or general best-practices if no JD).
+
+    Returns dict with 'score' (the full markdown scorecard), 'has_jd' (bool),
+    and metadata. The scorecard contains: overall score, keyword match table,
+    format issues, bullet-level rewrites (before/after), and a prioritized
+    action list.
+    """
+    if not resume_text or not resume_text.strip():
+        raise ValueError("resume_text is required and cannot be empty")
+    p = profile or load_profile()
+    backend = _resolve_agent(p, agent)
+    system, user = score_resume_prompts(p, resume_text, jd_text)
+    resp = backend.call(system, user, model=p.agent.model or None, max_tokens=p.agent.max_tokens)
+    return {
+        "score": resp.text,
+        "has_jd": bool(jd_text and jd_text.strip()),
+        "jd_provided": bool(jd_text and jd_text.strip()),
+        "resume_length": len(resume_text),
+        "model": resp.model,
+        "tokens_in": resp.tokens_in,
+        "tokens_out": resp.tokens_out,
+        "duration_ms": resp.duration_ms,
         "agent": backend.name,
     }

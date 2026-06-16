@@ -41,6 +41,7 @@ from .tools import (
     generate_negotiation_script as tool_generate_negotiation_script,
     research_company as tool_research_company,
     scan_jobs as tool_scan_jobs,
+    score_resume as tool_score_resume,
 )
 
 logger = logging.getLogger(__name__)
@@ -79,6 +80,11 @@ class InterviewStoriesRequest(BaseModel):
 class NegotiationRequest(BaseModel):
     offer_details: str
     c2c: bool = False
+
+
+class ScoreResumeRequest(BaseModel):
+    resume_text: str
+    jd_text: str = ""
 
 
 class ProfileFromYAMLRequest(BaseModel):
@@ -245,6 +251,21 @@ def create_app(
             )
         except BackendError as e:
             raise HTTPException(status_code=502, detail=f"Agent backend error: {e}")
+
+    @app.post("/api/score_resume")
+    def api_score_resume(req: ScoreResumeRequest) -> dict[str, Any]:
+        if not req.resume_text or not req.resume_text.strip():
+            raise HTTPException(status_code=422, detail="resume_text is required and cannot be empty")
+        try:
+            return tool_score_resume(
+                resume_text=req.resume_text,
+                jd_text=req.jd_text,
+                agent=_agent(),
+            )
+        except BackendError as e:
+            raise HTTPException(status_code=502, detail=f"Agent backend error: {e}")
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=str(e))
 
     @app.post("/api/negotiation_script")
     def api_negotiation_script(req: NegotiationRequest) -> dict[str, Any]:

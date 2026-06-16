@@ -138,6 +138,26 @@ class TestNegotiation:
         assert "script" in r.json()
 
 
+class TestScoreResume:
+    def test_basic(self, client):
+        r = client.post("/api/score_resume", json={"resume_text": "Experienced SWE with 8 years in Python"})
+        assert r.status_code == 200
+        body = r.json()
+        assert "score" in body
+        assert "has_jd" in body
+        assert "resume_length" in body
+        assert body["resume_length"] == len("Experienced SWE with 8 years in Python")
+        assert "agent" in body
+
+    def test_requires_resume_text(self, client):
+        r = client.post("/api/score_resume", json={})
+        assert r.status_code == 422
+        r2 = client.post("/api/score_resume", json={"resume_text": ""})
+        assert r2.status_code == 422
+        r3 = client.post("/api/score_resume", json={"resume_text": "   "})
+        assert r3.status_code == 422
+
+
 class TestProfileFromYAML:
     """POST /profile/from_yaml — Onboarding wizard sends YAML text and gets back a parsed Profile."""
 

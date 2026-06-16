@@ -16,6 +16,7 @@ from backend.tools import (
     scan_jobs,
     generate_interview_stories,
     generate_negotiation_script,
+    score_resume,
 )
 
 
@@ -147,3 +148,37 @@ class TestNegotiation:
         generate_negotiation_script("Offer: $80k", c2c=False, agent=fake)
         # Check the engagement type is in the user prompt
         assert "full-time" in fake.last_user.lower()
+
+
+class TestScoreResume:
+    def test_returns_score_key(self):
+        fake = FakeBackend(canned_text="## 1. OVERALL SCORE: 7/10")
+        result = score_resume("Experienced SWE with 8 years", agent=fake)
+        assert result["score"] == "## 1. OVERALL SCORE: 7/10"
+        assert "has_jd" in result
+        assert "resume_length" in result
+        assert result["resume_length"] == len("Experienced SWE with 8 years")
+        assert "model" in result
+        assert "tokens_in" in result
+        assert "tokens_out" in result
+        assert "duration_ms" in result
+        assert result["agent"] == "fake"
+
+    def test_passes_resume_to_agent(self):
+        fake = FakeBackend()
+        score_resume("I am a Python developer with 5 years experience", agent=fake)
+        assert "I am a Python developer" in fake.last_user
+
+    def test_passes_jd_when_provided(self):
+        fake = FakeBackend()
+        score_resume("My resume", jd_text="Looking for a senior backend engineer", agent=fake)
+        assert "Looking for a senior backend engineer" in fake.last_user
+        assert "My resume" in fake.last_user
+
+    def test_raises_on_empty_resume(self):
+        fake = FakeBackend()
+        import pytest
+        with pytest.raises(ValueError, match="resume_text is required"):
+            score_resume("", agent=fake)
+        with pytest.raises(ValueError, match="resume_text is required"):
+            score_resume("   ", agent=fake)

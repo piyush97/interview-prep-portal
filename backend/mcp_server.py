@@ -44,6 +44,7 @@ from .tools import (
     generate_negotiation_script as tool_generate_negotiation_script,
     research_company as tool_research_company,
     scan_jobs as tool_scan_jobs,
+    score_resume as tool_score_resume,
 )
 
 logger = logging.getLogger(__name__)
@@ -155,6 +156,23 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="score_resume",
+        description=(
+            "Score a resume against a job description (or general best-practices "
+            "if no JD). Returns a structured ATS scorecard with overall score, "
+            "keyword match table, format issues, bullet rewrites, gaps, and "
+            "a prioritized action list. Requires resume_text; jd_text is optional."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "resume_text": {"type": "string", "description": "Full resume text to evaluate"},
+                "jd_text": {"type": "string", "description": "Optional: job description for keyword matching rubric"},
+            },
+            "required": ["resume_text"],
+        },
+    ),
+    Tool(
         name="get_profile",
         description="Get the candidate's current profile (decoded from profile.yaml).",
         inputSchema={"type": "object", "properties": {}},
@@ -235,6 +253,13 @@ async def dispatch_tool_call(name: str, arguments: dict[str, Any]) -> list[TextC
                 agent=agent,
             )
             return [TextContent(type="text", text=result["script"])]
+        if name == "score_resume":
+            result = tool_score_resume(
+                resume_text=arguments["resume_text"],
+                jd_text=arguments.get("jd_text", ""),
+                agent=agent,
+            )
+            return [TextContent(type="text", text=result["score"])]
         if name == "get_profile":
             profile = load_profile()
             return [TextContent(type="text", text=json.dumps(profile_to_dict(profile), indent=2))]

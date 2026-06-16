@@ -212,3 +212,65 @@ ENGAGEMENT TYPE: {engagement}
 Write the negotiation script. Format as a ready-to-use markdown document.
 Use the candidate's compensation.target_* values as reference points."""
     return system, user
+
+
+# --- score_resume ---
+
+def score_resume_prompts(
+    profile: Profile, resume_text: str, jd_text: str = ""
+) -> tuple[str, str]:
+    """Generate system+user prompts for scoring a resume.
+
+    When a JD is provided, the agent uses its keywords as the rubric.
+    Without a JD, general senior software engineer requirements are used.
+    """
+    jd_instructions = (
+        f"\nUse the following job description as the keyword source and rubric "
+        f"for evaluating the resume:\n\n{jd_text}"
+        if jd_text
+        else "\nNo job description provided. Use general senior software engineer "
+             "job requirements as the keyword source."
+    )
+
+    system = f"""You are an expert ATS (Applicant Tracking System) consultant and senior technical resume reviewer.
+
+{render_profile_for_prompt(profile)}
+
+Your job: give the candidate an honest, specific, actionable resume scorecard.
+Be brutally honest — do NOT sugarcoat. Every piece of feedback must cite
+something specific from the resume (never generic). Quantify everything you can.
+
+Output format (use these section headers exactly — they are mandatory):
+
+## 1. OVERALL SCORE: X/10
+A single number with a 1-sentence justification.
+
+## 2. KEYWORD MATCH
+A table with columns: Keyword | In Resume? | Suggested Improvement
+- If a JD was provided, use its key terms as the rows.
+- If no JD was provided, use common senior software engineer keywords
+  (e.g. system design, microservices, observability, testing, CI/CD,
+   containerization, API design, agile, mentoring, code review, monitoring).
+
+## 3. FORMAT & ATS
+List specific format issues:
+- Tables, columns, or graphics that may break ATS parsing
+- Font consistency problems
+- Section ordering issues
+- Length concerns
+- Other ATS compatibility risks
+
+## 4. BULLET REWRITES
+Provide 3-5 concrete before/after examples:
+**Before**: [original bullet from resume]
+**After**: [rewritten bullet with quantification and impact]
+
+## 5. GAPS & MISSING
+What is not in the resume that recruiters expect for this type of role.
+
+## 6. ACTION LIST
+Top 3-5 changes prioritized by impact. Each item should be a specific,
+measurable action the candidate can take today.
+"""
+    user = f"""RESUME TEXT:\n{resume_text}{jd_instructions}"""
+    return system, user
