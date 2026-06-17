@@ -4,6 +4,14 @@ Local-first job search and interview preparation workspace for people using AI, 
 
 The portal helps you turn job descriptions into a working prep system: applications, resume fit, interview plans, STAR stories, answer coaching, reminders, contacts, offers, and learning resources. It works across professions because the default profile is blank and the AI layer reads from your own profile instead of baked-in prompts.
 
+## Visual Preview
+
+![Dashboard command center with OpenClaw gateway connected](docs/assets/dashboard-command-center.jpg)
+
+| Application pipeline | AI prep kit from skill gaps |
+| --- | --- |
+| ![Application pipeline with interview stages and offers](docs/assets/application-pipeline.jpg) | ![Skills matrix with AI prep kit generator](docs/assets/ai-prep-kit.jpg) |
+
 ## Why It Exists
 
 Most job-search tools stop at tracking applications. Interview Prep Portal tries to close the loop:
