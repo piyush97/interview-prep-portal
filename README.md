@@ -78,7 +78,7 @@ Use the Story Bank to store STAR stories. In Interview Prep, insert a story into
 
 ### Requirements
 
-- Node.js 20+
+- Node.js 24+
 - Python 3.11+
 - uv
 - Optional: Hermes, Claude Code, Codex CLI, or an OpenAI-compatible HTTP endpoint
@@ -99,6 +99,16 @@ npm run dev
 ```
 
 Open the local URL printed by Vite. In this repo the app is also built for the `/interview-prep-portal/` base path.
+
+### Deploy To GitHub Pages
+
+The Pages workflow builds with Node.js 24 and deploys the `dist/` artifact through GitHub Actions. Before the first deployment, enable Pages in the repository:
+
+1. Open **Settings → Pages**.
+2. Set **Build and deployment → Source** to **GitHub Actions**.
+3. Re-run **CI + Deploy to GitHub Pages**.
+
+If `actions/deploy-pages` returns `404 Not Found` after uploading the artifact, the repository Pages setting is still disabled or not set to GitHub Actions.
 
 ### Start The Optional Backend
 

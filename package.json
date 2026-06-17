@@ -26,7 +26,7 @@
     "url": "https://github.com/piyush97/interview-prep-portal/issues"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "dev": "vite",
