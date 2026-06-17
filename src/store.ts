@@ -8,6 +8,19 @@ const STORAGE_KEY = "interview-prep-portal-data";
 
 const defaultLearningPaths: LearningPath[] = [
   {
+    id: "lp0", title: "Universal Interview Readiness",
+    description: "Core prep that works for healthcare, education, sales, operations, trades, tech, and leadership roles",
+    category: "soft-skills", priority: "high",
+    completedModules: [],
+    modules: [
+      { id: "lp0m1", title: "Role Scorecard", description: "Turn the JD into must-haves, nice-to-haves, proof points, and open questions", duration: "45m", resources: [] },
+      { id: "lp0m2", title: "STAR Story Bank", description: "Build reusable stories with situation, task, action, result, reflection, and metrics", duration: "1hr", resources: [] },
+      { id: "lp0m3", title: "Recruiter Screen", description: "Practice role fit, compensation range, availability, work authorization, and deal-breaker answers", duration: "45m", resources: [] },
+      { id: "lp0m4", title: "Company Research Brief", description: "Map products, customers, culture, competitors, risks, and thoughtful questions", duration: "1hr", resources: [] },
+      { id: "lp0m5", title: "Follow-Up System", description: "Prepare thank-you notes, timeline checks, referral nudges, and decision reminders", duration: "30m", resources: [] },
+    ],
+  },
+  {
     id: "lp1", title: "System Design for AI & Full-Stack",
     description: "Design scalable systems, microservices, event-driven architectures, and AI-infused platforms",
     category: "soft-skills", priority: "high",
@@ -191,6 +204,17 @@ const defaultFlashcards: Flashcard[] = [
   { id: "fc15", question: "Tell me about a time you failed", answer: "STAR: Situation: I committed to a change that was too large for the available time. Task: Recover trust and still deliver value. Action: I named the miss early, cut scope to the highest-impact slice, set a checkpoint cadence, and captured what should wait. Result: The team shipped the most valuable part on schedule and avoided a half-finished rollout. Lesson: smaller verified releases beat heroic overreach.", category: "behavioral", deck: "Behavioral", difficulty: "medium", level: 3 },
   { id: "fc16", question: "Why do you want to work here?", answer: "Research the company before. Structure: 1) Their tech/product (I've used X, impressed by Y). 2) Alignment (my experience in AI/agents matches your Z initiative). 3) Impact (I want to solve the specific problems you're tackling). Always specific, never generic.", category: "behavioral", deck: "Behavioral", difficulty: "easy", level: 4 },
   { id: "fc17", question: "Tell me about your most challenging technical problem", answer: "STAR: Situation: A critical workflow depended on slow, fragmented, or unreliable data. Task: Design a solution that improved speed without sacrificing correctness. Action: I mapped the data path, isolated failure modes, added validation and retry behavior, and made status visible to stakeholders. Result: The workflow became faster, easier to support, and safer to change. Lesson: hard technical problems usually need both architecture and operational clarity.", category: "behavioral", deck: "Behavioral", difficulty: "medium", level: 3 },
+
+  // Universal role decks
+  { id: "fc36", question: "How do you answer 'walk me through your background' for any role?", answer: "Use a 60-second arc: current role or skill base, 2 relevant proof points, why this role is the logical next step, and one sentence tying your strengths to the employer's needs.", category: "general", deck: "Universal Interview Basics", difficulty: "easy", level: 3 },
+  { id: "fc37", question: "What should you confirm in a recruiter screen?", answer: "Role scope, interview stages, must-have requirements, schedule, compensation range, work location, work authorization, start date, and next-step timeline. End by asking what a strong candidate shows in the next round.", category: "general", deck: "Universal Interview Basics", difficulty: "easy", level: 3 },
+  { id: "fc38", question: "How do you turn a job description into a prep checklist?", answer: "Extract must-haves, repeated keywords, responsibilities, tools or certifications, stakeholder groups, success metrics, and interview signals. For each item, write one proof story, one resume line, and one question.", category: "general", deck: "Universal Interview Basics", difficulty: "medium", level: 2 },
+  { id: "fc39", question: "Healthcare: how do you discuss patient safety without sounding generic?", answer: "Use one concrete example: risk spotted, protocol followed, communication with patient/family/team, escalation path, documentation, and outcome. Mention judgment, empathy, and compliance together.", category: "behavioral", deck: "Healthcare", difficulty: "medium", level: 2 },
+  { id: "fc40", question: "Education: how do you show classroom or learner impact?", answer: "Anchor on learner baseline, intervention, differentiation, family/team communication, measurement, and improvement. Use numbers when possible: attendance, assessment lift, engagement, retention, or completion.", category: "behavioral", deck: "Education", difficulty: "medium", level: 2 },
+  { id: "fc41", question: "Marketing/Sales: how do you explain a campaign or pipeline win?", answer: "State target segment, insight, channel or motion, experiment, conversion metric, revenue/pipeline impact, and what changed after the result. Separate your contribution from team baseline.", category: "behavioral", deck: "Marketing & Sales", difficulty: "medium", level: 2 },
+  { id: "fc42", question: "Operations: how do you describe process improvement?", answer: "Name the bottleneck, baseline metric, root cause, constraints, process change, adoption plan, and resulting time/cost/quality improvement. Include how you kept service quality stable during change.", category: "behavioral", deck: "Operations", difficulty: "medium", level: 2 },
+  { id: "fc43", question: "Customer Success: how do you handle an unhappy customer?", answer: "Acknowledge impact, clarify facts, define ownership, propose next steps, communicate cadence, and close the loop. Include retention, expansion, satisfaction, or resolution-time metrics when possible.", category: "behavioral", deck: "Customer Success", difficulty: "medium", level: 2 },
+  { id: "fc44", question: "Trades/Field: how do you show safety and quality discipline?", answer: "Describe site conditions, hazard assessment, standard or code followed, tool/material choice, communication, inspection, and final outcome. Show that speed never outranked safety or workmanship.", category: "behavioral", deck: "Trades & Field", difficulty: "medium", level: 2 },
 
   // Technical
   { id: "fc18", question: "What's the difference between var, let, const?", answer: "var: function-scoped, hoisted, can redeclare. let: block-scoped, hoisted (TDZ), can reassign. const: block-scoped, cannot reassign (but object properties can mutate). Always use const by default, let when reassigning. Never var.", category: "technical", deck: "TypeScript/JS", difficulty: "easy", level: 5 },

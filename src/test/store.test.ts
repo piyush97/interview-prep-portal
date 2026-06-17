@@ -144,6 +144,19 @@ describe("Flashcards Store", () => {
     expect(decks).toContain("System Design");
     expect(decks).toContain("MCP & Agents");
   });
+
+  it("includes universal and non-technical starter decks", () => {
+    const decks = getFlashcardDecks();
+    expect(decks).toEqual(expect.arrayContaining([
+      "Universal Interview Basics",
+      "Healthcare",
+      "Education",
+      "Marketing & Sales",
+      "Operations",
+      "Customer Success",
+      "Trades & Field",
+    ]));
+  });
 });
 
 // ─── Learning Paths ───
@@ -151,6 +164,18 @@ describe("Flashcards Store", () => {
 describe("Learning Paths Store", () => {
   it("starts with pre-seeded paths", () => {
     expect(getLearningPaths().length).toBeGreaterThan(0);
+  });
+
+  it("starts with universal interview readiness before technical paths", () => {
+    const [firstPath] = getLearningPaths();
+    expect(firstPath.title).toBe("Universal Interview Readiness");
+    expect(firstPath.modules.map((module) => module.title)).toEqual(expect.arrayContaining([
+      "Role Scorecard",
+      "STAR Story Bank",
+      "Recruiter Screen",
+      "Company Research Brief",
+      "Follow-Up System",
+    ]));
   });
 
   it("toggles module completion on/off", () => {

@@ -31,7 +31,7 @@ Everything is designed to remain useful offline. AI can improve drafts and resea
 | Story Bank | Reusable STAR stories with metrics, tags, and target roles |
 | Resume | Multiple resume versions, JD targeting, and backend ATS scorecards |
 | Research | Company research notes, products, people, culture, interview process |
-| Practice | Flashcards, learning paths, curated resources |
+| Practice | Universal and role-specific flashcards, learning paths, curated resources |
 | Career Ops | Contacts, reminders, journal, offer comparison, job comparison |
 | Integrations | Optional Python backend, MCP server, and Hermes plugin shim |
 

@@ -176,7 +176,7 @@ export default function Flashcards() {
                       </button>
                       <button onClick={() => handleRate(current.level)}
                         className="flex items-center gap-1 px-3 py-2 bg-amber-50 text-amber-700 rounded-lg text-sm hover:bg-amber-100">
-                        Brain icon Knew partially
+                        <Brain size={14} /> Knew partially
                       </button>
                       <button onClick={() => handleRate(Math.max(1, current.level - 1))}
                         className="flex items-center gap-1 px-3 py-2 bg-red-50 text-red-700 rounded-lg text-sm hover:bg-red-100">
