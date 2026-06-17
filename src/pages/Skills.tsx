@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { addFlashcards, addLearningPath, getProfile, getSkills, updateSkill } from "../store";
+import { addFlashcards, addLearningPath, getApplications, getProfile, getSkills, updateSkill } from "../store";
 import Modal from "../components/Modal";
-import type { Skill, SkillCategory } from "../types";
+import type { Application, Skill, SkillCategory } from "../types";
 import { Bot, Sparkles, Star, Search } from "lucide-react";
 import { backend } from "../lib/backend";
 import { parseAiStarterContent } from "../utils/aiStarterContent";
@@ -16,6 +16,12 @@ const categories: { key: SkillCategory; label: string }[] = [
   { key: "tools", label: "Tools" },
   { key: "soft-skills", label: "Soft Skills" },
 ];
+
+const priorityRank: Record<Skill["priority"], number> = {
+  high: 3,
+  medium: 2,
+  low: 1,
+};
 
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -34,12 +40,15 @@ export default function Skills() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [selectedApplicationId, setSelectedApplicationId] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [generationStatus, setGenerationStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [generationMessage, setGenerationMessage] = useState("");
 
   useEffect(() => {
     setSkills(getSkills());
+    setApplications(getApplications());
     setTargetRole(getProfile().title);
   }, []);
 
@@ -51,7 +60,17 @@ export default function Skills() {
     return matchSearch && matchCat;
   });
 
-  const gapSkills = skills.filter((s) => s.level < s.targetLevel).sort((a, b) => b.priority.localeCompare(a.priority));
+  const gapSkills = skills
+    .filter((s) => s.level < s.targetLevel)
+    .sort((a, b) => priorityRank[b.priority] - priorityRank[a.priority] || (b.targetLevel - b.level) - (a.targetLevel - a.level));
+  const selectedApplication = applications.find((app) => app.id === selectedApplicationId);
+  const applicationsWithJd = applications.filter((app) => app.jdText?.trim());
+
+  const selectApplication = (id: string) => {
+    setSelectedApplicationId(id);
+    const app = applications.find((candidate) => candidate.id === id);
+    if (app) setTargetRole(`${app.role} at ${app.company}`);
+  };
 
   const generatePrepKit = async () => {
     if (gapSkills.length === 0) {
@@ -64,6 +83,7 @@ export default function Skills() {
     try {
       const result = await backend.generateStarterContent({
         target_role: targetRole,
+        jd_text: selectedApplication?.jdText,
         skill_gaps: gapSkills.slice(0, 10).map((skill) => ({
           name: skill.name,
           category: skill.category,
@@ -77,7 +97,7 @@ export default function Skills() {
       addLearningPath(parsed.learningPath);
       addFlashcards(parsed.flashcards);
       setGenerationStatus("success");
-      setGenerationMessage(`Saved "${parsed.learningPath.title}" plus ${parsed.flashcards.length} flashcards from ${result.agent}.`);
+      setGenerationMessage(`Saved "${parsed.learningPath.title}" plus ${parsed.flashcards.length} flashcards from ${result.agent}${selectedApplication ? " using saved JD context" : ""}.`);
     } catch (error) {
       setGenerationStatus("error");
       setGenerationMessage(error instanceof Error ? error.message : "Could not generate prep kit.");
@@ -118,11 +138,21 @@ export default function Skills() {
               <h3 className="text-sm font-semibold text-gray-900">AI Prep Kit From Skill Gaps</h3>
             </div>
             <p className="mt-1 text-sm text-gray-600">
-              Use Hermes/OpenClaw backend to turn your skill matrix into a saved learning path and flashcard deck.
+              Generate a saved learning path and flashcard deck from skill gaps, optionally grounded in a saved JD.
             </p>
             <p className="mt-1 text-xs text-gray-500">Provider keys stay in backend env or agent login; generated content saves locally.</p>
           </div>
           <div className="flex w-full flex-col gap-2 lg:w-[360px]">
+            <select
+              value={selectedApplicationId}
+              onChange={(e) => selectApplication(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            >
+              <option value="">No saved JD selected</option>
+              {applicationsWithJd.map((app) => (
+                <option key={app.id} value={app.id}>{app.role} at {app.company}</option>
+              ))}
+            </select>
             <input
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}

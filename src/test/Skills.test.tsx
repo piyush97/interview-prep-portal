@@ -1,7 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Skills from "../pages/Skills";
-import { getFlashcardDecks, getLearningPaths, resetData } from "../store";
+import { addApplication, getFlashcardDecks, getLearningPaths, resetData } from "../store";
+import type { Application } from "../types";
 
 const backendMocks = vi.hoisted(() => ({
   generateStarterContent: vi.fn(),
@@ -63,6 +64,38 @@ describe("Skills AI prep kit", () => {
     expect(getFlashcardDecks()).toContain("AI Clinic Ops");
   });
 
+  it("grounds AI prep generation in a selected saved JD", async () => {
+    addApplication(mockApplication({
+      id: "app_with_jd",
+      company: "North Clinic",
+      role: "Clinic Operations Manager",
+      jdText: "Own patient flow, scheduling, staff coordination, and quality metrics.",
+    }));
+    backendMocks.generateStarterContent.mockResolvedValue({
+      content: starterJson,
+      target_role: "Clinic Operations Manager at North Clinic",
+      skill_gap_count: 7,
+      has_jd: true,
+      model: "openclaw",
+      agent: "http",
+    });
+
+    render(<Skills />);
+
+    fireEvent.change(screen.getByDisplayValue("No saved JD selected"), {
+      target: { value: "app_with_jd" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Generate Prep Kit/i }));
+
+    await waitFor(() => {
+      expect(backendMocks.generateStarterContent).toHaveBeenCalledWith(expect.objectContaining({
+        target_role: "Clinic Operations Manager at North Clinic",
+        jd_text: "Own patient flow, scheduling, staff coordination, and quality metrics.",
+      }));
+    });
+    expect(await screen.findByText(/using saved JD context/i)).toBeInTheDocument();
+  });
+
   it("does not save invalid AI output", async () => {
     backendMocks.generateStarterContent.mockResolvedValue({
       content: "{}",
@@ -80,3 +113,22 @@ describe("Skills AI prep kit", () => {
     expect(getLearningPaths().some((path) => path.title === "AI Clinic Ops Prep")).toBe(false);
   });
 });
+
+function mockApplication(overrides: Partial<Application>): Application {
+  const now = "2026-06-17T00:00:00.000Z";
+  return {
+    id: "app",
+    company: "Company",
+    role: "Role",
+    url: "",
+    status: "saved",
+    dateApplied: "",
+    contacts: [],
+    documents: [],
+    notes: "",
+    timeline: [],
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
