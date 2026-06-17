@@ -29,6 +29,7 @@ from .prompts import (
     research_company_prompts,
     scan_jobs_prompts,
     score_resume_prompts,
+    generate_starter_content_prompts,
 )
 
 logger = logging.getLogger(__name__)
@@ -210,6 +211,32 @@ def score_resume(
         "has_jd": bool(jd_text and jd_text.strip()),
         "jd_provided": bool(jd_text and jd_text.strip()),
         "resume_length": len(resume_text),
+        "model": resp.model,
+        "tokens_in": resp.tokens_in,
+        "tokens_out": resp.tokens_out,
+        "duration_ms": resp.duration_ms,
+        "agent": backend.name,
+    }
+
+
+def generate_starter_content(
+    target_role: str = "",
+    skill_gaps: list[dict[str, Any]] | None = None,
+    jd_text: str = "",
+    profile: Profile | None = None,
+    agent: AgentBackend | None = None,
+) -> dict[str, Any]:
+    """Generate AI-native learning path + flashcard JSON from profile and gaps."""
+    p = profile or load_profile()
+    backend = _resolve_agent(p, agent)
+    gaps = skill_gaps or []
+    system, user = generate_starter_content_prompts(p, target_role, gaps, jd_text)
+    resp = backend.call(system, user, model=p.agent.model or None, max_tokens=p.agent.max_tokens)
+    return {
+        "content": resp.text,
+        "target_role": target_role,
+        "skill_gap_count": len(gaps),
+        "has_jd": bool(jd_text and jd_text.strip()),
         "model": resp.model,
         "tokens_in": resp.tokens_in,
         "tokens_out": resp.tokens_out,

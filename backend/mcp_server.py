@@ -12,6 +12,7 @@ agent dispatcher. Any MCP client can then call:
     - scan_jobs
     - generate_interview_stories
     - generate_negotiation_script
+    - generate_starter_content
     - get_profile
     - update_profile
 """
@@ -42,6 +43,7 @@ from .tools import (
     generate_cover_letter as tool_generate_cover_letter,
     generate_interview_stories as tool_generate_interview_stories,
     generate_negotiation_script as tool_generate_negotiation_script,
+    generate_starter_content as tool_generate_starter_content,
     research_company as tool_research_company,
     scan_jobs as tool_scan_jobs,
     score_resume as tool_score_resume,
@@ -173,6 +175,26 @@ TOOLS: list[Tool] = [
         },
     ),
     Tool(
+        name="generate_starter_content",
+        description=(
+            "Generate AI-native learning path and flashcard JSON from the "
+            "candidate profile, target role, skill gaps, and optional JD. "
+            "Use this to turn the Skills Matrix into personalized prep data."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "target_role": {"type": "string", "description": "Target role for the generated prep data"},
+                "skill_gaps": {
+                    "type": "array",
+                    "description": "Skill gap objects with name/category/current/target/priority",
+                    "items": {"type": "object"},
+                },
+                "jd_text": {"type": "string", "description": "Optional JD text to ground the generated content"},
+            },
+        },
+    ),
+    Tool(
         name="get_profile",
         description="Get the candidate's current profile (decoded from profile.yaml).",
         inputSchema={"type": "object", "properties": {}},
@@ -260,6 +282,14 @@ async def dispatch_tool_call(name: str, arguments: dict[str, Any]) -> list[TextC
                 agent=agent,
             )
             return [TextContent(type="text", text=result["score"])]
+        if name == "generate_starter_content":
+            result = tool_generate_starter_content(
+                target_role=arguments.get("target_role", ""),
+                skill_gaps=arguments.get("skill_gaps", []),
+                jd_text=arguments.get("jd_text", ""),
+                agent=agent,
+            )
+            return [TextContent(type="text", text=result["content"])]
         if name == "get_profile":
             profile = load_profile()
             return [TextContent(type="text", text=json.dumps(profile_to_dict(profile), indent=2))]

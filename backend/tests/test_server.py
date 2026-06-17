@@ -158,6 +158,25 @@ class TestScoreResume:
         assert r3.status_code == 422
 
 
+class TestStarterContent:
+    def test_basic(self, client):
+        r = client.post("/api/starter_content", json={
+            "target_role": "Operations Manager",
+            "skill_gaps": [{"name": "Process improvement", "priority": "high"}],
+        })
+        assert r.status_code == 200
+        body = r.json()
+        assert "content" in body
+        assert body["target_role"] == "Operations Manager"
+        assert body["skill_gap_count"] == 1
+        assert "agent" in body
+
+    def test_accepts_empty_payload(self, client):
+        r = client.post("/api/starter_content", json={})
+        assert r.status_code == 200
+        assert "content" in r.json()
+
+
 class TestProfileFromYAML:
     """POST /profile/from_yaml — Onboarding wizard sends YAML text and gets back a parsed Profile."""
 
@@ -227,4 +246,3 @@ class TestProfileAgentWinsOverDetection:
         body = r.json()
         assert "cover_letter" in body
         assert body["agent"] == "offline", f"Wrong agent: {body.get('agent')}"
-

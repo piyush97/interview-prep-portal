@@ -208,6 +208,24 @@ export const backend = {
       body: JSON.stringify(args),
     });
   },
+
+  async generateStarterContent(args: {
+    target_role?: string;
+    skill_gaps?: Array<Record<string, unknown>>;
+    jd_text?: string;
+  }): Promise<{
+    content: string;
+    target_role: string;
+    skill_gap_count: number;
+    has_jd: boolean;
+    model: string;
+    agent: string;
+  }> {
+    return _fetch("/api/starter_content", {
+      method: "POST",
+      body: JSON.stringify(args),
+    });
+  },
 };
 
 export async function isBackendUp(): Promise<boolean> {

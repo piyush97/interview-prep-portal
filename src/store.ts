@@ -601,6 +601,15 @@ export function deleteResume(id: string): boolean {
 
 // --- Learning Paths CRUD ---
 export function getLearningPaths(): LearningPath[] { return getData().learningPaths; }
+export function addLearningPath(path: LearningPath): LearningPath {
+  if (!isNonEmptyString(path.title)) throw new Error("Learning path requires a title");
+  const p = ensureId(path, "lp");
+  if (!Array.isArray(p.modules)) p.modules = [];
+  if (!Array.isArray(p.completedModules)) p.completedModules = [];
+  getData().learningPaths.push(p);
+  persist();
+  return p;
+}
 export function toggleModuleComplete(pathId: string, moduleId: string): boolean {
   const path = getData().learningPaths.find(p => p.id === pathId);
   if (!path) return false;
@@ -620,6 +629,15 @@ export function getLearningPathProgress(pathId: string): { completed: number; to
 
 // --- Flashcards CRUD ---
 export function getFlashcards(): Flashcard[] { return getData().flashcards; }
+export function addFlashcards(cards: Flashcard[]): Flashcard[] {
+  const saved = cards
+    .filter((card) => isNonEmptyString(card.question) && isNonEmptyString(card.answer))
+    .map((card) => ensureId(card, "fc"));
+  if (saved.length === 0) return [];
+  getData().flashcards.push(...saved);
+  persist();
+  return saved;
+}
 export function getFlashcardDecks(): string[] {
   return Array.from(new Set(getData().flashcards.map(f => f.deck))).sort();
 }

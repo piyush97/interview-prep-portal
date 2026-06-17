@@ -13,6 +13,7 @@ from backend.prompts import (
     scan_jobs_prompts,
     interview_stories_prompts,
     negotiation_script_prompts,
+    generate_starter_content_prompts,
     score_resume_prompts,
     STORY_FOCUS_DESC,
 )
@@ -159,3 +160,30 @@ class TestScoreResume:
 
         assert "Need licensed RN with oncology experience" in u
         assert "Resume text" in u
+
+
+class TestStarterContent:
+    def test_uses_profile_skills_and_json_contract(self):
+        s, u = generate_starter_content_prompts(
+            _nurse_profile(),
+            "Nurse Educator",
+            [{"name": "Patient education", "level": 2, "targetLevel": 5, "priority": "high"}],
+        )
+        combined = f"{s}\n{u}".lower()
+
+        assert "json only" in combined
+        assert "learning_path" in combined
+        assert "flashcards" in combined
+        assert "nurse educator" in combined
+        assert "patient education" in combined
+        assert "do not assume software engineering" in combined
+
+    def test_optional_jd_grounds_generation(self):
+        _, u = generate_starter_content_prompts(
+            empty_profile(),
+            "Operations Manager",
+            [],
+            jd_text="Own clinic scheduling and patient service metrics",
+        )
+
+        assert "Own clinic scheduling and patient service metrics" in u

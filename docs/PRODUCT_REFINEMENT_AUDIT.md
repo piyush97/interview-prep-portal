@@ -11,6 +11,7 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 - Broad workflow coverage: applications, JD evaluation, resumes, interview prep, flashcards, learning, contacts, offers, reminders, journal, research, settings, and onboarding.
 - Agent-agnostic backend: Hermes, Claude Code, Codex, HTTP, and offline profiles can share the same tool contract.
 - Profile-driven prompts: backend avoids baking one person's career into generated materials.
+- AI-native prep data: the Skills Matrix can turn gaps into schema-bound learning paths and flashcards through the configured backend.
 - Local-first privacy: browser app data and backend profile stay local by default.
 - Plugin shim now routes through the backend instead of duplicating prompts or shelling out to stale commands.
 
@@ -26,7 +27,7 @@ Interview Prep Portal should be a job-search command center for any candidate: h
    It stores questions and answers, but does not score answers for structure, evidence, clarity, or role fit.
 
 4. **Learning paths still need deeper role-specific expansion.**
-   Universal starter paths and cross-industry flashcard decks now exist, but industry packs can go deeper.
+   Universal starter paths, cross-industry decks, and AI-generated prep kits now exist, but industry packs can go deeper.
 
 5. **No explicit data health/backup guardrail in daily workflow.**
    Backup exists in settings, but dashboard should surface stale backup risk.
@@ -39,6 +40,7 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 - **Application prep packet**: one generated page per application with JD summary, resume version, cover letter, company research, interview questions, recruiter contacts, follow-up plan, and notes.
 - **Resume-to-JD matrix**: must-have requirements, evidence bullets, missing proof, keywords, and suggested resume edits.
 - **Answer coach**: score answers for STAR/SOAR structure, specificity, metrics, concision, and confidence. Store improved versions.
+- **AI content review loop**: let users preview, edit, and accept generated learning paths/cards before saving.
 - **Universal starter decks**: expand the new healthcare, education, marketing/sales, operations, customer success, trades/field, and general decks with deeper industry scenarios.
 - **Pipeline health model**: target active applications, follow-up aging, upcoming interviews, open offers, stale research, backup status.
 - **Import/export upgrades**: CSV import for applications/contacts, markdown export for prep packets, printable interview brief.
@@ -74,5 +76,5 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 1. Add application prep packet.
 2. Add resume-to-JD matrix.
 3. Add answer coach.
-4. Expand non-technical starter decks with deeper industry scenarios.
+4. Add review-before-save for AI-generated prep kits.
 5. Merge or clearly separate local and backend profile concepts.

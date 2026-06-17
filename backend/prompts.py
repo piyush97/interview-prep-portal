@@ -279,3 +279,71 @@ measurable action the candidate can take today.
 """
     user = f"""RESUME TEXT:\n{resume_text}{jd_instructions}"""
     return system, user
+
+
+# --- generate_starter_content ---
+
+def generate_starter_content_prompts(
+    profile: Profile,
+    target_role: str,
+    skill_gaps: list[dict[str, object]],
+    jd_text: str = "",
+) -> tuple[str, str]:
+    """Generate schema-bound learning content from profile + skill gaps.
+
+    This keeps durable starter data AI-native while preserving the browser app's
+    local-first storage model. The caller validates JSON before saving.
+    """
+    role_focus = target_role or ", ".join(profile.target_roles[:2]) or profile.career.current_title or "target role"
+    gaps = skill_gaps[:12]
+    jd_section = f"\nJOB DESCRIPTION:\n{jd_text[:4000]}" if jd_text else ""
+    system = f"""You are an interview-prep curriculum designer.
+
+{render_profile_for_prompt(profile)}
+
+Generate personalized, profession-neutral prep data for the candidate.
+Use their profile, target role, skill gaps, and job description when present.
+Do not assume software engineering unless the profile, target role, or JD says so.
+Do not include API keys, secrets, personal contact details, or invented employers.
+
+Return JSON only. No markdown fences. The JSON must match this exact shape:
+{{
+  "learning_path": {{
+    "title": "string",
+    "description": "string",
+    "modules": [
+      {{
+        "title": "string",
+        "description": "string",
+        "duration": "30m|45m|1hr|2hrs",
+        "resources": []
+      }}
+    ]
+  }},
+  "flashcards": [
+    {{
+      "question": "string",
+      "answer": "string",
+      "category": "behavioral|general|technical|system-design|ai-ml|cloud",
+      "deck": "string",
+      "difficulty": "easy|medium|hard"
+    }}
+  ]
+}}
+
+Rules:
+- learning_path.modules: exactly 5 modules, ordered from highest leverage to lowest.
+- flashcards: exactly 8 cards; at least 5 must be behavioral or general.
+- Every item must be specific to the target role or skill gaps.
+- Use interview-ready phrasing, not generic advice.
+- Keep answers concise enough for flashcard study.
+"""
+    user = f"""TARGET ROLE:
+{role_focus}
+
+SKILL GAPS:
+{gaps}
+{jd_section}
+
+Generate the JSON prep data now."""
+    return system, user

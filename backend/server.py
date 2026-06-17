@@ -39,6 +39,7 @@ from .tools import (
     generate_cover_letter as tool_generate_cover_letter,
     generate_interview_stories as tool_generate_interview_stories,
     generate_negotiation_script as tool_generate_negotiation_script,
+    generate_starter_content as tool_generate_starter_content,
     research_company as tool_research_company,
     scan_jobs as tool_scan_jobs,
     score_resume as tool_score_resume,
@@ -84,6 +85,12 @@ class NegotiationRequest(BaseModel):
 
 class ScoreResumeRequest(BaseModel):
     resume_text: str
+    jd_text: str = ""
+
+
+class StarterContentRequest(BaseModel):
+    target_role: str = ""
+    skill_gaps: list[dict[str, Any]] = Field(default_factory=list)
     jd_text: str = ""
 
 
@@ -266,6 +273,18 @@ def create_app(
             raise HTTPException(status_code=502, detail=f"Agent backend error: {e}")
         except ValueError as e:
             raise HTTPException(status_code=422, detail=str(e))
+
+    @app.post("/api/starter_content")
+    def api_starter_content(req: StarterContentRequest) -> dict[str, Any]:
+        try:
+            return tool_generate_starter_content(
+                target_role=req.target_role,
+                skill_gaps=req.skill_gaps,
+                jd_text=req.jd_text,
+                agent=_agent(),
+            )
+        except BackendError as e:
+            raise HTTPException(status_code=502, detail=f"Agent backend error: {e}")
 
     @app.post("/api/negotiation_script")
     def api_negotiation_script(req: NegotiationRequest) -> dict[str, Any]:

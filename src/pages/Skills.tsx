@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { getSkills, updateSkill } from "../store";
+import { addFlashcards, addLearningPath, getProfile, getSkills, updateSkill } from "../store";
 import Modal from "../components/Modal";
 import type { Skill, SkillCategory } from "../types";
-import { Star, Search } from "lucide-react";
+import { Bot, Sparkles, Star, Search } from "lucide-react";
+import { backend } from "../lib/backend";
+import { parseAiStarterContent } from "../utils/aiStarterContent";
 
 const categories: { key: SkillCategory; label: string }[] = [
   { key: "ai-ml", label: "AI / ML" },
@@ -32,8 +34,14 @@ export default function Skills() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
+  const [targetRole, setTargetRole] = useState("");
+  const [generationStatus, setGenerationStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [generationMessage, setGenerationMessage] = useState("");
 
-  useEffect(() => { setSkills(getSkills()); }, []);
+  useEffect(() => {
+    setSkills(getSkills());
+    setTargetRole(getProfile().title);
+  }, []);
 
   const refresh = () => setSkills(getSkills());
 
@@ -44,6 +52,37 @@ export default function Skills() {
   });
 
   const gapSkills = skills.filter((s) => s.level < s.targetLevel).sort((a, b) => b.priority.localeCompare(a.priority));
+
+  const generatePrepKit = async () => {
+    if (gapSkills.length === 0) {
+      setGenerationStatus("error");
+      setGenerationMessage("No skill gaps available. Lower a current level or raise a target level first.");
+      return;
+    }
+    setGenerationStatus("loading");
+    setGenerationMessage("");
+    try {
+      const result = await backend.generateStarterContent({
+        target_role: targetRole,
+        skill_gaps: gapSkills.slice(0, 10).map((skill) => ({
+          name: skill.name,
+          category: skill.category,
+          current: skill.level,
+          target: skill.targetLevel,
+          priority: skill.priority,
+          notes: skill.notes,
+        })),
+      });
+      const parsed = parseAiStarterContent(result.content);
+      addLearningPath(parsed.learningPath);
+      addFlashcards(parsed.flashcards);
+      setGenerationStatus("success");
+      setGenerationMessage(`Saved "${parsed.learningPath.title}" plus ${parsed.flashcards.length} flashcards from ${result.agent}.`);
+    } catch (error) {
+      setGenerationStatus("error");
+      setGenerationMessage(error instanceof Error ? error.message : "Could not generate prep kit.");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -70,6 +109,43 @@ export default function Skills() {
           </div>
         </div>
       )}
+
+      <div className="bg-white border border-indigo-100 rounded-xl p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Bot size={18} className="text-indigo-600" />
+              <h3 className="text-sm font-semibold text-gray-900">AI Prep Kit From Skill Gaps</h3>
+            </div>
+            <p className="mt-1 text-sm text-gray-600">
+              Use Hermes/OpenClaw backend to turn your skill matrix into a saved learning path and flashcard deck.
+            </p>
+            <p className="mt-1 text-xs text-gray-500">Provider keys stay in backend env or agent login; generated content saves locally.</p>
+          </div>
+          <div className="flex w-full flex-col gap-2 lg:w-[360px]">
+            <input
+              value={targetRole}
+              onChange={(e) => setTargetRole(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              placeholder="Target role, e.g. Clinic Operations Manager"
+            />
+            <button
+              onClick={generatePrepKit}
+              disabled={generationStatus === "loading"}
+              className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-indigo-300"
+            >
+              <Sparkles size={15} /> {generationStatus === "loading" ? "Generating..." : "Generate Prep Kit"}
+            </button>
+          </div>
+        </div>
+        {generationMessage && (
+          <div className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+            generationStatus === "error" ? "border-red-100 bg-red-50 text-red-700" : "border-emerald-100 bg-emerald-50 text-emerald-800"
+          }`}>
+            {generationMessage}
+          </div>
+        )}
+      </div>
 
       {/* Filters */}
       <div className="flex items-center gap-3">

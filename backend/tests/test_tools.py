@@ -16,6 +16,7 @@ from backend.tools import (
     scan_jobs,
     generate_interview_stories,
     generate_negotiation_script,
+    generate_starter_content,
     score_resume,
 )
 
@@ -182,3 +183,31 @@ class TestScoreResume:
             score_resume("", agent=fake)
         with pytest.raises(ValueError, match="resume_text is required"):
             score_resume("   ", agent=fake)
+
+
+class TestStarterContent:
+    def test_returns_content_json_text(self):
+        fake = FakeBackend(canned_text='{"learning_path":{"title":"Plan","description":"D","modules":[]},"flashcards":[]}')
+        result = generate_starter_content(
+            target_role="Clinic Manager",
+            skill_gaps=[{"name": "Patient communication", "priority": "high"}],
+            agent=fake,
+        )
+
+        assert result["content"].startswith("{")
+        assert result["target_role"] == "Clinic Manager"
+        assert result["skill_gap_count"] == 1
+        assert result["agent"] == "fake"
+
+    def test_passes_skill_gaps_to_agent(self):
+        fake = FakeBackend()
+        generate_starter_content(
+            target_role="Customer Success Manager",
+            skill_gaps=[{"name": "Renewal negotiation", "priority": "high"}],
+            jd_text="Own adoption and retention",
+            agent=fake,
+        )
+
+        assert "Customer Success Manager" in fake.last_user
+        assert "Renewal negotiation" in fake.last_user
+        assert "Own adoption and retention" in fake.last_user

@@ -31,7 +31,7 @@ Everything is designed to remain useful offline. AI can improve drafts and resea
 | Story Bank | Reusable STAR stories with metrics, tags, and target roles |
 | Resume | Multiple resume versions, JD targeting, and backend ATS scorecards |
 | Research | Company research notes, products, people, culture, interview process |
-| Practice | Universal and role-specific flashcards, learning paths, curated resources |
+| Practice | Universal defaults plus AI-generated learning paths and flashcards from skill gaps |
 | Career Ops | Contacts, reminders, journal, offer comparison, job comparison |
 | Integrations | Optional Python backend, MCP server, and Hermes plugin shim |
 
@@ -187,6 +187,12 @@ Example commands:
 /prep negotiate "Offer: 120k base, hybrid, deadline Friday"
 /prep status
 ```
+
+## AI-Native Prep Data
+
+The app ships with profession-neutral starter content, but the durable prep data is meant to become personal. In **Skills Matrix**, use **AI Prep Kit From Skill Gaps** to send your target role and skill gaps to the configured backend. Hermes, OpenClaw, Codex, Claude, or an HTTP gateway returns schema-bound JSON, and the browser saves the resulting learning path and flashcards locally.
+
+Raw API keys are never stored in browser data. Provider credentials stay in your agent login or backend environment variables.
 
 ## Development
 
