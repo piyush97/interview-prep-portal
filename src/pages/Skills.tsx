@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { addFlashcards, addLearningPath, getApplications, getProfile, getSkills, updateSkill } from "../store";
 import Modal from "../components/Modal";
-import type { Application, Skill, SkillCategory } from "../types";
-import { Bot, Sparkles, Star, Search } from "lucide-react";
+import type { Application, Flashcard, LearningModule, LearningPath, Skill, SkillCategory } from "../types";
+import { Bot, CheckCircle2, Sparkles, Star, Search, X } from "lucide-react";
 import { backend } from "../lib/backend";
 import { parseAiStarterContent } from "../utils/aiStarterContent";
 
@@ -21,6 +21,13 @@ const priorityRank: Record<Skill["priority"], number> = {
   high: 3,
   medium: 2,
   low: 1,
+};
+
+type PendingPrepKit = {
+  learningPath: LearningPath;
+  flashcards: Flashcard[];
+  agent: string;
+  groundedInJd: boolean;
 };
 
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
@@ -45,6 +52,7 @@ export default function Skills() {
   const [targetRole, setTargetRole] = useState("");
   const [generationStatus, setGenerationStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [generationMessage, setGenerationMessage] = useState("");
+  const [pendingPrepKit, setPendingPrepKit] = useState<PendingPrepKit | null>(null);
 
   useEffect(() => {
     setSkills(getSkills());
@@ -80,6 +88,7 @@ export default function Skills() {
     }
     setGenerationStatus("loading");
     setGenerationMessage("");
+    setPendingPrepKit(null);
     try {
       const result = await backend.generateStarterContent({
         target_role: targetRole,
@@ -94,14 +103,56 @@ export default function Skills() {
         })),
       });
       const parsed = parseAiStarterContent(result.content);
-      addLearningPath(parsed.learningPath);
-      addFlashcards(parsed.flashcards);
+      setPendingPrepKit({
+        ...parsed,
+        agent: result.agent,
+        groundedInJd: Boolean(selectedApplication),
+      });
       setGenerationStatus("success");
-      setGenerationMessage(`Saved "${parsed.learningPath.title}" plus ${parsed.flashcards.length} flashcards from ${result.agent}${selectedApplication ? " using saved JD context" : ""}.`);
+      setGenerationMessage(`Review "${parsed.learningPath.title}" and ${parsed.flashcards.length} flashcards from ${result.agent} before saving.`);
     } catch (error) {
       setGenerationStatus("error");
       setGenerationMessage(error instanceof Error ? error.message : "Could not generate prep kit.");
     }
+  };
+
+  const updatePendingPath = (updates: Partial<LearningPath>) => {
+    setPendingPrepKit((current) => current && {
+      ...current,
+      learningPath: { ...current.learningPath, ...updates },
+    });
+  };
+
+  const updatePendingModule = (id: string, updates: Partial<LearningModule>) => {
+    setPendingPrepKit((current) => current && {
+      ...current,
+      learningPath: {
+        ...current.learningPath,
+        modules: current.learningPath.modules.map((module) => module.id === id ? { ...module, ...updates } : module),
+      },
+    });
+  };
+
+  const updatePendingFlashcard = (id: string, updates: Partial<Flashcard>) => {
+    setPendingPrepKit((current) => current && {
+      ...current,
+      flashcards: current.flashcards.map((card) => card.id === id ? { ...card, ...updates } : card),
+    });
+  };
+
+  const savePendingPrepKit = () => {
+    if (!pendingPrepKit) return;
+    addLearningPath(pendingPrepKit.learningPath);
+    addFlashcards(pendingPrepKit.flashcards);
+    setGenerationStatus("success");
+    setGenerationMessage(`Saved "${pendingPrepKit.learningPath.title}" plus ${pendingPrepKit.flashcards.length} flashcards from ${pendingPrepKit.agent}${pendingPrepKit.groundedInJd ? " using saved JD context" : ""}.`);
+    setPendingPrepKit(null);
+  };
+
+  const discardPendingPrepKit = () => {
+    setPendingPrepKit(null);
+    setGenerationStatus("idle");
+    setGenerationMessage("");
   };
 
   return (
@@ -173,6 +224,95 @@ export default function Skills() {
             generationStatus === "error" ? "border-red-100 bg-red-50 text-red-700" : "border-emerald-100 bg-emerald-50 text-emerald-800"
           }`}>
             {generationMessage}
+          </div>
+        )}
+        {pendingPrepKit && (
+          <div className="mt-4 border-t border-indigo-100 pt-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">Review AI Prep Kit</h4>
+                <p className="text-xs text-gray-500">Edit generated data before it becomes part of your local prep library.</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={discardPendingPrepKit}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <X size={15} /> Discard
+                </button>
+                <button
+                  type="button"
+                  onClick={savePendingPrepKit}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                >
+                  <CheckCircle2 size={15} /> Save Prep Kit
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <div className="space-y-3">
+                <label className="block text-xs font-medium text-gray-700">
+                  Learning path title
+                  <input
+                    value={pendingPrepKit.learningPath.title}
+                    onChange={(e) => updatePendingPath({ title: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="block text-xs font-medium text-gray-700">
+                  Learning path description
+                  <textarea
+                    value={pendingPrepKit.learningPath.description}
+                    onChange={(e) => updatePendingPath({ description: e.target.value })}
+                    rows={3}
+                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  />
+                </label>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-gray-700">Modules</p>
+                  {pendingPrepKit.learningPath.modules.map((module) => (
+                    <div key={module.id} className="space-y-1 border-l-2 border-indigo-100 pl-3">
+                      <input
+                        value={module.title}
+                        onChange={(e) => updatePendingModule(module.id, { title: e.target.value })}
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        aria-label={`Module title: ${module.title}`}
+                      />
+                      <textarea
+                        value={module.description}
+                        onChange={(e) => updatePendingModule(module.id, { description: e.target.value })}
+                        rows={2}
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        aria-label={`Module description: ${module.title}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-gray-700">Flashcards</p>
+                {pendingPrepKit.flashcards.map((card) => (
+                  <div key={card.id} className="space-y-1 border-l-2 border-emerald-100 pl-3">
+                    <input
+                      value={card.question}
+                      onChange={(e) => updatePendingFlashcard(card.id, { question: e.target.value })}
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      aria-label={`Flashcard question: ${card.question}`}
+                    />
+                    <textarea
+                      value={card.answer}
+                      onChange={(e) => updatePendingFlashcard(card.id, { answer: e.target.value })}
+                      rows={2}
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      aria-label={`Flashcard answer: ${card.question}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

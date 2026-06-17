@@ -39,7 +39,7 @@ describe("Skills AI prep kit", () => {
     backendMocks.generateStarterContent.mockReset();
   });
 
-  it("generates and saves AI-native learning path and flashcards from skill gaps", async () => {
+  it("previews, edits, and saves AI-native learning path and flashcards from skill gaps", async () => {
     backendMocks.generateStarterContent.mockResolvedValue({
       content: starterJson,
       target_role: "Clinic Operations Manager",
@@ -59,8 +59,20 @@ describe("Skills AI prep kit", () => {
     await waitFor(() => {
       expect(backendMocks.generateStarterContent).toHaveBeenCalled();
     });
-    expect(await screen.findByText(/Saved "AI Clinic Ops Prep"/i)).toBeInTheDocument();
-    expect(getLearningPaths().some((path) => path.title === "AI Clinic Ops Prep")).toBe(true);
+    expect(await screen.findByText(/Review "AI Clinic Ops Prep"/i)).toBeInTheDocument();
+    expect(screen.getByText("Review AI Prep Kit")).toBeInTheDocument();
+    expect(getLearningPaths().some((path) => path.title === "AI Clinic Ops Prep")).toBe(false);
+
+    fireEvent.change(screen.getByDisplayValue("AI Clinic Ops Prep"), {
+      target: { value: "Edited Clinic Ops Prep" },
+    });
+    fireEvent.change(screen.getByDisplayValue("How did you improve patient flow?"), {
+      target: { value: "How did you reduce patient wait time?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Save Prep Kit/i }));
+
+    expect(await screen.findByText(/Saved "Edited Clinic Ops Prep"/i)).toBeInTheDocument();
+    expect(getLearningPaths().some((path) => path.title === "Edited Clinic Ops Prep")).toBe(true);
     expect(getFlashcardDecks()).toContain("AI Clinic Ops");
   });
 
@@ -93,7 +105,28 @@ describe("Skills AI prep kit", () => {
         jd_text: "Own patient flow, scheduling, staff coordination, and quality metrics.",
       }));
     });
+    fireEvent.click(screen.getByRole("button", { name: /Save Prep Kit/i }));
     expect(await screen.findByText(/using saved JD context/i)).toBeInTheDocument();
+  });
+
+  it("can discard generated AI prep before it mutates local data", async () => {
+    backendMocks.generateStarterContent.mockResolvedValue({
+      content: starterJson,
+      target_role: "Clinic Operations Manager",
+      skill_gap_count: 7,
+      has_jd: false,
+      model: "openclaw",
+      agent: "http",
+    });
+
+    render(<Skills />);
+    fireEvent.click(screen.getByRole("button", { name: /Generate Prep Kit/i }));
+
+    expect(await screen.findByText("Review AI Prep Kit")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Discard/i }));
+
+    expect(screen.queryByText("Review AI Prep Kit")).not.toBeInTheDocument();
+    expect(getLearningPaths().some((path) => path.title === "AI Clinic Ops Prep")).toBe(false);
   });
 
   it("does not save invalid AI output", async () => {

@@ -16,6 +16,7 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 - Local-first privacy: browser app data and backend profile stay local by default.
 - Plugin shim now routes through the backend instead of duplicating prompts or shelling out to stale commands.
 - Route-level lazy loading keeps the initial bundle under the default Vite chunk warning while preserving the shell during page loads.
+- AI-generated prep kits now require human review: users can inspect, edit, save, or discard generated learning paths and flashcards before local data changes.
 
 ## Biggest Gaps
 
@@ -31,8 +32,8 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 4. **Learning paths still need deeper role-specific expansion.**
    Universal starter paths, cross-industry decks, and AI-generated prep kits now exist, but industry packs can go deeper.
 
-5. **Generated content needs more review before save.**
-   AI prep kits now save validated JSON, but users should be able to preview, edit, and accept generated learning paths/cards before they become durable data.
+5. **Generated content needs quality feedback after save.**
+   Prep kits now have review-before-save, but users still need quality checks after repeated AI generation: duplicate card detection, weak-answer flags, and role-fit scoring.
 
 6. **No import path from real job boards beyond agent search.**
    Users still paste roles manually. A browser extension/bookmarklet or CSV import would reduce friction.
@@ -42,7 +43,7 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 - **Application prep packet**: one generated page per application with JD summary, resume version, cover letter, company research, interview questions, recruiter contacts, follow-up plan, and notes.
 - **Resume-to-JD matrix**: must-have requirements, evidence bullets, missing proof, keywords, and suggested resume edits.
 - **Answer coach**: score answers for STAR/SOAR structure, specificity, metrics, concision, and confidence. Store improved versions.
-- **AI content review loop**: let users preview, edit, and accept generated learning paths/cards before saving.
+- **AI content quality loop**: detect duplicate flashcards, low-specificity cards, missing metrics, and generic modules after users accept generated prep.
 - **Universal starter decks**: expand the new healthcare, education, marketing/sales, operations, customer success, trades/field, and general decks with deeper industry scenarios.
 - **Pipeline health model v2**: target active applications, follow-up aging, upcoming interviews, open offers, stale research, backup status, and AI runtime readiness.
 - **Import/export upgrades**: CSV import for applications/contacts, markdown export for prep packets, printable interview brief.
@@ -78,6 +79,6 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 1. Add application prep packet.
 2. Add resume-to-JD matrix.
 3. Add answer coach.
-4. Add review-before-save for AI-generated prep kits.
+4. Add AI content quality checks after generated prep is saved.
 5. Add CSV import/export and printable application prep packets.
 6. Merge or clearly separate local and backend profile concepts.
