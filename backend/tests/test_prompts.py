@@ -13,6 +13,7 @@ from backend.prompts import (
     scan_jobs_prompts,
     interview_stories_prompts,
     negotiation_script_prompts,
+    score_resume_prompts,
     STORY_FOCUS_DESC,
 )
 
@@ -141,3 +142,20 @@ class TestNegotiation:
         s, _ = negotiation_script_prompts(empty_profile(), "Offer: $50/hr")
         assert "ANCHOR" in s
         assert "WALK-AWAY" in s
+
+
+class TestScoreResume:
+    def test_no_jd_uses_profile_role_without_software_engineer_default(self):
+        s, u = score_resume_prompts(_nurse_profile(), "ICU triage and patient education")
+        combined = f"{s}\n{u}".lower()
+
+        assert "nurse practitioner" in combined
+        assert "senior software engineer" not in combined
+        assert "microservices" not in combined
+        assert "software-engineering terms" in combined
+
+    def test_jd_text_becomes_keyword_rubric(self):
+        _, u = score_resume_prompts(empty_profile(), "Resume text", jd_text="Need licensed RN with oncology experience")
+
+        assert "Need licensed RN with oncology experience" in u
+        assert "Resume text" in u

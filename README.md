@@ -29,7 +29,7 @@ Everything is designed to remain useful offline. AI can improve drafts and resea
 | Interview Prep | Blank prep or generated prep from a saved application/JD |
 | Answer Coach | Scores answer structure, evidence, action language, and role relevance |
 | Story Bank | Reusable STAR stories with metrics, tags, and target roles |
-| Resume | Multiple resume versions for role targeting |
+| Resume | Multiple resume versions, JD targeting, and backend ATS scorecards |
 | Research | Company research notes, products, people, culture, interview process |
 | Practice | Flashcards, learning paths, curated resources |
 | Career Ops | Contacts, reminders, journal, offer comparison, job comparison |
@@ -233,7 +233,7 @@ backend/
   profile.py         Profile schema and persistence
   prompts.py         Profile-aware prompt builders
   server.py          FastAPI HTTP backend
-  tools.py           Backend tool implementations
+  tools.py           Backend tool implementations, including resume scoring
 
 plugin/
   career-prep/       Optional Hermes plugin shim

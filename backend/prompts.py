@@ -222,17 +222,22 @@ def score_resume_prompts(
     """Generate system+user prompts for scoring a resume.
 
     When a JD is provided, the agent uses its keywords as the rubric.
-    Without a JD, general senior software engineer requirements are used.
+    Without a JD, the agent uses the candidate's target roles/current title
+    as the rubric and stays profession-neutral.
     """
+    role_focus = ", ".join(profile.target_roles[:3]) or profile.career.current_title or "the candidate's target role"
     jd_instructions = (
         f"\nUse the following job description as the keyword source and rubric "
         f"for evaluating the resume:\n\n{jd_text}"
         if jd_text
-        else "\nNo job description provided. Use general senior software engineer "
-             "job requirements as the keyword source."
+        else f"\nNo job description provided. Use {role_focus} as the role target. "
+             "Build the keyword rubric from the candidate profile and broadly applicable "
+             "hiring signals: role-specific fundamentals, measurable impact, domain tools, "
+             "certifications or licenses when relevant, stakeholder/customer communication, "
+             "process improvement, reliability, leadership, and collaboration."
     )
 
-    system = f"""You are an expert ATS (Applicant Tracking System) consultant and senior technical resume reviewer.
+    system = f"""You are an expert ATS (Applicant Tracking System) consultant and cross-industry resume reviewer.
 
 {render_profile_for_prompt(profile)}
 
@@ -248,9 +253,9 @@ A single number with a 1-sentence justification.
 ## 2. KEYWORD MATCH
 A table with columns: Keyword | In Resume? | Suggested Improvement
 - If a JD was provided, use its key terms as the rows.
-- If no JD was provided, use common senior software engineer keywords
-  (e.g. system design, microservices, observability, testing, CI/CD,
-   containerization, API design, agile, mentoring, code review, monitoring).
+- If no JD was provided, use the candidate's target role/profile as the source.
+  Stay profession-neutral; do not default to software-engineering terms unless
+  the candidate profile itself points there.
 
 ## 3. FORMAT & ATS
 List specific format issues:

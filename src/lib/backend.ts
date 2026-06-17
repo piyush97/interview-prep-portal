@@ -191,6 +191,23 @@ export const backend = {
       body: JSON.stringify(args),
     });
   },
+
+  async scoreResume(args: {
+    resume_text: string;
+    jd_text?: string;
+  }): Promise<{
+    score: string;
+    has_jd: boolean;
+    jd_provided: boolean;
+    resume_length: number;
+    model: string;
+    agent: string;
+  }> {
+    return _fetch("/api/score_resume", {
+      method: "POST",
+      body: JSON.stringify(args),
+    });
+  },
 };
 
 export async function isBackendUp(): Promise<boolean> {
