@@ -1,6 +1,6 @@
 # Product Refinement Audit
 
-Date: 2026-06-15
+Date: 2026-06-17
 
 ## Product North Star
 
@@ -12,8 +12,10 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 - Agent-agnostic backend: Hermes, Claude Code, Codex, HTTP, and offline profiles can share the same tool contract.
 - Profile-driven prompts: backend avoids baking one person's career into generated materials.
 - AI-native prep data: the Skills Matrix can turn gaps into schema-bound learning paths and flashcards through the configured backend.
+- Hermes/OpenClaw-first dashboard: runtime tiles and launch checklist make backend, provider, endpoint, credential env var, and profile grounding visible from the first screen.
 - Local-first privacy: browser app data and backend profile stay local by default.
 - Plugin shim now routes through the backend instead of duplicating prompts or shelling out to stale commands.
+- Route-level lazy loading keeps the initial bundle under the default Vite chunk warning while preserving the shell during page loads.
 
 ## Biggest Gaps
 
@@ -29,8 +31,8 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 4. **Learning paths still need deeper role-specific expansion.**
    Universal starter paths, cross-industry decks, and AI-generated prep kits now exist, but industry packs can go deeper.
 
-5. **No explicit data health/backup guardrail in daily workflow.**
-   Backup exists in settings, but dashboard should surface stale backup risk.
+5. **Generated content needs more review before save.**
+   AI prep kits now save validated JSON, but users should be able to preview, edit, and accept generated learning paths/cards before they become durable data.
 
 6. **No import path from real job boards beyond agent search.**
    Users still paste roles manually. A browser extension/bookmarklet or CSV import would reduce friction.
@@ -42,7 +44,7 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 - **Answer coach**: score answers for STAR/SOAR structure, specificity, metrics, concision, and confidence. Store improved versions.
 - **AI content review loop**: let users preview, edit, and accept generated learning paths/cards before saving.
 - **Universal starter decks**: expand the new healthcare, education, marketing/sales, operations, customer success, trades/field, and general decks with deeper industry scenarios.
-- **Pipeline health model**: target active applications, follow-up aging, upcoming interviews, open offers, stale research, backup status.
+- **Pipeline health model v2**: target active applications, follow-up aging, upcoming interviews, open offers, stale research, backup status, and AI runtime readiness.
 - **Import/export upgrades**: CSV import for applications/contacts, markdown export for prep packets, printable interview brief.
 - **Accessibility pass**: keyboard flow, aria labels for icon-only buttons, focus visibility, color contrast for status badges.
 
@@ -55,7 +57,7 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 
 ## Refine
 
-- **Dashboard**: evolve readiness score into explainable category scores with direct links to fix weak areas.
+- **Dashboard**: evolve readiness score into explainable category scores with direct links to fix weak areas; keep Hermes/OpenClaw launch checklist as the first-run command surface.
 - **JD Evaluator**: show confidence/source badges, backend status, and a profile completeness warning before AI analysis.
 - **Applications**: add stage-specific empty states and quick actions per row.
 - **Resume**: support cloning, tagging, selected default resume, and application attachment.
@@ -77,4 +79,5 @@ Interview Prep Portal should be a job-search command center for any candidate: h
 2. Add resume-to-JD matrix.
 3. Add answer coach.
 4. Add review-before-save for AI-generated prep kits.
-5. Merge or clearly separate local and backend profile concepts.
+5. Add CSV import/export and printable application prep packets.
+6. Merge or clearly separate local and backend profile concepts.

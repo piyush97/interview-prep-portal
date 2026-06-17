@@ -20,6 +20,9 @@ vi.mock("../lib/backend", () => ({
 function profile(agent: Record<string, unknown>) {
   return {
     identity: { name: "Candidate" },
+    career: { current_title: "Operations Manager" },
+    target_roles: ["Operations Manager"],
+    skills: { core: ["Process improvement"], growing: [], certifications: [] },
     agent: {
       backend: "offline",
       model: "",
@@ -51,6 +54,8 @@ describe("Dashboard agent runtime", () => {
     expect(screen.getByText("Agent Setup")).toBeInTheDocument();
     expect(screen.getByText("Backend offline")).toBeInTheDocument();
     expect(screen.getByText(/Run: uv run python -m backend.cli serve/i)).toBeInTheDocument();
+    expect(screen.getByText("AI Launch Checklist")).toBeInTheDocument();
+    expect(screen.getByText("0/5 ready")).toBeInTheDocument();
   });
 
   it("shows connected Hermes agent health", async () => {
@@ -85,7 +90,29 @@ describe("Dashboard agent runtime", () => {
     render(<MemoryRouter><Dashboard /></MemoryRouter>);
 
     expect(await screen.findByText("Backend connected")).toBeInTheDocument();
-    expect(screen.getByText("OpenClaw gateway")).toBeInTheDocument();
+    expect(screen.getAllByText("OpenClaw gateway").length).toBeGreaterThan(0);
     expect(screen.getByText("Env: OPENCLAW_API_KEY")).toBeInTheDocument();
+    expect(screen.getByText("5/5 ready")).toBeInTheDocument();
+    expect(screen.getByText("Backend will read OPENCLAW_API_KEY from shell env.")).toBeInTheDocument();
+  });
+
+  it("surfaces missing OpenClaw endpoint and env var setup", async () => {
+    backendMocks.health.mockResolvedValue({
+      ok: true,
+      version: "1.4.0",
+      agent: "http",
+      profile_path: "/tmp/profile.yaml",
+    });
+    backendMocks.getProfile.mockResolvedValue(profile({
+      backend: "http",
+      endpoint: "",
+      api_key_env: "",
+    }));
+
+    render(<MemoryRouter><Dashboard /></MemoryRouter>);
+
+    expect(await screen.findByText("Backend connected")).toBeInTheDocument();
+    expect(screen.getByText("Set OpenClaw/custom endpoint URL.")).toBeInTheDocument();
+    expect(screen.getByText("Add the env var name for your OpenClaw/custom key.")).toBeInTheDocument();
   });
 });

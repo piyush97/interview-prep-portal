@@ -21,7 +21,14 @@ import {
   KeyRound,
   PlugZap,
   Terminal,
+  CheckCircle2,
 } from "lucide-react";
+
+const skillPriorityRank = {
+  high: 3,
+  medium: 2,
+  low: 1,
+};
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -55,8 +62,10 @@ export default function Dashboard() {
 
   const weakSkills = getSkills()
     .filter((s) => s.level < s.targetLevel)
-    .sort((a, b) => b.priority.localeCompare(a.priority))
+    .sort((a, b) => skillPriorityRank[b.priority] - skillPriorityRank[a.priority])
     .slice(0, 5);
+  const launchChecklist = buildAgentLaunchChecklist(agentHealth, agentProfile);
+  const completedLaunchItems = launchChecklist.filter((item) => item.complete).length;
 
   return (
     <div className="space-y-6">
@@ -116,6 +125,35 @@ export default function Dashboard() {
             value={keyStatus(agentProfile)}
             detail="Raw API keys stay in your shell env, not browser storage or backups."
           />
+        </div>
+
+        <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/80 p-4">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-100">AI Launch Checklist</h3>
+              <p className="text-xs text-slate-400">Make Hermes, OpenClaw, or your AI gateway ready before interview workflows depend on it.</p>
+            </div>
+            <span className="text-xs font-medium text-cyan-200">{completedLaunchItems}/{launchChecklist.length} ready</span>
+          </div>
+          <div className="mt-3 grid grid-cols-1 gap-2 lg:grid-cols-2">
+            {launchChecklist.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => navigate(item.href)}
+                className="flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-left hover:border-cyan-500/60 hover:bg-slate-900"
+              >
+                {item.complete ? (
+                  <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-emerald-300" />
+                ) : (
+                  <AlertCircle size={17} className="mt-0.5 shrink-0 text-amber-300" />
+                )}
+                <span>
+                  <span className="block text-sm font-medium text-slate-100">{item.title}</span>
+                  <span className="block text-xs text-slate-400">{item.detail}</span>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -399,4 +437,77 @@ function keyStatus(profile: Profile | null) {
 
 function isOpenClawEndpoint(endpoint: string) {
   return endpoint.toLowerCase().includes("openclaw");
+}
+
+type AgentLaunchChecklistItem = {
+  id: string;
+  title: string;
+  detail: string;
+  complete: boolean;
+  href: string;
+};
+
+function buildAgentLaunchChecklist(
+  health: BackendHealth | null,
+  profile: Profile | null,
+): AgentLaunchChecklistItem[] {
+  const backendConnected = Boolean(health?.ok);
+  const agent = profile?.agent;
+  const providerConfigured = Boolean(agent && agent.backend !== "offline");
+  const isHttpProvider = agent?.backend === "http";
+  const hasEndpoint = !isHttpProvider || Boolean(agent.endpoint?.trim());
+  const hasCredentialPath = Boolean(agent && (
+    agent.backend !== "http" || agent.api_key_env.trim()
+  ));
+  const hasProfileGrounding = Boolean(profile && (
+    profile.target_roles?.length ||
+    profile.career?.current_title?.trim() ||
+    profile.skills?.core?.length
+  ));
+
+  return [
+    {
+      id: "backend",
+      title: "Start local backend",
+      detail: backendConnected ? `${agentLabel(health?.agent || "offline")} responding` : "Run uv run python -m backend.cli serve",
+      complete: backendConnected,
+      href: "/settings",
+    },
+    {
+      id: "provider",
+      title: "Choose AI provider",
+      detail: providerConfigured ? configuredProvider(profile) : "Select Hermes, OpenClaw/HTTP, Codex, Claude, or custom gateway.",
+      complete: providerConfigured,
+      href: "/settings",
+    },
+    {
+      id: "credentials",
+      title: "Connect subscription credentials",
+      detail: !agent
+        ? "Connect backend so the portal can read credential settings."
+        : agent.backend === "http"
+          ? agent.api_key_env ? `Backend will read ${agent.api_key_env} from shell env.` : "Add the env var name for your OpenClaw/custom key."
+          : agent.backend === "offline"
+            ? "Switch away from offline mode to use an AI subscription."
+            : "CLI login/subscription handles credentials.",
+      complete: hasCredentialPath && providerConfigured,
+      href: "/settings",
+    },
+    {
+      id: "endpoint",
+      title: "Set gateway endpoint",
+      detail: isHttpProvider
+        ? agent.endpoint || "Set OpenClaw/custom endpoint URL."
+        : "Local CLI providers do not need an HTTP endpoint.",
+      complete: hasEndpoint && providerConfigured,
+      href: "/settings",
+    },
+    {
+      id: "profile",
+      title: "Ground AI in your profile",
+      detail: hasProfileGrounding ? "Target role, career, or core skills are available." : "Add target roles, current title, or core skills.",
+      complete: hasProfileGrounding,
+      href: "/settings",
+    },
+  ];
 }
